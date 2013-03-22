@@ -2,6 +2,8 @@ package com.shico.mnm.amq.client.components;
 
 import java.util.Map;
 
+import com.google.gwt.core.client.Callback;
+import com.google.gwt.user.client.Window;
 import com.shico.mnm.amq.client.AmqClientHandle;
 import com.shico.mnm.amq.client.AmqSettingsController;
 import com.shico.mnm.amq.model.AmqRemoteSettingsDS;
@@ -12,6 +14,9 @@ import com.shico.mnm.common.event.DataLoadedEventHandler;
 import com.shico.mnm.common.event.EventBus;
 import com.shico.mnm.common.model.SettingsValuesManager;
 import com.smartgwt.client.data.Criteria;
+import com.smartgwt.client.data.DSCallback;
+import com.smartgwt.client.data.DSRequest;
+import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.TitleOrientation;
 import com.smartgwt.client.types.VerticalAlignment;
@@ -19,8 +24,6 @@ import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.events.SubmitValuesEvent;
-import com.smartgwt.client.widgets.form.events.SubmitValuesHandler;
 import com.smartgwt.client.widgets.form.fields.HiddenItem;
 import com.smartgwt.client.widgets.form.fields.PasswordItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
@@ -55,22 +58,8 @@ public class AmqAdminSettingsPortlet extends PortletWin implements DataLoadedEve
 		valuesManager = new SettingsValuesManager();
 		valuesManager.addMember(getUserSettingsForm());
 		valuesManager.addMember(getAdminSettingsForm());
-		valuesManager.setDataSource(settingsConroller.getSettings());
-		
-		valuesManager.addSubmitValuesHandler(new SubmitValuesHandler() {
-			
-			@Override
-			public void onSubmitValues(SubmitValuesEvent event) {
-				Map valuesAsMap = event.getValuesAsMap();
-				System.out.println("00000000 "+event.toString());
-				if(valuesAsMap != null){
-					for (Object key : valuesAsMap.keySet()) {
-						System.out.println("0000000 "+key+" = "+valuesAsMap.get(key));
-					}
-				}
-			}
-		});
-		
+		valuesManager.setDataSource(settingsConroller.getSettingsDS());
+				
 		EventBus.instance().addHandler(DataLoadedEvent.TYPE, this);
 	}
 
@@ -132,8 +121,17 @@ public class AmqAdminSettingsPortlet extends PortletWin implements DataLoadedEve
 		submitBtn.addClickHandler(new ClickHandler() {				
 			@Override
 			public void onClick(ClickEvent event) {
-				valuesManager.saveData();
-				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_ADMIN_SETTINGS_CHANGED_EVENT));
+				valuesManager.saveData(new Callback<Map, String>() {					
+					@Override
+					public void onSuccess(Map result) {
+						settingsConroller.getSettingsMap().putAll(result);
+						EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_ADMIN_SETTINGS_CHANGED_EVENT, result));
+					}					
+					@Override
+					public void onFailure(String reason) {
+						Window.alert(reason);
+					}
+				});
 			}
 		});
 		
@@ -176,6 +174,15 @@ public class AmqAdminSettingsPortlet extends PortletWin implements DataLoadedEve
 		case AMQ_ADMIN_SETTINGS_CHANGED_EVENT:
 			update();
 			break;
+		}
+	}
+
+	private void printMap(Map map){
+		if(map == null){
+			return;
+		}
+		for (Object key : map.keySet()) {
+			System.out.println(":::: "+key+"="+map.get(key));
 		}
 	}
 

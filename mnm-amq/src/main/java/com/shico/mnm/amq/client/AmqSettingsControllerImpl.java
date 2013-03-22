@@ -50,7 +50,7 @@ public class AmqSettingsControllerImpl implements AmqSettingsController {
 
 
 	@Override
-	public DataSource getSettings() {
+	public DataSource getSettingsDS() {
 		if(useLocalStorage){
 			return adminSettingsLocalStorageDS;
 		}
@@ -63,8 +63,24 @@ public class AmqSettingsControllerImpl implements AmqSettingsController {
 	}
 
 	@Override
+	public void setBrokerInfoDS(BrokerInfoDS brokerInfoDS) {
+		if(this.brokerInfoDS != null){
+			this.brokerInfoDS.destroy();
+		}
+		this.brokerInfoDS = brokerInfoDS;
+	}
+
+	@Override
 	public QueueListDS getQueueListDS(){
 		return queueListDS;
+	}
+
+	@Override
+	public void setQueueListDS(QueueListDS queueListDS) {
+		if(this.queueListDS != null){
+			this.queueListDS.destroy();
+		}
+		this.queueListDS = queueListDS;
 	}
 	
 	@Override
@@ -72,18 +88,12 @@ public class AmqSettingsControllerImpl implements AmqSettingsController {
 		return messageListDS;
 	}
 	
-	public void setQueueListDS(QueueListDS queueListDS) {
-		this.queueListDS = queueListDS;
-	}
-
-	public void setBrokerInfoDS(BrokerInfoDS brokerInfoDS) {
-		this.brokerInfoDS = brokerInfoDS;
-	}
 
 	public void setMessageListDS(MessageListDS messageListDS) {
 		this.messageListDS = messageListDS;
 	}
-
+	
+	@Override
 	public Map<String, Object> getSettingsMap() {
 		return settingsMap;
 	}

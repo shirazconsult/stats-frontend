@@ -279,9 +279,9 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 
 	Timer timer;
 	@Override
-	public void schedule(final int schedulePeriod, int viewWindow) {
-		slidingWinTime = viewWindow;
-		scheduleIntervalSec = schedulePeriod;
+	public void schedule(final int schedulePeriodInSec, int viewWindowInMin) {
+		slidingWinTime = viewWindowInMin;
+		scheduleIntervalSec = schedulePeriodInSec;
 		if(timer != null){
 			timer.cancel();
 		}
@@ -298,11 +298,11 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 	public void onDataLoaded(DataLoadedEvent event) {
 		switch (event.eventType) {
 		case AMQ_CHART_SETTINGS_CHANGED_EVENT:
-			// Set url
-			String chartUrl = (String)settingsController.getSetting(AmqRemoteSettingsDS.CHARTURL);
-			if(chartUrl == null){
+			String chartUrl = (String)event.info.get(AmqRemoteSettingsDS.CHARTURL);
+			if(chartUrl == null || chartUrl.trim().isEmpty()){
 				return;
 			}
+			
 			Resource resource = new Resource(chartUrl);
 			service = GWT.create(StatRestService.class);
 			((RestServiceProxy)service).setResource(resource);
@@ -323,7 +323,7 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 			}catch(NumberFormatException nfe){
 				System.out.println("WARN: "+nfe.getMessage());
 			}
-			schedule(refreshInterval/1000, winSize/(60*1000));
+			schedule(Math.max(refreshInterval, 10), Math.max(winSize,10));
 			break;
 		case BROKER_METADATA_LOADED_EVENT:
 			// get rows for the last 20 seconds

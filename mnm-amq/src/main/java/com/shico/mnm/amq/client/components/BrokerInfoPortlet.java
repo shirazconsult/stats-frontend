@@ -60,19 +60,21 @@ public class BrokerInfoPortlet extends PortletWin implements DataLoadedEventHand
 		switch (event.eventType) {
 		case BROKER_INFO_LOADED_EVENT:
 			update();
-//			adminClient.getMetadata("local");
 			break;
 		case AMQ_ADMIN_SETTINGS_CHANGED_EVENT:
-			update();
+			String brokerUrl = (String)event.info.get(AmqRemoteSettingsDS.BROKERURL);
+			settingsController.setBrokerInfoDS(new BrokerInfoDS(brokerUrl));
+			valuesManager.setDataSource(settingsController.getBrokerInfoDS());
+			if(brokerUrl != null && !brokerUrl.trim().isEmpty()){
+				update();
+			}
 			break;
 		}
 	}
 	
 	public void update() {
-		if(settingsController.getSetting(AmqRemoteSettingsDS.BROKERURL) != null){
-			Criteria criteria = new Criteria(BrokerInfoDS.BROKER_NAME, "local");
-			valuesManager.fetchData(criteria);
-		}
+		Criteria criteria = new Criteria(BrokerInfoDS.BROKER_NAME, "local");
+		valuesManager.fetchData(criteria);
 	}
 
 	private DynamicForm setupAboutInfo(){

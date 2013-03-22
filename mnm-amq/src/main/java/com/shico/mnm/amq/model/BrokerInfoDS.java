@@ -6,6 +6,7 @@ import com.smartgwt.client.types.FieldType;
 
 public class BrokerInfoDS extends DefaultRestDS {
 	public final static String restPathInfo = "brokerInfo"; 
+	public final static String defaultDataSourceID = "BrokerInfoDS";
 	
 	public final static String BROKER_NAME = "brokerName";
 	public final static String BROKER_VER = "brokerVersion";
@@ -24,6 +25,10 @@ public class BrokerInfoDS extends DefaultRestDS {
 		}else{
 			setDataURL(restUrl + "/" + restPathInfo);
 		}
+	}
+
+	public BrokerInfoDS(String restUrl) {
+		this(defaultDataSourceID, restUrl);
 	}
 
 	@Override

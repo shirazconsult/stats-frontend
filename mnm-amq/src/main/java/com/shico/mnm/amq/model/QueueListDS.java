@@ -6,6 +6,7 @@ import com.smartgwt.client.data.fields.DataSourceTextField;
 
 public class QueueListDS extends DefaultRestDS {
 	public final static String restPathInfo = "queue";
+	public final static String defaultDataSourceID = "QueueListDS";
 	
 	public final static String NAME = "name";
 	public final static String CONSUMERCOUNT = "consumerCount";
@@ -34,5 +35,9 @@ public class QueueListDS extends DefaultRestDS {
 		addField(new DataSourceIntegerField(EXPIREDCOUNT));
 		addField(new DataSourceIntegerField(QUEUESIZE));
 		addField(new DataSourceTextField(BROKERNAME));
+	}
+	
+	public QueueListDS(String restUrl) {
+		this(defaultDataSourceID, restUrl);
 	}
 }

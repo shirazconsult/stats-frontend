@@ -2,6 +2,7 @@ package com.shico.mnm.amq.client.components;
 
 import com.shico.mnm.amq.client.AmqSettingsController;
 import com.shico.mnm.amq.client.HasData;
+import com.shico.mnm.amq.model.AmqRemoteSettingsDS;
 import com.shico.mnm.amq.model.QueueListDS;
 import com.shico.mnm.common.component.PortletWin;
 import com.shico.mnm.common.event.DataEventType;
@@ -64,7 +65,14 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 	public void onDataLoaded(DataLoadedEvent event) {
 		switch (event.eventType) {
 		case AMQ_ADMIN_SETTINGS_CHANGED_EVENT:
-			update();
+			String brokerUrl = (String)event.info.get(AmqRemoteSettingsDS.BROKERURL);
+			settingsController.setQueueListDS(new QueueListDS(brokerUrl));
+			if(listGrid != null){
+				listGrid.setDataSource(settingsController.getQueueListDS()); 
+			}
+			if(brokerUrl != null && !brokerUrl.trim().isEmpty()){
+				update();
+			}
 			break;
 		case MSG_EVENT:
 			switch(event.getMsgActionType()){
@@ -131,8 +139,10 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 	}
 	
 	public void update(){
-		Criteria criteria = new Criteria(QueueListDS.BROKERNAME, "local");
-		listGrid.fetchData(criteria);
+		if(settingsController.getSetting(AmqRemoteSettingsDS.BROKERURL) != null){
+			Criteria criteria = new Criteria(QueueListDS.BROKERNAME, "local");
+			listGrid.fetchData(criteria);
+		}
 	}
 	
 	private IButton getPurgeButton(final ListGridRecord record){

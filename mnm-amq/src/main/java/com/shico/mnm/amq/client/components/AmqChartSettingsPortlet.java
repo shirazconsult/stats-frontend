@@ -1,5 +1,9 @@
 package com.shico.mnm.amq.client.components;
 
+import java.util.Map;
+
+import com.google.gwt.core.client.Callback;
+import com.google.gwt.user.client.Window;
 import com.shico.mnm.amq.client.AmqClientHandle;
 import com.shico.mnm.amq.client.AmqSettingsController;
 import com.shico.mnm.amq.model.AmqRemoteSettingsDS;
@@ -51,7 +55,7 @@ public class AmqChartSettingsPortlet extends PortletWin implements DataLoadedEve
 		valuesManager = new SettingsValuesManager();
 		valuesManager.addMember(getUserSettingsForm());
 		valuesManager.addMember(getAdminSettingsForm());
-		valuesManager.setDataSource(settingsConroller.getSettings());
+		valuesManager.setDataSource(settingsConroller.getSettingsDS());
 
 		EventBus.instance().addHandler(DataLoadedEvent.TYPE, this);
 	}
@@ -122,8 +126,17 @@ public class AmqChartSettingsPortlet extends PortletWin implements DataLoadedEve
 		submitBtn.addClickHandler(new ClickHandler() {				
 			@Override
 			public void onClick(ClickEvent event) {
-				valuesManager.saveData();
-				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_CHART_SETTINGS_CHANGED_EVENT));
+				valuesManager.saveData(new Callback<Map, String>() {					
+					@Override
+					public void onSuccess(Map result) {
+						settingsConroller.getSettingsMap().putAll(result);
+						EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_CHART_SETTINGS_CHANGED_EVENT, result));
+					}					
+					@Override
+					public void onFailure(String reason) {
+						Window.alert(reason);
+					}
+				});
 			}
 		});
 		

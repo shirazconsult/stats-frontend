@@ -71,7 +71,7 @@ public class AmqTabPanel extends VLayout {
 			@Override
 			public void doRun() {
 				Criteria criteria = new Criteria(AmqRemoteSettingsDS.APP, AmqClientHandle.APP_NAME);
-				DataSource settingsDS = settingsController.getSettings();
+				DataSource settingsDS = settingsController.getSettingsDS();
 				if(settingsDS.getClientOnly() != null && settingsDS.getClientOnly()){
 					// Read from local storage
 					Storage settingsStorage = Storage.getLocalStorageIfSupported();
@@ -86,13 +86,13 @@ public class AmqTabPanel extends VLayout {
 						
 						String restUrl = sm.get(AmqRemoteSettingsDS.BROKERURL);
 						if(restUrl != null){
-							settingsController.setBrokerInfoDS(new BrokerInfoDS("BrokerInfoDS", restUrl));
-							settingsController.setQueueListDS(new QueueListDS("QueueListDS", restUrl));							
+							settingsController.setBrokerInfoDS(new BrokerInfoDS(restUrl));
+							settingsController.setQueueListDS(new QueueListDS(restUrl));							
 						}
 					}else{
 						settingsLoaded = false;
-						settingsController.setBrokerInfoDS(new BrokerInfoDS("BrokerInfoDS", null));
-						settingsController.setQueueListDS(new QueueListDS("QueueListDS", null));							
+						settingsController.setBrokerInfoDS(new BrokerInfoDS(null));
+						settingsController.setQueueListDS(new QueueListDS(null));							
 					}
 
 					System.out.println("Settings loaded from local storage.");
@@ -107,8 +107,8 @@ public class AmqTabPanel extends VLayout {
 
 							// instantiate datasources
 							String restUrl = (String)settings.get(AmqRemoteSettingsDS.BROKERURL);
-							settingsController.setBrokerInfoDS(new BrokerInfoDS("BrokerInfoDS", restUrl));
-							settingsController.setQueueListDS(new QueueListDS("QueueListDS", restUrl));
+							settingsController.setBrokerInfoDS(new BrokerInfoDS(restUrl));
+							settingsController.setQueueListDS(new QueueListDS(restUrl));
 							//						EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_SETTINGS_LOADED_EVENT, settings));
 
 							System.out.println("Settings loaded from server.");

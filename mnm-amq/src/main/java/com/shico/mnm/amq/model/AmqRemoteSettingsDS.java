@@ -16,7 +16,6 @@ public class AmqRemoteSettingsDS extends DefaultRestDS {
 	public final static String CHARTPWD = "chartPwd";
 	public final static String CHARTREFRESHINTERVAL = "chartRefreshInterval";
 	public final static String CHARTWINSIZE = "chartWinSize";
-
 	
 	public AmqRemoteSettingsDS(String datasourceID, String restUrl) {
 		super(datasourceID, restUrl);
