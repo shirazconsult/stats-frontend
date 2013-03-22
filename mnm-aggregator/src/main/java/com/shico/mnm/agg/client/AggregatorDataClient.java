@@ -406,25 +406,4 @@ public class AggregatorDataClient implements AggregatorChartDataProvider, DataLo
 			break;	
 		}
 	}
-
-//	@Override
-//	public void onChange(PropertyChangedEvent event) {
-//		if(event.property.equals(MonitorSettingsEventObject.EVENT_NAME) && 
-//				(event.source instanceof ControlPanel)){
-//			MonitorSettingsEventObject mseo = (MonitorSettingsEventObject)event.value;
-//			if(mseo.getAddress() != null){
-//				aggregatorAddress = mseo.getAddress();
-//			}
-//			int newSchedule = scheduleIntervalSec;
-//			if(mseo.getRefreshInterval() != null){
-//				newSchedule = mseo.getRefreshInterval();
-//			}
-//			int newSlidingView = slidingWinTime;
-//			if(mseo.getViewSize() != null){
-//				newSlidingView = mseo.getViewSize();
-//			}
-//			schedule(newSchedule, newSlidingView);
-//		}
-//	}
-
 }

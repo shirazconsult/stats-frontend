@@ -171,7 +171,6 @@ public class AmqAdminSettingsPortlet extends PortletWin implements DataLoadedEve
 	public void onDataLoaded(DataLoadedEvent event) {
 		switch(event.eventType){
 		case AMQ_SETTINGS_LOADED_EVENT:
-		case AMQ_ADMIN_SETTINGS_CHANGED_EVENT:
 			update();
 			break;
 		}

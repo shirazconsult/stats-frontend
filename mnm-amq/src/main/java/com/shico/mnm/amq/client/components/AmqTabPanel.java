@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.storage.client.StorageMap;
-import com.google.gwt.user.client.Window;
 import com.shico.mnm.amq.client.AmqChartDataProviderImpl;
 import com.shico.mnm.amq.client.AmqClientHandle;
 import com.shico.mnm.amq.client.AmqSettingsControllerImpl;
@@ -56,7 +55,7 @@ public class AmqTabPanel extends VLayout {
 	BrokerInfoPortlet brokerInfoPortlet;
 	QueueListPortlet queueListPortlet;
 	
-	boolean settingsLoaded = true;
+	boolean settingsLoaded = false;
 	
 	public AmqTabPanel(final ChartDataProvider chartDataProvider, final AmqSettingsControllerImpl settingsController) {
 		super();
@@ -89,8 +88,8 @@ public class AmqTabPanel extends VLayout {
 							settingsController.setBrokerInfoDS(new BrokerInfoDS(restUrl));
 							settingsController.setQueueListDS(new QueueListDS(restUrl));							
 						}
+						settingsLoaded = true;
 					}else{
-						settingsLoaded = false;
 						settingsController.setBrokerInfoDS(new BrokerInfoDS(null));
 						settingsController.setQueueListDS(new QueueListDS(null));							
 					}
@@ -109,8 +108,8 @@ public class AmqTabPanel extends VLayout {
 							String restUrl = (String)settings.get(AmqRemoteSettingsDS.BROKERURL);
 							settingsController.setBrokerInfoDS(new BrokerInfoDS(restUrl));
 							settingsController.setQueueListDS(new QueueListDS(restUrl));
-							//						EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_SETTINGS_LOADED_EVENT, settings));
 
+							settingsLoaded = true;
 							System.out.println("Settings loaded from server.");
 
 							getParent().done();
@@ -124,12 +123,6 @@ public class AmqTabPanel extends VLayout {
 			@Override
 			public void doRun() {
 				setup();
-
-				if(settingsLoaded){
-					EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_SETTINGS_LOADED_EVENT));
-				}else{
-					Window.alert("Please start by defining the required settings.");
-				}
 			}
 		};
 		
@@ -176,26 +169,6 @@ public class AmqTabPanel extends VLayout {
 		setWidth100();
 
 		addMember(container);
-		
-//		container.addSelectionHandler(new SelectionHandler<Integer>() {
-//			// Manual selection should not cause refresh, why the Place objects are called with no refresh
-//			@Override
-//			public void onSelection(SelectionEvent<Integer> event) {
-//				Integer itemIdx = event.getSelectedItem();
-//				switch(itemIdx){
-//				case MONITOR_TAB_IDX:
-//					// TODO: add when activity/place for monitor panel is implemented
-//					AmqClientHandle.getPlaceController().goTo(new MonitorChartsPlace("local"));
-//					break;
-//				case ADMIN_TAB_IDX:
-//					AmqClientHandle.getPlaceController().goTo(new QueueListPlace("local"));
-//					break;
-//				default:
-//					Closeable w = (Closeable)container.getWidget(event.getSelectedItem());
-//					AmqClientHandle.getPlaceController().goTo(new MessageListPlace("local", w.getTitle()));
-//				}
-//			}
-//		});
 	}
 	
 	public VLayout getMonitorPanel(){
@@ -250,8 +223,9 @@ public class AmqTabPanel extends VLayout {
 			mainAdminPanel.addMember(amqSettingsPortal);
 			
 			if(settingsLoaded){
+				// Because MainAdmin portal contains the brokerInfo portlet which needs to be notified of settings.
+				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_SETTINGS_LOADED_EVENT, settingsController.getSettingsMap()));
 				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_ADMIN_SETTINGS_CHANGED_EVENT, settingsController.getSettingsMap()));
-				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_CHART_SETTINGS_CHANGED_EVENT, settingsController.getSettingsMap()));
 			}
 		}	
 	}
