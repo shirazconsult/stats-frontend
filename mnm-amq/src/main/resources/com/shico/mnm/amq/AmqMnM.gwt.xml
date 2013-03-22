@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='AmqMnM'>
+  <!-- Inherit the core Web Toolkit stuff.                        -->
+  <inherits name='com.google.gwt.user.User' />
+
+  <!-- We need the JUnit module in the main module,               -->
+  <!-- otherwise eclipse complains (Google plugin bug?)           -->
+  <inherits name='com.google.gwt.junit.JUnit' />
+
+  <!-- Inherit the default GWT style sheet.  You can change       -->
+  <!-- the theme of your GWT application by uncommenting          -->
+  <!-- any one of the following lines.                            -->
+<!--   <inherits name='com.google.gwt.user.theme.standard.Standard' /> -->
+  <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
+<!--   <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
+<!--   <inherits name='com.shico.mnm.common.theme.dark.Dark'/> -->
+
+  <!-- Other module inherits                                      -->
+  <inherits name='com.google.gwt.visualization.Visualization'/>
+  <inherits name='org.fusesource.restygwt.RestyGWT' />
+  <inherits name='com.google.gwt.activity.Activity'/>
+  <inherits name='com.google.gwt.place.Place'/>
+  <inherits name="com.shico.mnm.common.MnMCommon"/>
+  
+  <!-- Specify the app entry point class.                         -->
+  <entry-point class='com.shico.mnm.amq.client.MnMAmq'/>
+
+  <!-- Specify the paths for translatable code                    -->
+  <source path='client' />
+  <source path='shared' />
+  <source path='model' />
+  <source path='activities' />
+  <source path='component' />
+  <source path='places' />
+  <source path='presenters' />
+  <source path='model' />
+  <source path="">
+  	<include name="**/*.java"/>
+  </source>
+
+  <!-- compile for the the following browsers -->
+  <set-property name="user.agent" value="safari"/>
+
+</module>

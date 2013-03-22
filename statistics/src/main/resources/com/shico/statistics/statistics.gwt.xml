@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='statistics'>
+  <!-- Inherit the core Web Toolkit stuff.                        -->
+  <inherits name='com.google.gwt.user.User' />
+
+  <!-- We need the JUnit module in the main module,               -->
+  <!-- otherwise eclipse complains (Google plugin bug?)           -->
+<!--   <inherits name='com.google.gwt.junit.JUnit' /> -->
+
+  <!-- Inherit the default GWT style sheet.  You can change       -->
+  <!-- the theme of your GWT application by uncommenting          -->
+  <!-- any one of the following lines.                            -->
+<!--   <inherits name='com.google.gwt.user.theme.standard.Standard' /> -->
+  <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
+<!--   <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
+  <inherits name='com.shico.mnm.common.theme.dark.Dark'/>
+  
+  <!-- Other module inherits -->
+  <inherits name='com.smartgwt.SmartGwt'/>                          
+  <inherits name='com.google.gwt.visualization.Visualization'/>
+  <inherits name='org.fusesource.restygwt.RestyGWT' />
+  
+  <inherits name="com.shico.mnm.common.MnMCommon"/>  
+  <inherits name="com.shico.mnm.amq.AmqMnM"/>
+  <inherits name="com.shico.mnm.agg.AggregatorMnM"/>
+    
+  <!-- Specify the app entry point class.                         -->
+  <entry-point class='com.shico.statistics.client.Statistics'/>
+
+  <!-- Specify the paths for translatable code                    -->
+  <source path='resources' />
+  <source path='client' />
+  <source path='shared' />
+
+  <!-- compile for the the following browsers -->
+  <set-property name="user.agent" value="safari"/>
+  <!-- compile for the following locales -->
+<!--   <extend-property name="locale" values="en_UK" /> -->
+</module>

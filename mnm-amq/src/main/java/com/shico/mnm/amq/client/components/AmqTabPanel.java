@@ -1,0 +1,331 @@
+package com.shico.mnm.amq.client.components;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.gwt.storage.client.Storage;
+import com.google.gwt.storage.client.StorageMap;
+import com.google.gwt.user.client.Window;
+import com.shico.mnm.amq.client.AmqChartDataProviderImpl;
+import com.shico.mnm.amq.client.AmqClientHandle;
+import com.shico.mnm.amq.client.AmqSettingsControllerImpl;
+import com.shico.mnm.amq.client.charts.AvgEnqTimeChartPortlet;
+import com.shico.mnm.amq.client.charts.DiskUsageChartPortlet;
+import com.shico.mnm.amq.client.charts.EnqDecInflChartPortlet;
+import com.shico.mnm.amq.client.charts.MemUsageChartPortlet;
+import com.shico.mnm.amq.model.AmqRemoteSettingsDS;
+import com.shico.mnm.amq.model.BrokerInfoDS;
+import com.shico.mnm.amq.model.QueueListDS;
+import com.shico.mnm.common.client.ChartDataProvider;
+import com.shico.mnm.common.client.ChildRunnable;
+import com.shico.mnm.common.client.ParentRunnable;
+import com.shico.mnm.common.component.PortalWin;
+import com.shico.mnm.common.event.DataEventType;
+import com.shico.mnm.common.event.DataLoadedEvent;
+import com.shico.mnm.common.event.EventBus;
+import com.smartgwt.client.data.Criteria;
+import com.smartgwt.client.data.DSCallback;
+import com.smartgwt.client.data.DSRequest;
+import com.smartgwt.client.data.DSResponse;
+import com.smartgwt.client.data.DataSource;
+import com.smartgwt.client.types.Side;
+import com.smartgwt.client.widgets.layout.PortalLayout;
+import com.smartgwt.client.widgets.layout.Portlet;
+import com.smartgwt.client.widgets.layout.VLayout;
+import com.smartgwt.client.widgets.tab.Tab;
+import com.smartgwt.client.widgets.tab.TabSet;
+import com.smartgwt.client.widgets.tab.events.TabSelectedEvent;
+import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
+
+public class AmqTabPanel extends VLayout { 
+	public static final int MONITOR_TAB_IDX = 0;
+	public static final int ADMIN_TAB_IDX = 1;
+	
+	// temp. field for controlling the authentication flow. Must be removed
+	// when real authentication is in place.
+	static boolean authenticated = true;
+	
+	AmqChartDataProviderImpl dataClient;
+	AmqSettingsControllerImpl settingsController;
+	
+	TabSet container;
+	VLayout settingsPanel;
+	VLayout mainAdminPanel;
+	VLayout monitorPanel;
+	VLayout queuePanel;
+	BrokerInfoPortlet brokerInfoPortlet;
+	QueueListPortlet queueListPortlet;
+	
+	boolean settingsLoaded = true;
+	
+	public AmqTabPanel(final ChartDataProvider chartDataProvider, final AmqSettingsControllerImpl settingsController) {
+		super();
+		
+		this.settingsController = settingsController;
+		
+		if(authenticated){
+			this.dataClient = (AmqChartDataProviderImpl)chartDataProvider;
+		}
+		
+		ChildRunnable settingLoader = new ChildRunnable() {			
+			@Override
+			public void doRun() {
+				Criteria criteria = new Criteria(AmqRemoteSettingsDS.APP, AmqClientHandle.APP_NAME);
+				DataSource settingsDS = settingsController.getSettings();
+				if(settingsDS.getClientOnly() != null && settingsDS.getClientOnly()){
+					// Read from local storage
+					Storage settingsStorage = Storage.getLocalStorageIfSupported();
+					if(settingsStorage == null){
+						throw new IllegalStateException("Cannot read settings from local storage, because it is not supported. Please use a browser with HTML5.");
+					}
+					StorageMap sm = new StorageMap(settingsStorage);
+					if(sm != null && !sm.isEmpty()){
+						Map settingsMap = new HashMap();
+						settingsMap.putAll(sm);
+						settingsController.setSettingsMap(settingsMap);
+						
+						String restUrl = sm.get(AmqRemoteSettingsDS.BROKERURL);
+						if(restUrl != null){
+							settingsController.setBrokerInfoDS(new BrokerInfoDS("BrokerInfoDS", restUrl));
+							settingsController.setQueueListDS(new QueueListDS("QueueListDS", restUrl));							
+						}
+					}else{
+						settingsLoaded = false;
+						settingsController.setBrokerInfoDS(new BrokerInfoDS("BrokerInfoDS", null));
+						settingsController.setQueueListDS(new QueueListDS("QueueListDS", null));							
+					}
+
+					System.out.println("Settings loaded from local storage.");
+					getParent().done();
+				}else{
+					settingsDS.fetchData(criteria, new DSCallback() {
+						@SuppressWarnings("rawtypes")
+						@Override
+						public void execute(DSResponse response, Object rawData, DSRequest request) {
+							Map settings = response.getData()[0].toMap();
+							settingsController.setSettingsMap(settings);
+
+							// instantiate datasources
+							String restUrl = (String)settings.get(AmqRemoteSettingsDS.BROKERURL);
+							settingsController.setBrokerInfoDS(new BrokerInfoDS("BrokerInfoDS", restUrl));
+							settingsController.setQueueListDS(new QueueListDS("QueueListDS", restUrl));
+							//						EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_SETTINGS_LOADED_EVENT, settings));
+
+							System.out.println("Settings loaded from server.");
+
+							getParent().done();
+						}
+					});
+				}
+			};
+		};
+		
+		ParentRunnable parent = new ParentRunnable(settingLoader) {			
+			@Override
+			public void doRun() {
+				setup();
+
+				if(settingsLoaded){
+					EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_SETTINGS_LOADED_EVENT));
+				}else{
+					Window.alert("Please start by defining the required settings.");
+				}
+			}
+		};
+		
+		parent.run();		
+	}
+
+	void setup(){
+		container = new TabSet();
+		container.setTabBarPosition(Side.TOP);  
+		container.setTabBarAlign(Side.LEFT);  
+		
+		Tab adminTab = new Tab("Admin");
+		adminTab.setPane(getAmqMainAdminPanel());
+		adminTab.addTabSelectedHandler(new TabSelectedHandler() {			
+			@Override
+			public void onTabSelected(TabSelectedEvent event) {
+				setAmqMainAdminPanelPortal();
+			}
+		});
+		container.addTab(adminTab);
+		if(authenticated){
+			Tab queueTab = new Tab("Queues");
+			queueTab.setPane(getAmqQueuePanel());
+			queueTab.addTabSelectedHandler(new TabSelectedHandler() {				
+				@Override
+				public void onTabSelected(TabSelectedEvent event) {
+					setAmqQueuePanelPortal();
+				}
+			});
+			container.addTab(queueTab);
+
+			Tab monitorTab = new Tab("Monitor");
+			monitorTab.setPane(getMonitorPanel());
+			monitorTab.addTabSelectedHandler(new TabSelectedHandler() {				
+				@Override
+				public void onTabSelected(TabSelectedEvent event) {
+					setMonitorPanelPortal();
+				}
+			});
+			container.addTab(monitorTab);
+		}
+		
+		
+		setWidth100();
+
+		addMember(container);
+		
+//		container.addSelectionHandler(new SelectionHandler<Integer>() {
+//			// Manual selection should not cause refresh, why the Place objects are called with no refresh
+//			@Override
+//			public void onSelection(SelectionEvent<Integer> event) {
+//				Integer itemIdx = event.getSelectedItem();
+//				switch(itemIdx){
+//				case MONITOR_TAB_IDX:
+//					// TODO: add when activity/place for monitor panel is implemented
+//					AmqClientHandle.getPlaceController().goTo(new MonitorChartsPlace("local"));
+//					break;
+//				case ADMIN_TAB_IDX:
+//					AmqClientHandle.getPlaceController().goTo(new QueueListPlace("local"));
+//					break;
+//				default:
+//					Closeable w = (Closeable)container.getWidget(event.getSelectedItem());
+//					AmqClientHandle.getPlaceController().goTo(new MessageListPlace("local", w.getTitle()));
+//				}
+//			}
+//		});
+	}
+	
+	public VLayout getMonitorPanel(){
+		// Monitor Panel
+		if(monitorPanel == null){
+			monitorPanel = new VLayout();
+			
+			monitorPanel.setWidth100();
+		}
+		return monitorPanel;
+	}
+	
+	private void setMonitorPanelPortal(){
+		if(monitorPanel.getMembers().length == 0){
+			PortalLayout portalLayout = new PortalWin(2);  
+
+	        portalLayout.addPortlet(new EnqDecInflChartPortlet(dataClient, 0.45, 0.40), 0, 0);
+	        portalLayout.addPortlet(new AvgEnqTimeChartPortlet(dataClient, 0.45, 0.40), 0, 1);
+	        portalLayout.addPortlet(new MemUsageChartPortlet(dataClient, 0.45, 0.40), 1, 0);
+	        portalLayout.addPortlet(new DiskUsageChartPortlet(dataClient, 0.45, 0.40), 1, 1); 
+
+			monitorPanel.addMember(portalLayout);
+
+			if(settingsLoaded){
+				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_CHART_SETTINGS_CHANGED_EVENT, settingsController.getSettingsMap()));
+			}
+		}
+	}
+	
+	public VLayout getAmqMainAdminPanel(){
+		if(mainAdminPanel == null){
+			mainAdminPanel = new VLayout();
+	
+			mainAdminPanel.setWidth100();
+		}
+		return mainAdminPanel;
+	}
+
+	private void setAmqMainAdminPanelPortal(){
+		if(mainAdminPanel.getMembers().length == 0){			
+			PortalLayout portalLayout = new PortalWin(1);
+			portalLayout.addPortlet(getBrokerInfoPortlet(), 0, 0);
+			int height = getBrokerInfoPortlet().getHeight();
+			portalLayout.setHeight(height);
+			mainAdminPanel.addMember(portalLayout);
+			
+			PortalLayout amqSettingsPortal = getAmqSettingsPortal();
+			
+			height += amqSettingsPortal.getHeight();
+			mainAdminPanel.setHeight(height);
+			
+			mainAdminPanel.addMember(amqSettingsPortal);
+			
+			if(settingsLoaded){
+				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_ADMIN_SETTINGS_CHANGED_EVENT, settingsController.getSettingsMap()));
+				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_CHART_SETTINGS_CHANGED_EVENT, settingsController.getSettingsMap()));
+			}
+		}	
+	}
+	
+	public PortalLayout getAmqSettingsPortal(){
+		PortalLayout portalLayout = new PortalWin(2);  
+		
+		portalLayout.addPortlet(getAmqAdminSettingsPortlet(), 0, 0);
+		portalLayout.addPortlet(getAmqChartSettingsPortlet(), 1, 0);
+		
+		portalLayout.setHeight(Math.max(getAmqAdminSettingsPortlet().getHeight(), getAmqChartSettingsPortlet().getHeight()));
+		return portalLayout;
+	}
+
+	AmqChartSettingsPortlet amqChartSettingsPortlet;
+	private Portlet getAmqChartSettingsPortlet() {
+		if(amqChartSettingsPortlet == null){
+			amqChartSettingsPortlet = new AmqChartSettingsPortlet(settingsController);
+		}
+		return amqChartSettingsPortlet;
+	}
+
+	AmqAdminSettingsPortlet amqAdminSettingsPortlet;
+	private Portlet getAmqAdminSettingsPortlet() {
+		if(amqAdminSettingsPortlet == null){
+			amqAdminSettingsPortlet = new AmqAdminSettingsPortlet(settingsController);
+		}
+		return amqAdminSettingsPortlet;
+	}
+
+	public VLayout getAmqQueuePanel(){
+		if(queuePanel == null){
+			queuePanel = new VLayout();
+	
+			queuePanel.setWidth100();
+		}
+		return queuePanel;
+	}
+	
+	private void setAmqQueuePanelPortal(){
+		if(queuePanel.getMembers().length == 0){			
+			PortalWin portalLayout = new PortalWin(1);  
+	        
+	        portalLayout.addPortlet(getQueueListPortlet());
+	        // queuelist portlet has to be able to drop msg-portlets into the portal
+	        getQueueListPortlet().setPortalContainer(portalLayout);
+	        
+	        queuePanel.addMember(portalLayout);
+	        
+			if(settingsLoaded){
+				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_ADMIN_SETTINGS_CHANGED_EVENT, settingsController.getSettingsMap()));
+			}
+		}
+	}
+		
+	public void selectAdminTab(){
+		container.selectTab(ADMIN_TAB_IDX);
+	}
+	public void selectMonitorTab(){
+		container.selectTab(MONITOR_TAB_IDX);
+	}
+	public QueueListPortlet getQueueListPortlet(){
+		if(queueListPortlet == null){
+			queueListPortlet = new QueueListPortlet(settingsController);
+		}
+		return queueListPortlet;
+	}
+	public BrokerInfoPortlet getBrokerInfoPortlet(){
+		if(brokerInfoPortlet == null){
+			brokerInfoPortlet = new BrokerInfoPortlet(settingsController);
+		}
+		return brokerInfoPortlet;
+	}
+	public TabSet getTabContainer(){
+		return container;
+	}
+}
