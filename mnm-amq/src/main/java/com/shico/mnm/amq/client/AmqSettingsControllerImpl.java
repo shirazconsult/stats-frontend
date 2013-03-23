@@ -33,7 +33,7 @@ public class AmqSettingsControllerImpl implements AmqSettingsController {
 	BrokerInfoDS brokerInfoDS; 
 	QueueListDS queueListDS;
 	MessageListDS messageListDS;
-	Map<String, Object> settingsMap;
+	Map<String, Object> settingsMap = new HashMap<String, Object>();
 	
 	@Override
 	public void loadSettings() {

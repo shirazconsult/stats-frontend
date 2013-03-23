@@ -139,10 +139,8 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 	}
 	
 	public void update(){
-		if(settingsController.getSetting(AmqRemoteSettingsDS.BROKERURL) != null){
-			Criteria criteria = new Criteria(QueueListDS.BROKERNAME, "local");
-			listGrid.fetchData(criteria);
-		}
+		Criteria criteria = new Criteria(QueueListDS.BROKERNAME, "local");
+		listGrid.fetchData(criteria);
 	}
 	
 	private IButton getPurgeButton(final ListGridRecord record){

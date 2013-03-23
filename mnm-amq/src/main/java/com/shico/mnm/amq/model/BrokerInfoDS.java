@@ -1,10 +1,14 @@
 package com.shico.mnm.amq.model;
 
+import java.util.logging.Logger;
+
 import com.shico.mnm.common.client.DefaultRestDS;
 import com.smartgwt.client.data.DataSourceField;
 import com.smartgwt.client.types.FieldType;
 
 public class BrokerInfoDS extends DefaultRestDS {
+	private static final Logger logger = Logger.getLogger("BrokerInfoDS");
+	
 	public final static String restPathInfo = "brokerInfo"; 
 	public final static String defaultDataSourceID = "BrokerInfoDS";
 	
@@ -20,10 +24,12 @@ public class BrokerInfoDS extends DefaultRestDS {
 
 	public BrokerInfoDS(String datasourceID, String restUrl) {
 		super(datasourceID);
-		if(restUrl.endsWith("/")){
-			setDataURL(restUrl + restPathInfo);
-		}else{
-			setDataURL(restUrl + "/" + restPathInfo);
+		if(restUrl != null && !restUrl.trim().isEmpty()){
+			if(restUrl.endsWith("/")){
+				setDataURL(restUrl + restPathInfo);
+			}else{
+				setDataURL(restUrl + "/" + restPathInfo);
+			}
 		}
 	}
 

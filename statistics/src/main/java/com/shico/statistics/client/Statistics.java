@@ -1,8 +1,13 @@
 package com.shico.statistics.client;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.Table;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
@@ -28,6 +33,24 @@ public class Statistics implements EntryPoint {
 	AggregatorDataClient aggDataClient = new AggregatorDataClient();
 	
 	public void onModuleLoad() {
+		GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
+			
+			@Override
+			public void onUncaughtException(Throwable e) {
+				Window.alert(e.getMessage());
+				logger.log(Level.SEVERE, "Failed to startup Statistics.", e);
+			}
+		});
+		
+	    Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+	        @Override
+	        public void execute() {
+	           startApplication();
+	        }
+	    });
+	}
+
+	private void startApplication(){
 		
 		// Root panel
 		final VLayout wrapper = new VLayout();

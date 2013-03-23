@@ -139,9 +139,10 @@ public class SettingsValuesManager extends ValuesManager {
 			FormItem[] fields = df.getFields();
 			for (FormItem fi : fields) {
 				String fieldName = fi.getName();
+				String value = (fi.getValue() == null ? "" : String.valueOf(fi.getValue()));
 				if(ds.getField(fieldName) != null){
-					newData.put(fieldName, fi.getValue());
-					settingsStorage.setItem(fieldName,String.valueOf(fi.getValue()));
+					newData.put(fieldName, value);
+					settingsStorage.setItem(fieldName, value);
 				}
 			}
 		}

@@ -16,9 +16,6 @@ import com.shico.mnm.common.event.DataLoadedEventHandler;
 import com.shico.mnm.common.event.EventBus;
 import com.shico.mnm.common.model.SettingsValuesManager;
 import com.smartgwt.client.data.Criteria;
-import com.smartgwt.client.data.DSCallback;
-import com.smartgwt.client.data.DSRequest;
-import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.TitleOrientation;
 import com.smartgwt.client.types.VerticalAlignment;
@@ -82,10 +79,10 @@ public class AmqAdminSettingsPortlet extends PortletWin implements DataLoadedEve
 
 			userSettingsform.setFields(userItem, pwdItem);
 			
-			// validators
-			userSettingsform.setValidateOnChange(true);
-			userItem.setRequired(true);
-			pwdItem.setRequired(true);
+			// no validators
+//			userSettingsform.setValidateOnChange(true);
+//			userItem.setRequired(true);
+//			pwdItem.setRequired(true);
 		}
 		return userSettingsform;
 	}
@@ -128,8 +125,12 @@ public class AmqAdminSettingsPortlet extends PortletWin implements DataLoadedEve
 				valuesManager.saveData(new Callback<Map, String>() {					
 					@Override
 					public void onSuccess(Map result) {
-						settingsConroller.getSettingsMap().putAll(result);
-						EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_ADMIN_SETTINGS_CHANGED_EVENT, result));
+						if(result != null){
+							settingsConroller.getSettingsMap().putAll(result);
+							EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_ADMIN_SETTINGS_CHANGED_EVENT, result));
+						}else{
+							logger.log(Level.SEVERE, "Saving of settings probably failed. The returned settings is null.");
+						}
 					}					
 					@Override
 					public void onFailure(String reason) {
@@ -185,7 +186,7 @@ public class AmqAdminSettingsPortlet extends PortletWin implements DataLoadedEve
 			return;
 		}
 		for (Object key : map.keySet()) {
-			logger.log(Level.FINE, ":::: "+key+"="+map.get(key));
+			logger.log(Level.INFO, ":::: "+key+"="+map.get(key));
 		}
 	}
 

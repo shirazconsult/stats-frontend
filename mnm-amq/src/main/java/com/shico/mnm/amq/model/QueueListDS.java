@@ -19,10 +19,12 @@ public class QueueListDS extends DefaultRestDS {
 	
 	public QueueListDS(String datasourceID, String restUrl) {
 		super(datasourceID);
-		if(restUrl.endsWith("/")){
-			setDataURL(restUrl + restPathInfo);
-		}else{
-			setDataURL(restUrl + "/" + restPathInfo);
+		if(restUrl != null && !restUrl.trim().isEmpty()){
+			if(restUrl.endsWith("/")){
+				setDataURL(restUrl + restPathInfo);
+			}else{
+				setDataURL(restUrl + "/" + restPathInfo);
+			}
 		}
 
 		DataSourceTextField pk = new DataSourceTextField(NAME);

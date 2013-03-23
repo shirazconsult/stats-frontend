@@ -1,5 +1,7 @@
 package com.shico.mnm.amq.client;
 
+import java.util.logging.Logger;
+
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
@@ -7,6 +9,8 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.shico.mnm.amq.client.components.AmqTabPanel;
 
 public class AmqClientHandle {
+	private final static Logger logger = Logger.getLogger("AmqClientHandle");
+	
 	public final static String ADMIN_REST_URL = "rest/admin/";
 	public final static String APP_NAME = "mnm-amq";
 	

@@ -39,7 +39,7 @@ import com.smartgwt.client.widgets.tab.events.TabSelectedEvent;
 import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 
 public class AmqTabPanel extends VLayout { 
-	private static Logger logger = Logger.getLogger("AmqTabPanel");
+	private static final Logger logger = Logger.getLogger("AmqTabPanel");
 			
 	// temp. field for controlling the authentication flow. Must be removed
 	// when real authentication is in place.
@@ -73,6 +73,7 @@ public class AmqTabPanel extends VLayout {
 				Criteria criteria = new Criteria(AmqRemoteSettingsDS.APP, AmqClientHandle.APP_NAME);
 				DataSource settingsDS = settingsController.getSettingsDS();
 				if(settingsDS.getClientOnly() != null && settingsDS.getClientOnly()){
+					logger.log(Level.INFO, "Loading settings from local storage.");
 					// Read from local storage
 					Storage settingsStorage = Storage.getLocalStorageIfSupported();
 					if(settingsStorage == null){
@@ -91,13 +92,15 @@ public class AmqTabPanel extends VLayout {
 						}
 						settingsLoaded = true;
 					}else{
-						settingsController.setBrokerInfoDS(new BrokerInfoDS(null));
-						settingsController.setQueueListDS(new QueueListDS(null));							
+						settingsController.setBrokerInfoDS(new BrokerInfoDS(""));
+						settingsController.setQueueListDS(new QueueListDS(""));							
 					}
 
 					logger.log(Level.INFO, "Settings loaded from local storage.");
 					getParent().done();
 				}else{
+					logger.log(Level.INFO, "Loading settings from server.");
+
 					settingsDS.fetchData(criteria, new DSCallback() {
 						@SuppressWarnings("rawtypes")
 						@Override
@@ -107,6 +110,7 @@ public class AmqTabPanel extends VLayout {
 
 							// instantiate datasources
 							String restUrl = (String)settings.get(AmqRemoteSettingsDS.BROKERURL);
+
 							settingsController.setBrokerInfoDS(new BrokerInfoDS(restUrl));
 							settingsController.setQueueListDS(new QueueListDS(restUrl));
 
@@ -127,7 +131,7 @@ public class AmqTabPanel extends VLayout {
 			}
 		};
 		
-		parent.run();		
+		parent.run();
 	}
 
 	void setup(){
@@ -293,8 +297,5 @@ public class AmqTabPanel extends VLayout {
 			brokerInfoPortlet = new BrokerInfoPortlet(settingsController);
 		}
 		return brokerInfoPortlet;
-	}
-	public TabSet getTabContainer(){
-		return container;
 	}
 }

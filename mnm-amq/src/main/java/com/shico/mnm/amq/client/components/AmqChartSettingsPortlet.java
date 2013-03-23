@@ -1,6 +1,8 @@
 package com.shico.mnm.amq.client.components;
 
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.user.client.Window;
@@ -28,6 +30,8 @@ import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 public class AmqChartSettingsPortlet extends PortletWin implements DataLoadedEventHandler {
+	private static Logger logger = Logger.getLogger("AmqChartSettingsPortlet");
+	
 	public final static String TITLE = "Chart Settings";
 	VLayout container;
 	AmqSettingsController settingsConroller;
@@ -75,10 +79,10 @@ public class AmqChartSettingsPortlet extends PortletWin implements DataLoadedEve
 
 			userSettingsform.setFields(userItem, pwdItem);
 			
-			// validators
-			userSettingsform.setValidateOnChange(true);
-			userItem.setRequired(true);
-			pwdItem.setRequired(true);
+			// no validators
+//			userSettingsform.setValidateOnChange(true);
+//			userItem.setRequired(true);
+//			pwdItem.setRequired(true);
 		}
 		return userSettingsform;
 	}
@@ -105,11 +109,11 @@ public class AmqChartSettingsPortlet extends PortletWin implements DataLoadedEve
 			viewItem.setLength(5);
 			chartSettingsform.setFields(urlItem, refreshItem, viewItem, appItem);
 			
-			// validators
-			chartSettingsform.setValidateOnChange(true);
-			urlItem.setRequired(true);
-			refreshItem.setRequired(true);
-			viewItem.setRequired(true);			
+			// no validators
+//			chartSettingsform.setValidateOnChange(true);
+//			urlItem.setRequired(true);
+//			refreshItem.setRequired(true);
+//			viewItem.setRequired(true);			
 		}
 		return chartSettingsform;
 	}
@@ -129,8 +133,12 @@ public class AmqChartSettingsPortlet extends PortletWin implements DataLoadedEve
 				valuesManager.saveData(new Callback<Map, String>() {					
 					@Override
 					public void onSuccess(Map result) {
-						settingsConroller.getSettingsMap().putAll(result);
-						EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_CHART_SETTINGS_CHANGED_EVENT, result));
+						if(result != null){
+							settingsConroller.getSettingsMap().putAll(result);
+							EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_CHART_SETTINGS_CHANGED_EVENT, result));
+						}else{
+							logger.log(Level.SEVERE, "Saving of settings probably failed. The returned settings is null.");
+						}
 					}					
 					@Override
 					public void onFailure(String reason) {
