@@ -71,6 +71,12 @@
 		<dependency>
 			<groupId>com.sun.jersey.contribs</groupId>
 			<artifactId>jersey-apache-client</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
@@ -105,6 +111,12 @@
 		<dependency>
 			<artifactId>spring-core</artifactId>
 			<groupId>org.springframework</groupId>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<artifactId>spring-web</artifactId>
@@ -148,7 +160,7 @@
 						<compileSourcesArtifact>com.shico.mnm:mnm-amq</compileSourcesArtifact>
 						<compileSourcesArtifact>com.shico.mnm:mnm-aggregator</compileSourcesArtifact>
 					</compileSourcesArtifacts>
-					<runTarget>Web.html</runTarget>
+					<runTarget>statistics.html</runTarget>
 					<hostedWebapp>${webappDirectory}</hostedWebapp>
 					<i18nMessagesBundle>com.shico.statistics.client.Messages</i18nMessagesBundle>
 				</configuration>

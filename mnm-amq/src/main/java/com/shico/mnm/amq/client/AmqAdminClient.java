@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
@@ -28,6 +30,8 @@ import com.shico.mnm.common.model.NestedList;
 
 @Deprecated
 public class AmqAdminClient implements DataLoadedEventHandler { 
+	private static Logger logger = Logger.getLogger("AmqAdminClient");
+	
 	AmqAdminRestService adminService;
 	AmqSettingsControllerImpl settingsController;
 	
@@ -51,7 +55,7 @@ public class AmqAdminClient implements DataLoadedEventHandler {
 			adminService.getBrokerInfo(brokerName, new MethodCallback<MapResult<String,Object>>() {
 				@Override
 				public void onSuccess(Method method, MapResult<String, Object> response) {
-					System.out.println("Retrieving broker information for "+brokerName);
+					logger.log(Level.INFO, "Retrieving broker information for "+brokerName);
 //					brokerInfo.setData(response.result);
 					EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.BROKER_INFO_LOADED_EVENT));
 				}
@@ -59,7 +63,7 @@ public class AmqAdminClient implements DataLoadedEventHandler {
 				@Override
 				public void onFailure(Method method, Throwable exception) {
 					String msg = "Failed to get broker infomation for "+ brokerName+". " + exception.getMessage();
-					System.out.println(msg);
+					logger.log(Level.SEVERE, msg);
 					EventBus.instance().fireEvent(buildFailedMsgEvent(msg, exception, DataEventType.FAILED_BROKER_INFO_LOADED_EVENT));				
 				}
 			});
@@ -72,13 +76,13 @@ public class AmqAdminClient implements DataLoadedEventHandler {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				String msg = "Failed to retrieve queue list columns from "+brokerName;
-				System.out.println(msg);
+				logger.log(Level.SEVERE, msg);
 				EventBus.instance().fireEvent(buildFailedMsgEvent(msg, exception, DataEventType.FAILED_BROKER_METADATA_LOADED_EVENT));				
 			}
 
 			@Override
 			public void onSuccess(Method method, NestedList<String> response) {
-				System.out.println("Retrieving queue list columns from "+brokerName);
+				logger.log(Level.INFO, "Retrieving queue list columns from "+brokerName);
 				
 				List<ListResult<String>> rows = response.getRows();
 				queueColNames = new QueueColumns(rows.get(0).getResult(), rows.get(1).getResult());
@@ -95,7 +99,7 @@ public class AmqAdminClient implements DataLoadedEventHandler {
 
 				@Override
 				public void onSuccess(Method method, NestedList<Object> response) {
-					System.out.println("Retrieving queues from "+brokerName);
+					logger.log(Level.INFO, "Retrieving queues from "+brokerName);
 					List<ListResult<Object>> ql = response.getRows();
 					queueList = new ArrayList<Queue>();
 					for (ListResult<Object> q : ql) {
@@ -107,7 +111,7 @@ public class AmqAdminClient implements DataLoadedEventHandler {
 				@Override
 				public void onFailure(Method method, Throwable exception) {
 					String msg = "Failed to retrieve queues from "+ brokerName+". " + exception.getMessage();
-					System.out.println(msg);
+					logger.log(Level.SEVERE, msg);
 					EventBus.instance().fireEvent(buildFailedMsgEvent(msg, exception, DataEventType.FAILED_QUEUELIST_INFO_LOADED_EVENT));				
 				}
 			});
@@ -120,7 +124,7 @@ public class AmqAdminClient implements DataLoadedEventHandler {
 
 				@Override
 				public void onSuccess(Method method, NestedList<Object> response) {
-					System.out.println("Retrieving messages from queue: "+queueName);	
+					logger.log(Level.INFO, "Retrieving messages from queue: "+queueName);	
 					
 					List<Message> msgs = new ArrayList<Message>();
 					List<ListResult<Object>> ml = response.getRows();
@@ -140,7 +144,7 @@ public class AmqAdminClient implements DataLoadedEventHandler {
 				@Override
 				public void onFailure(Method method, Throwable exception) {
 					String msg = "Failed to retrieve messages from "+ queueName+". " + exception.getMessage();
-					System.out.println(msg);
+					logger.log(Level.SEVERE, msg);
 					EventBus.instance().fireEvent(buildFailedMsgEvent(msg, exception, DataEventType.FAILED_MSGLIST_LOADED_EVENT));				
 				}
 			});
@@ -153,13 +157,13 @@ public class AmqAdminClient implements DataLoadedEventHandler {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				String msg = "Failed to retrieve message with id = "+messageId+" from "+ queueName+". " + exception.getMessage();
-				System.out.println(msg);
+				logger.log(Level.SEVERE, msg);
 				EventBus.instance().fireEvent(buildFailedMsgEvent(msg, exception, DataEventType.FAILED_MSG_ACTION_EVENT));				
 			}
 
 			@Override
 			public void onSuccess(Method method, MapResult<String, Object> response) {
-				System.out.println("Retrieving message "+messageId+" from queue: "+queueName);
+				logger.log(Level.INFO, "Retrieving message "+messageId+" from queue: "+queueName);
 				Map<String, Object> info = getMsgEventInfo(response.result, DataEventType.LOAD, queueName, null);
 				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info));					
 			}
@@ -172,13 +176,13 @@ public class AmqAdminClient implements DataLoadedEventHandler {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				String msg = "Failed to delete message with id = "+msgIds+" from "+ qName+". " + exception.getMessage();
-				System.out.println(msg);
+				logger.log(Level.SEVERE, msg);
 				EventBus.instance().fireEvent(buildFailedMsgEvent(msg, exception, DataEventType.FAILED_MSG_ACTION_EVENT));				
 			}
 
 			@Override
 			public void onSuccess(Method method, Object response) {
-				System.out.println("Deleting message "+msgIds+" from queue: "+qName);
+				logger.log(Level.INFO, "Deleting message "+msgIds+" from queue: "+qName);
 				Map<String, Object> info = getMsgEventInfo(msgIds, DataEventType.DELETE, qName, null);
 				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info));				
 			}
@@ -192,13 +196,13 @@ public class AmqAdminClient implements DataLoadedEventHandler {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				String msg = "Failed to move message with id = "+msgIds+" from "+ fromQ+" to " + toQ+". "+exception.getMessage();
-				System.out.println(msg);
+				logger.log(Level.SEVERE, msg);
 				EventBus.instance().fireEvent(buildFailedMsgEvent(msg, exception, DataEventType.FAILED_MSG_ACTION_EVENT));				
 			}
 
 			@Override
 			public void onSuccess(Method method, Object response) {
-				System.out.println("Moving message "+msgIds+" from "+ fromQ+" to " + toQ+". ");
+				logger.log(Level.INFO, "Moving message "+msgIds+" from "+ fromQ+" to " + toQ+". ");
 				Map<String, Object> info = getMsgEventInfo(msgIds, DataEventType.MOVE, fromQ, toQ);
 				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info));				
 			}
@@ -211,13 +215,13 @@ public class AmqAdminClient implements DataLoadedEventHandler {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				String msg = "Failed to copy message with id = "+msgIds+" from "+ fromQ+" to " + toQ+". "+exception.getMessage();
-				System.out.println(msg);
+				logger.log(Level.SEVERE, msg);
 				EventBus.instance().fireEvent(buildFailedMsgEvent(msg, exception, DataEventType.FAILED_MSG_ACTION_EVENT));								
 			}
 
 			@Override
 			public void onSuccess(Method method, Object response) {
-				System.out.println("Copying message "+msgIds+" from "+ fromQ+" to " + toQ+". ");
+				logger.log(Level.INFO, "Copying message "+msgIds+" from "+ fromQ+" to " + toQ+". ");
 				Map<String, Object> info = getMsgEventInfo(msgIds, DataEventType.COPY, fromQ, toQ);
 				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info));				
 			}
@@ -230,13 +234,13 @@ public class AmqAdminClient implements DataLoadedEventHandler {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				String msg = "Failed to purge queued "+ qName+". " + exception.getMessage();
-				System.out.println(msg);
+				logger.log(Level.SEVERE, msg);
 				EventBus.instance().fireEvent(buildFailedMsgEvent(msg, exception, DataEventType.FAILED_MSG_ACTION_EVENT));				
 			}
 
 			@Override
 			public void onSuccess(Method method, Object response) {
-				System.out.println("Pruging queue: "+qName);
+				logger.log(Level.INFO, "Pruging queue: "+qName);
 				Map<String, Object> info = getMsgEventInfo(null, DataEventType.PURGE, qName, null);
 				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info));				
 			}
@@ -249,13 +253,13 @@ public class AmqAdminClient implements DataLoadedEventHandler {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				String msg = "Failed to purge queue "+ qName+". " + exception.getMessage();
-				System.out.println(msg);
+				logger.log(Level.SEVERE, msg);
 				EventBus.instance().fireEvent(buildFailedMsgEvent(msg, exception, DataEventType.FAILED_MSG_ACTION_EVENT));				
 			}
 
 			@Override
 			public void onSuccess(Method method, Object response) {
-				System.out.println("Deleting queue: "+qName);
+				logger.log(Level.INFO, "Deleting queue: "+qName);
 				Map<String, Object> info = getMsgEventInfo(null, DataEventType.DEL_Q, qName, null);
 				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info));				
 			}
@@ -268,13 +272,13 @@ public class AmqAdminClient implements DataLoadedEventHandler {
 			@Override
 			public void onFailure(Method method, Throwable exception) {
 				String msg = "Failed to add queue "+ qName+". " + exception.getMessage();
-				System.out.println(msg);
+				logger.log(Level.SEVERE, msg);
 				EventBus.instance().fireEvent(buildFailedMsgEvent(msg, exception, DataEventType.FAILED_MSG_ACTION_EVENT));				
 			}
 
 			@Override
 			public void onSuccess(Method method, Object response) {
-				System.out.println("Creating queue: "+qName);
+				logger.log(Level.INFO, "Creating queue: "+qName);
 				Map<String, Object> info = getMsgEventInfo(null, DataEventType.ADD_Q, qName, null);
 				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info));				
 			}

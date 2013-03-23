@@ -1,6 +1,9 @@
 package com.shico.mnm.common.chart;
 
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.FocusEvent;
@@ -20,6 +23,8 @@ import com.shico.mnm.common.client.ChartDataProvider;
 import com.shico.mnm.common.event.DataLoadedEventHandler;
 
 public abstract class ColumnChartPanel extends Composite implements DataLoadedEventHandler, ResizeHandler {
+	private static Logger logger = Logger.getLogger("ColumnChartPanel");
+	
 	protected FocusPanel container;
 	protected ColumnChart chart; 
 	protected double widthRatio, heightRatio;
@@ -65,7 +70,7 @@ public abstract class ColumnChartPanel extends Composite implements DataLoadedEv
 				chart.draw(view, getOptions());
 			}
 		} catch (Exception e) {
-			System.out.println("Error in drawing chart."+e.getMessage());
+			logger.log(Level.SEVERE, "Error in drawing chart."+e.getMessage());
 		}		
 	}
 	

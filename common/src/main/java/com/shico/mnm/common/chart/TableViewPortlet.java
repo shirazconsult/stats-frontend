@@ -1,6 +1,9 @@
 package com.shico.mnm.common.chart;
 
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
@@ -19,6 +22,8 @@ import com.smartgwt.client.widgets.events.RestoreClickHandler;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 public abstract class TableViewPortlet extends PortletWin implements DataLoadedEventHandler, MaximizeClickHandler, RestoreClickHandler {
+	private static Logger logger = Logger.getLogger("TableViewPortlet");
+	
 	protected VLayout container;
 	protected VLayout vPanel;
 	protected Table table; 
@@ -59,7 +64,7 @@ public abstract class TableViewPortlet extends PortletWin implements DataLoadedE
 				table.draw(view, getOptions());
 			}
 		} catch (Exception e) {
-			System.out.println("Error in drawing Table."+e.getMessage());
+			logger.log(Level.SEVERE, "Error in drawing Table."+e.getMessage());
 		}		
 	}
 

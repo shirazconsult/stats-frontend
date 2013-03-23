@@ -1,6 +1,11 @@
 package com.shico.mnm.common.client;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public abstract class ParentRunnable implements Runnable {
+	private static Logger logger = Logger.getLogger("ParentRunnable");
+	
 	int count;
 	ChildRunnable[] childRunnables;
 	
@@ -17,7 +22,7 @@ public abstract class ParentRunnable implements Runnable {
 
 	@Override
 	public final void run() {
-		System.out.println("################# Setting children to run.");
+		logger.log(Level.FINER, "Setting children to run.");
 		for (ChildRunnable child : childRunnables) {
 			child.run();
 		}
@@ -25,9 +30,9 @@ public abstract class ParentRunnable implements Runnable {
 
 	public synchronized void done(){
 		count--;
-		System.out.println("################# One child is done.");
+		logger.log(Level.FINER, "One child is done.");
 		if(count <= 0){	
-			System.out.println("################# No more waiting for children. Parent starts.");
+			logger.log(Level.FINER, "No more waiting for children. Parent starts.");
 			doRun();
 		}
 	}

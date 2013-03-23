@@ -2,6 +2,8 @@ package com.shico.mnm.amq.client.components;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.storage.client.StorageMap;
@@ -37,9 +39,8 @@ import com.smartgwt.client.widgets.tab.events.TabSelectedEvent;
 import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 
 public class AmqTabPanel extends VLayout { 
-	public static final int MONITOR_TAB_IDX = 0;
-	public static final int ADMIN_TAB_IDX = 1;
-	
+	private static Logger logger = Logger.getLogger("AmqTabPanel");
+			
 	// temp. field for controlling the authentication flow. Must be removed
 	// when real authentication is in place.
 	static boolean authenticated = true;
@@ -94,7 +95,7 @@ public class AmqTabPanel extends VLayout {
 						settingsController.setQueueListDS(new QueueListDS(null));							
 					}
 
-					System.out.println("Settings loaded from local storage.");
+					logger.log(Level.INFO, "Settings loaded from local storage.");
 					getParent().done();
 				}else{
 					settingsDS.fetchData(criteria, new DSCallback() {
@@ -110,7 +111,7 @@ public class AmqTabPanel extends VLayout {
 							settingsController.setQueueListDS(new QueueListDS(restUrl));
 
 							settingsLoaded = true;
-							System.out.println("Settings loaded from server.");
+							logger.log(Level.INFO, "Settings loaded from server.");
 
 							getParent().done();
 						}
@@ -280,13 +281,7 @@ public class AmqTabPanel extends VLayout {
 			}
 		}
 	}
-		
-	public void selectAdminTab(){
-		container.selectTab(ADMIN_TAB_IDX);
-	}
-	public void selectMonitorTab(){
-		container.selectTab(MONITOR_TAB_IDX);
-	}
+
 	public QueueListPortlet getQueueListPortlet(){
 		if(queueListPortlet == null){
 			queueListPortlet = new QueueListPortlet(settingsController);

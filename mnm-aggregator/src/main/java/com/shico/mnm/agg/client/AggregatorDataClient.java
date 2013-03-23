@@ -3,6 +3,8 @@ package com.shico.mnm.agg.client;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
@@ -27,6 +29,8 @@ import com.shico.mnm.common.model.NestedList;
 import com.shico.mnm.common.model.TARGET;
 
 public class AggregatorDataClient implements AggregatorChartDataProvider, DataLoadedEventHandler {
+	private final static Logger logger = Logger.getLogger("AggregatorDataClient");
+	
 	String aggregatorAddress;
 	DataTable data = null;
 	DataTable vmdata = null;
@@ -62,11 +66,11 @@ public class AggregatorDataClient implements AggregatorChartDataProvider, DataLo
 			vmdata = DataTable.create();
 			service.getColumnNames(TARGET.Aggregator.name(), new MethodCallback<ListResult<String>>() {
 				public void onFailure(Method method, Throwable exception) {
-					System.out.println("Failed to get column metadata for aggregator."+ exception.getMessage());
+					logger.log(Level.SEVERE, "Failed to get column metadata for aggregator."+ exception.getMessage());
 					EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.FAILED_AGGREGATOR_METADATA_LOADED_EVENT));
 				}
 				public void onSuccess(Method method, ListResult<String> response) {
-					System.out.println("Retrieving column metadata info for aggregator. ");
+					logger.log(Level.INFO, "Retrieving column metadata info for aggregator. ");
 					for (String st : response.getResult()) {
 						if(st.startsWith("VM") || st.equals("time") || st.equals("utime")){
 							vmdata.addColumn(ColumnType.NUMBER, st);
@@ -87,13 +91,13 @@ public class AggregatorDataClient implements AggregatorChartDataProvider, DataLo
 		service.getRows(TARGET.Aggregator.name(), from, to, new MethodCallback<NestedList<String>>() {
 			
 			public void onFailure(Method method, Throwable exception) {
-				System.out.println("Failed to get data rows. "+ exception.getMessage());
+				logger.log(Level.SEVERE, "Failed to get data rows. "+ exception.getMessage());
 				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.FAILED_AGGREGATOR_DATA_LOADED_EVENT));
 			}
 
 			public void onSuccess(Method method,
 					NestedList<String> response) {
-				System.out.println("Retrieving rows from "+from+" to "+to);
+				logger.log(Level.INFO, "Retrieving rows from "+from+" to "+to);
 				try{
 					List<ListResult<String>> rows = response.getRows();
 					for (ListResult<String> row : rows) {
@@ -118,7 +122,7 @@ public class AggregatorDataClient implements AggregatorChartDataProvider, DataLo
 					info.put("to", rowIdx);
 					EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AGGREGATOR_DATA_LOADED_EVENT, info));
 				}catch(Exception e){
-					System.out.println("Exception while updating data. "+e.getMessage());
+					logger.log(Level.SEVERE, "Exception while updating data. "+e.getMessage());
 				}
 			}
 		});	
@@ -129,13 +133,13 @@ public class AggregatorDataClient implements AggregatorChartDataProvider, DataLo
 		service.getLastRow(TARGET.Aggregator.name(), new MethodCallback<ListResult<String>>() {
 
 			public void onFailure(Method method, Throwable exception) {
-				System.out.println("Failed to get data rows. "+ exception.getMessage());
+				logger.log(Level.SEVERE, "Failed to get data rows. "+ exception.getMessage());
 				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.FAILED_AGGREGATOR_DATA_LOADED_EVENT));
 			}
 
 			public void onSuccess(Method method,
 					ListResult<String> response) {
-				System.out.println("Retrieving next data row.");
+				logger.log(Level.FINE, "Retrieving next data row.");
 				try{
 					List<String> row = response.getResult();
 					getData(row);
@@ -153,7 +157,7 @@ public class AggregatorDataClient implements AggregatorChartDataProvider, DataLo
 					//				arrowFormat();
 					EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AGGREGATOR_DATA_LOADED_EVENT));
 				}catch(Exception e){
-					System.out.println("Exception while updating data. "+e.getMessage());
+					logger.log(Level.SEVERE, "Exception while updating data. "+e.getMessage());
 				}
 			}
 		});
@@ -187,14 +191,14 @@ public class AggregatorDataClient implements AggregatorChartDataProvider, DataLo
 				colIdx++;
 			}
 		}catch(Exception e){
-			System.out.println("> Exception while updating data. "+e.getMessage());
+			logger.log(Level.SEVERE, "Exception while updating data. "+e.getMessage());
 		}
 	}
 	
 	void getVMData(List<String> row){
 		try{
 			if(row.isEmpty()){
-				System.out.println("No row returned from the Aggregator Monitor.");
+				logger.log(Level.WARNING, "No row returned from the Aggregator Monitor.");
 				return;
 			}
 			vmdata.addRow();
@@ -206,7 +210,7 @@ public class AggregatorDataClient implements AggregatorChartDataProvider, DataLo
 			vmdata.setValue(idx-1, 4, Integer.valueOf(row.get(timeIdx)));
 			vmdata.setValue(idx-1, 5, Long.valueOf(row.get(utimeIdx)));
 		}catch(Exception e){
-			System.out.println(">Exception while updating vm-data. "+e.getMessage());
+			logger.log(Level.SEVERE, "Exception while updating vm-data. "+e.getMessage());
 		}
 	}
 		

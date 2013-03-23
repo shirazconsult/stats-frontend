@@ -118,19 +118,9 @@ public class AmqSettingsControllerImpl implements AmqSettingsController {
 			adminSettingsLocalStorageDS = new AmqLocalSettingsDS("AmqAdminSettingsLocalStorageDS");
 			Map<String, String> cacheData = new HashMap<String, String>();
 			cacheData.put(AmqLocalSettingsDS.PRIMARY_KEY, "999");
-//			cacheData.put("app", "mnm-amq");
-//			cacheData.put("brokerUrl", "http://127.0.0.1:9119/statistics/rest/amq/admin");
-//			cacheData.put("chartUrl", "http://127.0.0.1:9119/statistics/rest/monitor");
-//			cacheData.put("brokerUser", "emil");
-//			cacheData.put("brokerPwd", "ZZZZ");
-//			cacheData.put("chartUser", "dehghani");
-//			cacheData.put("chartPwd", "YYYY");
-//			cacheData.put("chartRefreshInterval", "10000");
-//			cacheData.put("chartWinSize", "180000");
 			adminSettingsLocalStorageDS.addData(new Record(cacheData));
 		}else{
 			adminSettingsDS = new AmqRemoteSettingsDS("AmqAdminSettingsDS", GWT.getHostPageBaseURL()+AmqClientHandle.ADMIN_REST_URL+"settings");
-			System.out.println(">>>>>>>>>>> Admin Rest URL: "+GWT.getHostPageBaseURL()+AmqClientHandle.ADMIN_REST_URL+"settings");
 		}
 	}	
 }

@@ -1,5 +1,8 @@
 package com.shico.mnm.common.chart;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
@@ -22,6 +25,8 @@ import com.shico.mnm.common.client.ChartDataProvider;
 import com.shico.mnm.common.event.DataLoadedEventHandler;
 
 public abstract class LineChartPanel extends Composite implements DataLoadedEventHandler, ResizeHandler {
+	private static Logger logger = Logger.getLogger("LineChartPanel");
+	
 	protected FocusPanel container;
 	protected LineChart chart; 
 	protected double widthRatio, heightRatio;
@@ -71,7 +76,7 @@ public abstract class LineChartPanel extends Composite implements DataLoadedEven
 				chart.draw(view, getOptions());
 			}
 		} catch (Exception e) {
-			System.out.println("Error in drawing LineChart."+e.getMessage());
+			logger.log(Level.SEVERE, "Error in drawing LineChart."+e.getMessage());
 		}		
 	}
 	

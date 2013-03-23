@@ -1,5 +1,8 @@
 package com.shico.mnm.common.chart;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
@@ -19,6 +22,8 @@ import com.smartgwt.client.widgets.events.RestoreClickHandler;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 public abstract class LineChartPortlet extends PortletWin implements DataLoadedEventHandler, MaximizeClickHandler, RestoreClickHandler {
+	private static Logger logger = Logger.getLogger("LineChartPortlet");
+	
 	protected VLayout container;
 	protected LineChart chart; 
 	protected double originalWidthRatio, originalHeightRatio, widthRatio, heightRatio;
@@ -58,7 +63,7 @@ public abstract class LineChartPortlet extends PortletWin implements DataLoadedE
 				chart.draw(view, getOptions());
 			}
 		} catch (Exception e) {
-			System.out.println("Error in drawing LineChart."+e.getMessage());
+			logger.log(Level.SEVERE, "Error in drawing LineChart."+e.getMessage());
 		}		
 	}
 	

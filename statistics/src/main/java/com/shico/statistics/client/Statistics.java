@@ -1,5 +1,7 @@
 package com.shico.statistics.client;
 
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.Table;
@@ -18,24 +20,24 @@ import com.smartgwt.client.widgets.tab.TabSet;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class Statistics implements EntryPoint {
+	private final static Logger logger = Logger.getLogger("Statistics");
+	
 	TabSet mainTabPanel;
 
 	AmqChartDataProviderImpl amqDataClient;
 	AggregatorDataClient aggDataClient = new AggregatorDataClient();
 	
 	public void onModuleLoad() {
-
+		
 		// Root panel
 		final VLayout wrapper = new VLayout();
 		wrapper.setWidth100();
 		wrapper.setHeight100();
 
-		
 		// Load data and components
 		Runnable onAmqLoadCallback = new Runnable() {
 			public void run() {
-//				amqDataClient.getColumnNames();
-//				aggDataClient.getColumnNames();
+				// do nothing
 			}
 		};
 
@@ -59,14 +61,6 @@ public class Statistics implements EntryPoint {
 		
 		parent.run();
 
-//		AmqChartDataProviderImpl amqDataClient = AmqClientHandle.getChartDataClient();
-//		AmqAdminClient amqAdminClient = AmqClientHandle.getAdminClient();
-
-//		amqDataClient.schedule(5, 30);
-//		aggDataClient.schedule(10, 30);
-//		amqAdminClient.getBrokerInfo("local", true);
-//		amqAdminClient.getMetadata("local");
-//		AmqClientHandle.getPlaceHistoryHandler().handleCurrentHistory();
 		wrapper.draw();
 	}	
 
@@ -81,18 +75,6 @@ public class Statistics implements EntryPoint {
 		Tab aggTab = new Tab("Aggregator");
 		aggTab.setPane(new AggMonitorTabPanel(aggDataClient));
 		mainTabPanel.addTab(aggTab);
-		
-		//		mainTabPanel.add(AmqClientHandle.getAmqTabPanel(), "ActiveMQ", false);
-//		mainTabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
-//			@Override
-//			public void onSelection(SelectionEvent<Integer> event) {
-//				int tabIdx = event.getSelectedItem();
-//				Widget widget = mainTabPanel.getWidget(tabIdx);
-//				if(widget instanceof TabLayoutPanel){
-//					((TabPanel)widget).selectTab(0);
-//				}
-//			}
-//		});
 		mainTabPanel.selectTab(0);
 
 		return mainTabPanel;

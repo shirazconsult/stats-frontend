@@ -1,6 +1,11 @@
 package com.shico.mnm.common.client;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public abstract class ChildRunnable implements Runnable {
+	private static Logger logger = Logger.getLogger("ChildRunnable");
+	
 	ParentRunnable parent;
 	
 	public ChildRunnable() {
@@ -11,7 +16,7 @@ public abstract class ChildRunnable implements Runnable {
 	
 	@Override
 	public void run() {
-		System.out.println("################# Child starts running.");
+		logger.log(Level.FINER, "Child starts running.");
 		doRun();
 	}
 

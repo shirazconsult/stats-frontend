@@ -3,6 +3,8 @@ package com.shico.mnm.amq.client;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
@@ -27,6 +29,8 @@ import com.shico.mnm.common.model.NestedList;
 import com.shico.mnm.common.model.TARGET;
 
 public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoadedEventHandler {
+	private static Logger logger = Logger.getLogger("AmqChartDataProviderImpl");
+	
 	String brokerAddress;
 	DataTable data = null;
 	DataView enqDeqInfView = null;
@@ -55,11 +59,11 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 			data = DataTable.create();
 			service.getColumnNames(TARGET.ActiveMQ.name(), new MethodCallback<ListResult<String>>() {
 				public void onFailure(Method method, Throwable exception) {
-					System.out.println("Failed to get column metadata."+ exception.getMessage());
+					logger.log(Level.SEVERE, "Failed to get column metadata."+ exception.getMessage());
 					EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.FAILED_BROKER_METADATA_LOADED_EVENT));
 				}
 				public void onSuccess(Method method, ListResult<String> response) {
-					System.out.println("Retrieving column metadata info. ");
+					logger.log(Level.INFO, "Retrieving column metadata info. ");
 					for (String st : response.getResult()) {
 						data.addColumn(ColumnType.NUMBER, st);	
 					}
@@ -85,19 +89,19 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 		service.getRows(TARGET.ActiveMQ.name(), from, to, new MethodCallback<NestedList<String>>() {
 			
 			public void onFailure(Method method, Throwable exception) {
-				System.out.println("Failed to get data rows. "+ exception.getMessage());
+				logger.log(Level.SEVERE, "Failed to get data rows. "+ exception.getMessage());
 				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.FAILED_BROKER_DATA_LOADED_EVENT));
 			}
 
 			public void onSuccess(Method method,
 					NestedList<String> response) {
-				System.out.println("Retrieving rows from "+from+" - "+to);
+				logger.log(Level.INFO, "Retrieving rows from "+from+" - "+to);
 				try{
 					List<ListResult<String>> rows = response.getRows();
 					int idx = data.getNumberOfRows();
 					int size = rows.size();
 					if(size == 0){
-						System.out.println("No rows returned for period "+from+" - "+to);
+						logger.log(Level.WARNING, "No rows returned for period "+from+" - "+to);
 						return;
 					}
 					data.addRows(size);
@@ -125,7 +129,7 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 					info.put("to", idx);
 					EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.BROKER_DATA_LOADED_EVENT, info));
 				}catch(Exception e){
-					System.out.println("Exception while updating data. "+e.getMessage());
+					logger.log(Level.SEVERE, "Exception while updating data. "+e.getMessage());
 				}
 			}
 		});		
@@ -136,7 +140,7 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 		service.getLastRow(TARGET.ActiveMQ.name(), new MethodCallback<ListResult<String>>() {
 			
 			public void onFailure(Method method, Throwable exception) {
-				System.out.println("Failed to get data rows. "+ exception.getMessage());
+				logger.log(Level.SEVERE, "Failed to get data rows. "+ exception.getMessage());
 				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.FAILED_BROKER_DATA_LOADED_EVENT));
 			}
 
@@ -145,7 +149,7 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 				try{
 					List<String> row = response.getResult();
 					if(row.isEmpty()){
-						System.out.println("No row returned from ActiveMQ monitor.");
+						logger.log(Level.WARNING, "No row returned from ActiveMQ monitor.");
 						return;
 					}
 					int idx = data.getNumberOfRows();
@@ -168,7 +172,7 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 					}
 					EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.BROKER_DATA_LOADED_EVENT));
 				}catch(Exception e){
-					System.out.println("Exception while updating data. "+e.getMessage());
+					logger.log(Level.SEVERE, "Exception while updating data. "+e.getMessage());
 				}
 			}
 		});		
@@ -315,13 +319,13 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 			try{
 				refreshInterval = Integer.parseInt((String)settingsController.getSetting(AmqRemoteSettingsDS.CHARTREFRESHINTERVAL));
 			}catch(NumberFormatException nfe){
-				System.out.println("WARN: "+nfe.getMessage());
+				logger.log(Level.WARNING, nfe.getMessage());
 			}
 			int winSize = slidingWinTime;
 			try{
 				winSize = Integer.parseInt((String)settingsController.getSetting(AmqRemoteSettingsDS.CHARTWINSIZE));
 			}catch(NumberFormatException nfe){
-				System.out.println("WARN: "+nfe.getMessage());
+				logger.log(Level.WARNING, nfe.getMessage());
 			}
 			schedule(Math.max(refreshInterval, 10), Math.max(winSize,10));
 			break;

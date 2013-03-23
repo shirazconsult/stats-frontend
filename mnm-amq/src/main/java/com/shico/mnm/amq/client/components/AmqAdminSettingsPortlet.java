@@ -1,6 +1,8 @@
 package com.shico.mnm.amq.client.components;
 
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.user.client.Window;
@@ -31,6 +33,8 @@ import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 public class AmqAdminSettingsPortlet extends PortletWin implements DataLoadedEventHandler {
+	private static Logger logger = Logger.getLogger("AmqAdminSettingsPortlet");
+
 	public final static String TITLE = "Admin Settings";
 	VLayout container;
 	AmqSettingsController settingsConroller;
@@ -181,7 +185,7 @@ public class AmqAdminSettingsPortlet extends PortletWin implements DataLoadedEve
 			return;
 		}
 		for (Object key : map.keySet()) {
-			System.out.println(":::: "+key+"="+map.get(key));
+			logger.log(Level.FINE, ":::: "+key+"="+map.get(key));
 		}
 	}
 

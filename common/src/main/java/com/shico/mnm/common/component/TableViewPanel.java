@@ -1,6 +1,9 @@
 package com.shico.mnm.common.component;
 
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.FocusEvent;
@@ -21,6 +24,8 @@ import com.shico.mnm.common.client.ChartDataProvider;
 import com.shico.mnm.common.event.DataLoadedEventHandler;
 
 public abstract class TableViewPanel extends Composite implements DataLoadedEventHandler, ResizeHandler {
+	private static Logger logger = Logger.getLogger("TableViewPanel");
+	
 	protected FocusPanel container;
 	protected VerticalPanel vPanel;
 	protected Table table; 
@@ -66,7 +71,7 @@ public abstract class TableViewPanel extends Composite implements DataLoadedEven
 				table.draw(view, getOptions());
 			}
 		} catch (Exception e) {
-			System.out.println("Error in drawing Table."+e.getMessage());
+			logger.log(Level.SEVERE, "Error in drawing Table."+e.getMessage());
 		}		
 	}
 	
