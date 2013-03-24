@@ -337,7 +337,7 @@ public class AmqAdminClient implements DataLoadedEventHandler {
 		case AMQ_ADMIN_SETTINGS_CHANGED_EVENT:
 //			String restUrl = (String)event.info.get(AdminSettingsDS.BROKERURL);
 			@SuppressWarnings("deprecation")
-			Resource resource = new Resource(settingsController.getAdminRest());
+			Resource resource = new Resource("http://127.0.0.1:9119/statistics/rest/admin/amq");
 			adminService = GWT.create(AmqAdminRestService.class);
 			((RestServiceProxy)adminService).setResource(resource);
 			break;

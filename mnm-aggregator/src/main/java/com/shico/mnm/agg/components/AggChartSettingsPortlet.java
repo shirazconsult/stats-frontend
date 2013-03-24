@@ -1,4 +1,4 @@
-package com.shico.mnm.amq.client.components;
+package com.shico.mnm.agg.components;
 
 import java.util.Map;
 import java.util.logging.Level;
@@ -6,9 +6,9 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.user.client.Window;
-import com.shico.mnm.amq.client.AmqClientHandle;
-import com.shico.mnm.amq.client.AmqSettingsController;
-import com.shico.mnm.amq.model.AmqRemoteSettingsDS;
+import com.shico.mnm.agg.client.AggClientHandle;
+import com.shico.mnm.agg.client.AggSettingsController;
+import com.shico.mnm.agg.model.AggRemoteSettingsDS;
 import com.shico.mnm.common.component.PortletWin;
 import com.shico.mnm.common.event.DataEventType;
 import com.shico.mnm.common.event.DataLoadedEvent;
@@ -29,17 +29,17 @@ import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
-public class AmqAdminSettingsPortlet extends PortletWin implements DataLoadedEventHandler {
-	private static Logger logger = Logger.getLogger("AmqAdminSettingsPortlet");
-
-	public final static String TITLE = "Admin Settings";
+public class AggChartSettingsPortlet extends PortletWin implements DataLoadedEventHandler {
+	private static Logger logger = Logger.getLogger("AmqChartSettingsPortlet");
+	
+	public final static String TITLE = "Chart Settings";
 	VLayout container;
-	AmqSettingsController settingsConroller;
+	AggSettingsController settingsConroller;
 	DynamicForm userSettingsform;
-	DynamicForm adminSettingsform;
+	DynamicForm chartSettingsform;
 	SettingsValuesManager valuesManager;
 	
-	public AmqAdminSettingsPortlet(AmqSettingsController settingsConroller) {
+	public AggChartSettingsPortlet(AggSettingsController settingsConroller) {
 		super(TITLE);
 		this.settingsConroller = settingsConroller;
 		
@@ -55,12 +55,12 @@ public class AmqAdminSettingsPortlet extends PortletWin implements DataLoadedEve
 		container.addMember(getButtonPanel());
 		
 		addItem(container);
-		
-		valuesManager = new SettingsValuesManager(AmqClientHandle.APP_NAME);
+
+		valuesManager = new SettingsValuesManager(AggClientHandle.APP_NAME);
 		valuesManager.addMember(getUserSettingsForm());
 		valuesManager.addMember(getAdminSettingsForm());
 		valuesManager.setDataSource(settingsConroller.getSettingsDS());
-				
+
 		EventBus.instance().addHandler(DataLoadedEvent.TYPE, this);
 	}
 
@@ -72,42 +72,39 @@ public class AmqAdminSettingsPortlet extends PortletWin implements DataLoadedEve
 			userSettingsform.setTitleOrientation(TitleOrientation.TOP);
 			userSettingsform.setWidth100();
 			userSettingsform.setCellPadding(5);
-			userSettingsform.setNumCols(4);
+			userSettingsform.setNumCols(2);
 			
-			TextItem userItem = new TextItem(AmqRemoteSettingsDS.BROKERUSER, "User name");
-			TextItem pwdItem = new PasswordItem(AmqRemoteSettingsDS.BROKERPWD, "Password");
+			TextItem userItem = new TextItem(AggRemoteSettingsDS.CHARTUSER, "User name");
+			TextItem pwdItem = new PasswordItem(AggRemoteSettingsDS.CHARTPWD, "Password");
 
-			userSettingsform.setFields(userItem, pwdItem);
-			
-			// no validators
-//			userSettingsform.setValidateOnChange(true);
-//			userItem.setRequired(true);
-//			pwdItem.setRequired(true);
+			userSettingsform.setFields(userItem, pwdItem);			
 		}
 		return userSettingsform;
 	}
 
 	private DynamicForm getAdminSettingsForm() {
-		if(adminSettingsform == null){
-			adminSettingsform = new DynamicForm();
-			adminSettingsform.setIsGroup(true);
-			adminSettingsform.setGroupTitle("Admin Settings");
-			adminSettingsform.setTitleOrientation(TitleOrientation.TOP);
-			adminSettingsform.setWidth100();
-			adminSettingsform.setCellPadding(5);
-			adminSettingsform.setNumCols(2);
+		if(chartSettingsform == null){
+			chartSettingsform = new DynamicForm();
+			chartSettingsform.setIsGroup(true);
+			chartSettingsform.setGroupTitle("Chart Settings");
+			chartSettingsform.setTitleOrientation(TitleOrientation.TOP);
+			chartSettingsform.setWidth100();
+			chartSettingsform.setCellPadding(5);
+			chartSettingsform.setNumCols(4);
 			
-			HiddenItem appItem = new HiddenItem(AmqRemoteSettingsDS.APP);
-			appItem.setValue(AmqClientHandle.APP_NAME);
-			TextItem urlItem = new TextItem(AmqRemoteSettingsDS.BROKERURL, "Broker Url");
+			HiddenItem appItem = new HiddenItem(AggRemoteSettingsDS.APP);
+			appItem.setValue(AggClientHandle.APP_NAME);
+			TextItem urlItem = new TextItem(AggRemoteSettingsDS.CHARTURL, "Server URL");
 			urlItem.setWidth(400);
-			urlItem.setColSpan(2);
-			
-			adminSettingsform.setFields(urlItem, appItem);
-			adminSettingsform.setValidateOnChange(true);
-			urlItem.setRequired(true);
+			urlItem.setColSpan(4);
+			TextItem refreshItem = new TextItem(AggRemoteSettingsDS.CHARTREFRESHINTERVAL, "Refresh Interval (Sec.)");
+			TextItem viewItem = new TextItem(AggRemoteSettingsDS.CHARTWINSIZE, "View Size (Min.)");
+
+			refreshItem.setLength(3);
+			viewItem.setLength(5);
+			chartSettingsform.setFields(urlItem, refreshItem, viewItem, appItem);
 		}
-		return adminSettingsform;
+		return chartSettingsform;
 	}
 
 	public HLayout getButtonPanel(){
@@ -127,7 +124,7 @@ public class AmqAdminSettingsPortlet extends PortletWin implements DataLoadedEve
 					public void onSuccess(Map result) {
 						if(result != null){
 							settingsConroller.getSettingsMap().putAll(result);
-							EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_ADMIN_SETTINGS_CHANGED_EVENT, result));
+							EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AGG_CHART_SETTINGS_CHANGED_EVENT, result));
 						}else{
 							logger.log(Level.SEVERE, "Saving of settings probably failed. The returned settings is null.");
 						}
@@ -151,7 +148,7 @@ public class AmqAdminSettingsPortlet extends PortletWin implements DataLoadedEve
 	}
 	
 	public void update(){
-		Criteria criteria = new Criteria(AmqRemoteSettingsDS.APP, AmqClientHandle.APP_NAME);
+		Criteria criteria = new Criteria(AggRemoteSettingsDS.APP, AggClientHandle.APP_NAME);
 		valuesManager.fetchData(criteria);
 	}
 	
@@ -175,18 +172,9 @@ public class AmqAdminSettingsPortlet extends PortletWin implements DataLoadedEve
 	@Override
 	public void onDataLoaded(DataLoadedEvent event) {
 		switch(event.eventType){
-		case AMQ_SETTINGS_LOADED_EVENT:
+		case AGG_SETTINGS_LOADED_EVENT:
 			update();
 			break;
-		}
-	}
-
-	private void printMap(Map map){
-		if(map == null){
-			return;
-		}
-		for (Object key : map.keySet()) {
-			logger.log(Level.INFO, ":::: "+key+"="+map.get(key));
 		}
 	}
 

@@ -26,9 +26,11 @@ public class SettingsValuesManager extends ValuesManager {
 	private boolean useLocalStorage;
 	private StorageEvent.Handler storageEventHandler;
 	private Storage settingsStorage;
+	private String space = "";
 	
-	public SettingsValuesManager() {
+	public SettingsValuesManager(String appName) {
 		super();
+		this.space = appName+".";
 	}
 
 	public SettingsValuesManager(JavaScriptObject jsObj) {
@@ -118,8 +120,9 @@ public class SettingsValuesManager extends ValuesManager {
 			for (FormItem fi : fields) {
 				String fieldName = fi.getName();
 				if(ds.getField(fieldName) != null){
-					data.put(fieldName, sm.get(fieldName));
-					fi.setValue(sm.get(fieldName));
+					String value = sm.get(space+fieldName);
+					data.put(fieldName, value);
+					fi.setValue(value);
 				}
 			}
 		}
@@ -142,7 +145,7 @@ public class SettingsValuesManager extends ValuesManager {
 				String value = (fi.getValue() == null ? "" : String.valueOf(fi.getValue()));
 				if(ds.getField(fieldName) != null){
 					newData.put(fieldName, value);
-					settingsStorage.setItem(fieldName, value);
+					settingsStorage.setItem(space+fieldName, value);
 				}
 			}
 		}

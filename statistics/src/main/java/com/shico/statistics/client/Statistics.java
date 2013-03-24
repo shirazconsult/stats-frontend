@@ -11,9 +11,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.Table;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
-import com.shico.mnm.agg.client.AggMonitorTabPanel;
-import com.shico.mnm.agg.client.AggregatorDataClient;
-import com.shico.mnm.amq.client.AmqChartDataProviderImpl;
+import com.shico.mnm.agg.client.AggClientHandle;
 import com.shico.mnm.amq.client.AmqClientHandle;
 import com.shico.mnm.common.client.ChildRunnable;
 import com.shico.mnm.common.client.ParentRunnable;
@@ -29,9 +27,6 @@ public class Statistics implements EntryPoint {
 	
 	TabSet mainTabPanel;
 
-	AmqChartDataProviderImpl amqDataClient;
-	AggregatorDataClient aggDataClient = new AggregatorDataClient();
-	
 	public void onModuleLoad() {
 		GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
 			
@@ -96,7 +91,7 @@ public class Statistics implements EntryPoint {
 		mainTabPanel.addTab(amqTab);
 		
 		Tab aggTab = new Tab("Aggregator");
-		aggTab.setPane(new AggMonitorTabPanel(aggDataClient));
+		aggTab.setPane(AggClientHandle.getAggTabPanel());
 		mainTabPanel.addTab(aggTab);
 		mainTabPanel.selectTab(0);
 

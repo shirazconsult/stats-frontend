@@ -19,7 +19,7 @@ import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 
 public class AggMonitorTabPanel extends VLayout {
 	
-	AggregatorDataClient dataClient;
+	AggChartDataProviderImpl dataClient;
 
 	TabSet container;
 	VLayout monitorPanel;
@@ -27,7 +27,7 @@ public class AggMonitorTabPanel extends VLayout {
 	public AggMonitorTabPanel(ChartDataProvider chartDataProvider) {
 		super();
 		
-		dataClient = (AggregatorDataClient)chartDataProvider;
+		dataClient = (AggChartDataProviderImpl)chartDataProvider;
 
 		setup();
 	}

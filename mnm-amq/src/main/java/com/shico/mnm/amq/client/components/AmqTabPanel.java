@@ -1,12 +1,9 @@
 package com.shico.mnm.amq.client.components;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.storage.client.Storage;
-import com.google.gwt.storage.client.StorageMap;
 import com.shico.mnm.amq.client.AmqChartDataProviderImpl;
 import com.shico.mnm.amq.client.AmqClientHandle;
 import com.shico.mnm.amq.client.AmqSettingsControllerImpl;
@@ -28,7 +25,6 @@ import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
-import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.types.Side;
 import com.smartgwt.client.widgets.layout.PortalLayout;
 import com.smartgwt.client.widgets.layout.Portlet;
@@ -40,11 +36,7 @@ import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 
 public class AmqTabPanel extends VLayout { 
 	private static final Logger logger = Logger.getLogger("AmqTabPanel");
-			
-	// temp. field for controlling the authentication flow. Must be removed
-	// when real authentication is in place.
-	static boolean authenticated = true;
-	
+				
 	AmqChartDataProviderImpl dataClient;
 	AmqSettingsControllerImpl settingsController;
 	
@@ -55,7 +47,7 @@ public class AmqTabPanel extends VLayout {
 	VLayout queuePanel;
 	BrokerInfoPortlet brokerInfoPortlet;
 	QueueListPortlet queueListPortlet;
-	
+
 	boolean settingsLoaded = false;
 	
 	public AmqTabPanel(final ChartDataProvider chartDataProvider, final AmqSettingsControllerImpl settingsController) {
@@ -63,45 +55,27 @@ public class AmqTabPanel extends VLayout {
 		
 		this.settingsController = settingsController;
 		
-		if(authenticated){
-			this.dataClient = (AmqChartDataProviderImpl)chartDataProvider;
-		}
-		
+		this.dataClient = (AmqChartDataProviderImpl)chartDataProvider;
+
 		ChildRunnable settingLoader = new ChildRunnable() {			
 			@Override
 			public void doRun() {
-				Criteria criteria = new Criteria(AmqRemoteSettingsDS.APP, AmqClientHandle.APP_NAME);
-				DataSource settingsDS = settingsController.getSettingsDS();
-				if(settingsDS.getClientOnly() != null && settingsDS.getClientOnly()){
+				if(settingsController.useLocalStorage()){
 					logger.log(Level.INFO, "Loading settings from local storage.");
-					// Read from local storage
-					Storage settingsStorage = Storage.getLocalStorageIfSupported();
-					if(settingsStorage == null){
-						throw new IllegalStateException("Cannot read settings from local storage, because it is not supported. Please use a browser with HTML5.");
-					}
-					StorageMap sm = new StorageMap(settingsStorage);
-					if(sm != null && !sm.isEmpty()){
-						Map settingsMap = new HashMap();
-						settingsMap.putAll(sm);
-						settingsController.setSettingsMap(settingsMap);
+					settingsController.setSettingsMapFromLocalStorage();
 						
-						String restUrl = sm.get(AmqRemoteSettingsDS.BROKERURL);
-						if(restUrl != null){
-							settingsController.setBrokerInfoDS(new BrokerInfoDS(restUrl));
-							settingsController.setQueueListDS(new QueueListDS(restUrl));							
-						}
-						settingsLoaded = true;
-					}else{
-						settingsController.setBrokerInfoDS(new BrokerInfoDS(""));
-						settingsController.setQueueListDS(new QueueListDS(""));							
-					}
+					String restUrl = (String)settingsController.getSetting(AmqRemoteSettingsDS.BROKERURL);
+					settingsController.setBrokerInfoDS(new BrokerInfoDS(restUrl));
+					settingsController.setQueueListDS(new QueueListDS(restUrl));							
 
+					settingsLoaded = true;					
 					logger.log(Level.INFO, "Settings loaded from local storage.");
 					getParent().done();
 				}else{
 					logger.log(Level.INFO, "Loading settings from server.");
 
-					settingsDS.fetchData(criteria, new DSCallback() {
+					Criteria criteria = new Criteria(AmqRemoteSettingsDS.APP, AmqClientHandle.APP_NAME);
+					settingsController.getSettingsDS().fetchData(criteria, new DSCallback() {
 						@SuppressWarnings("rawtypes")
 						@Override
 						public void execute(DSResponse response, Object rawData, DSRequest request) {
@@ -138,7 +112,7 @@ public class AmqTabPanel extends VLayout {
 		container = new TabSet();
 		container.setTabBarPosition(Side.TOP);  
 		container.setTabBarAlign(Side.LEFT);  
-		
+
 		Tab adminTab = new Tab("Admin");
 		adminTab.setPane(getAmqMainAdminPanel());
 		adminTab.addTabSelectedHandler(new TabSelectedHandler() {			
@@ -148,29 +122,27 @@ public class AmqTabPanel extends VLayout {
 			}
 		});
 		container.addTab(adminTab);
-		if(authenticated){
-			Tab queueTab = new Tab("Queues");
-			queueTab.setPane(getAmqQueuePanel());
-			queueTab.addTabSelectedHandler(new TabSelectedHandler() {				
-				@Override
-				public void onTabSelected(TabSelectedEvent event) {
-					setAmqQueuePanelPortal();
-				}
-			});
-			container.addTab(queueTab);
+		Tab queueTab = new Tab("Queues");
+		queueTab.setPane(getAmqQueuePanel());
+		queueTab.addTabSelectedHandler(new TabSelectedHandler() {				
+			@Override
+			public void onTabSelected(TabSelectedEvent event) {
+				setAmqQueuePanelPortal();
+			}
+		});
+		container.addTab(queueTab);
 
-			Tab monitorTab = new Tab("Monitor");
-			monitorTab.setPane(getMonitorPanel());
-			monitorTab.addTabSelectedHandler(new TabSelectedHandler() {				
-				@Override
-				public void onTabSelected(TabSelectedEvent event) {
-					setMonitorPanelPortal();
-				}
-			});
-			container.addTab(monitorTab);
-		}
-		
-		
+		Tab monitorTab = new Tab("Monitor");
+		monitorTab.setPane(getMonitorPanel());
+		monitorTab.addTabSelectedHandler(new TabSelectedHandler() {				
+			@Override
+			public void onTabSelected(TabSelectedEvent event) {
+				setMonitorPanelPortal();
+			}
+		});
+		container.addTab(monitorTab);
+
+
 		setWidth100();
 
 		addMember(container);

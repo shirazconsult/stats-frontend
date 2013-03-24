@@ -11,7 +11,6 @@ import com.google.gwt.user.client.Window;
 
 public class MnMAmq implements EntryPoint {
 	private static final Logger logger = Logger.getLogger("AMQEntryPoint");
-	public static boolean loaded;
 	
 	@Override
 	public void onModuleLoad() {
@@ -34,11 +33,6 @@ public class MnMAmq implements EntryPoint {
 	}
 	
 	private void startApplication(){
-		// initialize ErrorDialog
-		AmqClientHandle.getAmqErrorHandler();
-		
-		final AmqSettingsControllerImpl settingsController = AmqClientHandle.getAmqSettingsController();
-		settingsController.init();		
 	}
 
 }

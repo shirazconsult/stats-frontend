@@ -56,7 +56,7 @@ public class AmqChartSettingsPortlet extends PortletWin implements DataLoadedEve
 		
 		addItem(container);
 
-		valuesManager = new SettingsValuesManager();
+		valuesManager = new SettingsValuesManager(AmqClientHandle.APP_NAME);
 		valuesManager.addMember(getUserSettingsForm());
 		valuesManager.addMember(getAdminSettingsForm());
 		valuesManager.setDataSource(settingsConroller.getSettingsDS());

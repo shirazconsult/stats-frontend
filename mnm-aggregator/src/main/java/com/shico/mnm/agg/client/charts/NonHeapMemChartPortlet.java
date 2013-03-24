@@ -2,14 +2,14 @@ package com.shico.mnm.agg.client.charts;
 
 import com.google.gwt.visualization.client.DataView;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import com.shico.mnm.agg.client.AggregatorChartDataProvider;
+import com.shico.mnm.agg.client.AggChartDataProvider;
 import com.shico.mnm.common.chart.LineChartPortlet;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
 
 public class NonHeapMemChartPortlet extends LineChartPortlet {
 
-	public NonHeapMemChartPortlet(AggregatorChartDataProvider dataProvider, double widthRatio, double heightRatio) {
+	public NonHeapMemChartPortlet(AggChartDataProvider dataProvider, double widthRatio, double heightRatio) {
 		super(dataProvider, widthRatio, heightRatio);
 		setTitle("PermGen Space");
 		
@@ -18,7 +18,7 @@ public class NonHeapMemChartPortlet extends LineChartPortlet {
 
 	@Override
 	protected DataView getView() {
-		return ((AggregatorChartDataProvider)dataProvider).getNonHeapMemView();
+		return ((AggChartDataProvider)dataProvider).getNonHeapMemView();
 	}
 
 	@Override

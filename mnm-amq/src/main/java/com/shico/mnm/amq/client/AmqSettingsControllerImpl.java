@@ -9,54 +9,19 @@ import com.shico.mnm.amq.model.AmqRemoteSettingsDS;
 import com.shico.mnm.amq.model.BrokerInfoDS;
 import com.shico.mnm.amq.model.MessageListDS;
 import com.shico.mnm.amq.model.QueueListDS;
-import com.shico.mnm.common.event.DataEventType;
-import com.shico.mnm.common.event.DataLoadedEvent;
-import com.shico.mnm.common.event.EventBus;
+import com.shico.mnm.common.client.AbstractSettingsController;
+import com.shico.mnm.common.client.DefaultRestDS;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.Record;
 
-/**
- * My responsibilities are:
- * <ul>
- * <li> To retrieve and cache the settings from backend. 
- * <li> To listen to app-setting events and save data to the backend.
- * </ul>
- * 
- * @author farhad
- *
- */
-public class AmqSettingsControllerImpl implements AmqSettingsController {
-	final static boolean useLocalStorage = true;
+public class AmqSettingsControllerImpl extends AbstractSettingsController implements AmqSettingsController {
 	
-	AmqRemoteSettingsDS adminSettingsDS;
+	AmqRemoteSettingsDS adminSettingsRemoteDS;
 	AmqLocalSettingsDS adminSettingsLocalStorageDS;
 	BrokerInfoDS brokerInfoDS; 
 	QueueListDS queueListDS;
 	MessageListDS messageListDS;
-	Map<String, Object> settingsMap = new HashMap<String, Object>();
 	
-	@Override
-	public void loadSettings() {
-		EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AMQ_SETTINGS_LOADED_EVENT));
-	}
-	
-	@Override
-	public Object getSetting(String key) {
-		if(settingsMap == null){
-			return null;
-		}
-		return settingsMap.get(key);
-	}
-
-
-	@Override
-	public DataSource getSettingsDS() {
-		if(useLocalStorage){
-			return adminSettingsLocalStorageDS;
-		}
-		return adminSettingsDS;
-	}
-
 	@Override
 	public BrokerInfoDS getBrokerInfoDS() {
 		return brokerInfoDS;
@@ -94,33 +59,31 @@ public class AmqSettingsControllerImpl implements AmqSettingsController {
 	}
 	
 	@Override
-	public Map<String, Object> getSettingsMap() {
-		return settingsMap;
+	public boolean useLocalStorage() {
+		return true;
 	}
 
-	public void setSettingsMap(Map<String, Object> settingsMap) {
-		if(useLocalStorage){
-			this.settingsMap = adminSettingsLocalStorageDS.getCacheData()[0].toMap();
+	@Override
+	protected DefaultRestDS getRemoteDS() {
+		if(adminSettingsRemoteDS == null){
+			adminSettingsRemoteDS = new AmqRemoteSettingsDS("AmqAdminSettingsDS", GWT.getHostPageBaseURL()+AmqClientHandle.ADMIN_REST_URL+"settings");			
 		}
-		this.settingsMap = settingsMap;
+		return adminSettingsRemoteDS;
 	}
 
-	@Deprecated
-	public String getAdminRest(){
-//		String brokerUrl = getSettings().getAttributeAsString(AdminSettingsDS.BROKERURL);
-//		return brokerUrl;
-		return "http://127.0.0.1:9119/statistics/rest/admin/amq";
-	}
-
-	public void init() {
-//		 /rest/admin/http://127.0.0.1:8888//settings
-		if(useLocalStorage){
+	@Override
+	protected DataSource getLocalDS() {
+		if(adminSettingsLocalStorageDS == null){
 			adminSettingsLocalStorageDS = new AmqLocalSettingsDS("AmqAdminSettingsLocalStorageDS");
 			Map<String, String> cacheData = new HashMap<String, String>();
 			cacheData.put(AmqLocalSettingsDS.PRIMARY_KEY, "999");
-			adminSettingsLocalStorageDS.addData(new Record(cacheData));
-		}else{
-			adminSettingsDS = new AmqRemoteSettingsDS("AmqAdminSettingsDS", GWT.getHostPageBaseURL()+AmqClientHandle.ADMIN_REST_URL+"settings");
+			adminSettingsLocalStorageDS.addData(new Record(cacheData));			
 		}
+		return adminSettingsLocalStorageDS;
+	}
+
+	@Override
+	protected String getAppName() {
+		return AmqClientHandle.APP_NAME;
 	}	
 }

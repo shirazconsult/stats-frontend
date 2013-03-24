@@ -2,14 +2,14 @@ package com.shico.mnm.agg.client.charts;
 
 import com.google.gwt.visualization.client.DataView;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import com.shico.mnm.agg.client.AggregatorChartDataProvider;
+import com.shico.mnm.agg.client.AggChartDataProvider;
 import com.shico.mnm.common.chart.LineChartPortlet;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
 
 public class HeapMemChartPortlet extends LineChartPortlet {
 
-	public HeapMemChartPortlet(AggregatorChartDataProvider dataProvider, double widthRatio, double heightRatio) {
+	public HeapMemChartPortlet(AggChartDataProvider dataProvider, double widthRatio, double heightRatio) {
 		super(dataProvider, widthRatio, heightRatio);
 		setTitle("Heap Memory");
 		
@@ -18,7 +18,7 @@ public class HeapMemChartPortlet extends LineChartPortlet {
 
 	@Override
 	protected DataView getView() {
-		return ((AggregatorChartDataProvider)dataProvider).getHeapMemView();
+		return ((AggChartDataProvider)dataProvider).getHeapMemView();
 	}
 
 	@Override

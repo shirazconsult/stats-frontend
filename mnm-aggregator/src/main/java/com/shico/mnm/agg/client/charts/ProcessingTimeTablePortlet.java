@@ -2,14 +2,14 @@ package com.shico.mnm.agg.client.charts;
 
 import com.google.gwt.visualization.client.DataView;
 import com.google.gwt.visualization.client.visualizations.Table.Options;
-import com.shico.mnm.agg.client.AggregatorChartDataProvider;
+import com.shico.mnm.agg.client.AggChartDataProvider;
 import com.shico.mnm.common.chart.TableViewPortlet;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
 
 public class ProcessingTimeTablePortlet extends TableViewPortlet {
 
-	public ProcessingTimeTablePortlet(AggregatorChartDataProvider dataProvider,
+	public ProcessingTimeTablePortlet(AggChartDataProvider dataProvider,
 			double widthRatio, double heightRatio) {
 		super(dataProvider, widthRatio, heightRatio);
 		setTitle("Exchange Processing Metrics");
@@ -24,7 +24,7 @@ public class ProcessingTimeTablePortlet extends TableViewPortlet {
 
 	@Override
 	protected DataView getView() {
-		return ((AggregatorChartDataProvider)dataProvider).getProcessingTimeView();
+		return ((AggChartDataProvider)dataProvider).getProcessingTimeView();
 	}
 
 	@Override

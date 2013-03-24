@@ -2,14 +2,14 @@ package com.shico.mnm.agg.client.charts;
 
 import com.google.gwt.visualization.client.DataView;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import com.shico.mnm.agg.client.AggregatorChartDataProvider;
+import com.shico.mnm.agg.client.AggChartDataProvider;
 import com.shico.mnm.common.chart.ColumnChartPortlet;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
 
 public class LoadViewPortlet extends ColumnChartPortlet {
 
-	public LoadViewPortlet(AggregatorChartDataProvider dataProvider, double widthRatio, double heightRatio) {
+	public LoadViewPortlet(AggChartDataProvider dataProvider, double widthRatio, double heightRatio) {
 		super(dataProvider, widthRatio, heightRatio);
 		setTitle("Load View");
 		
@@ -18,7 +18,7 @@ public class LoadViewPortlet extends ColumnChartPortlet {
 
 	@Override
 	protected DataView getView() {
-		return ((AggregatorChartDataProvider)dataProvider).getLoadView();
+		return ((AggChartDataProvider)dataProvider).getLoadView();
 	}
 
 	@Override

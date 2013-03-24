@@ -284,8 +284,6 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 	Timer timer;
 	@Override
 	public void schedule(final int schedulePeriodInSec, int viewWindowInMin) {
-		slidingWinTime = viewWindowInMin;
-		scheduleIntervalSec = schedulePeriodInSec;
 		if(timer != null){
 			timer.cancel();
 		}
@@ -294,13 +292,18 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 				getLastRow();
 			}
 		};
-		timer.scheduleRepeating(scheduleIntervalSec*1000);
-		slidingWinRows = (slidingWinTime * 60) / scheduleIntervalSec;		
+		timer.scheduleRepeating(schedulePeriodInSec*1000);
+		slidingWinRows = (viewWindowInMin * 60) / schedulePeriodInSec;		
 	}
 
 	@Override
 	public void onDataLoaded(DataLoadedEvent event) {
 		switch (event.eventType) {
+		case BROKER_METADATA_LOADED_EVENT:
+			// get rows for the last 20 seconds
+			long now = System.currentTimeMillis();
+			getRows(now - (60*1000), now);
+			break;
 		case AMQ_CHART_SETTINGS_CHANGED_EVENT:
 			String chartUrl = (String)event.info.get(AmqRemoteSettingsDS.CHARTURL);
 			if(chartUrl == null || chartUrl.trim().isEmpty()){
@@ -328,11 +331,6 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 				logger.log(Level.WARNING, nfe.getMessage());
 			}
 			schedule(Math.max(refreshInterval, 10), Math.max(winSize,10));
-			break;
-		case BROKER_METADATA_LOADED_EVENT:
-			// get rows for the last 20 seconds
-			long now = System.currentTimeMillis();
-			getRows(now - (60*1000), now);
 			break;
 		}
 	}
