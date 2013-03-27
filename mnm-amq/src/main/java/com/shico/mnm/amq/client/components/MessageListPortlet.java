@@ -52,7 +52,7 @@ public class MessageListPortlet extends PortletWin implements DataLoadedEventHan
 
 		container = new VLayout();
 		container.setWidth100();
-		container.setAutoHeight();
+		container.setHeight100();
 		container.setMembersMargin(10);
 		container.setMargin(10);
 		
@@ -95,7 +95,7 @@ public class MessageListPortlet extends PortletWin implements DataLoadedEventHan
 		if(listGrid == null){
 			listGrid = new ListGrid();
 			listGrid.setWidth100();
-			listGrid.setHeight(250);
+			listGrid.setHeight100();
 			listGrid.setShowAllRecords(true);  
 			listGrid.setCellHeight(24);
 			listGrid.setDataSource(datasource);
@@ -131,7 +131,6 @@ public class MessageListPortlet extends PortletWin implements DataLoadedEventHan
 						getPortalContainer().addPortlet(msgViewPortlet, 0, 2);
 					}
 					msgViewPortlet.restore();
-					msgViewPortlet.setHeight(250);
 					if(msgViewPortlet.isDirty()){
 						msgViewPortlet.draw();
 					}

@@ -221,7 +221,6 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 			getPortalContainer().addPortlet(msgListPortlet, 0, 1);
 		}
 		msgListPortlet.restore();
-		msgListPortlet.setHeight(300);
 		if(msgListPortlet.isDirty()){
 			msgListPortlet.draw();
 		}

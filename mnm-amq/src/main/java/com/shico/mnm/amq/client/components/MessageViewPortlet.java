@@ -62,7 +62,8 @@ public class MessageViewPortlet extends PortletWin {
 		container.setMembersMargin(5);
 		container.setMargin(5);
 		
-		container.setWidth("100%");
+		container.setWidth100();
+		container.setHeight100();
 //		container.setHeight(250);
 		
 		container.addMember(getContentPanel());
@@ -173,9 +174,9 @@ public class MessageViewPortlet extends PortletWin {
 		TextAreaItem bodyItem = new TextAreaItem("body");
 		bodyItem.setValue(fetchedMsg.get("body"));
 		bodyItem.setLength(5000);  
-		bodyItem.setColSpan(6);  
+		bodyItem.setColSpan(4);  
 		bodyItem.setWidth("*");  
-		bodyItem.setHeight(30);
+		bodyItem.setHeight(40);
 		bodyItem.setCanEdit(false);
         propItems.add(bodyItem);
         
