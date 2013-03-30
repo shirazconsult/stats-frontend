@@ -20,9 +20,11 @@ public class MessageListDS extends DefaultRestDS {
 	public final static String QUEUE = "queue";
 	public final static String BROKER = "brokerName";
 	public final static String SELECTOR = "selector";
-	// CMD is used for other operations than CRUD like move and copy. 
+	// CMD is used for other operations other than CRUD like move and copy. 
 	// The datasource should still use update operation.
 	public final static String CMD = "command";
+	// To indicate number of messages an operation should be applied to. -1 means no limit.
+	public final static String MAX_MSGS = "maxMsgs";
 	// Used to specify the target queue for copy and move opertation 
 	public final static String TO_QUEUE = "toQueue";
 
@@ -52,6 +54,7 @@ public class MessageListDS extends DefaultRestDS {
 		addField(new DataSourceBooleanField(REDELIVERED));
 		addField(new DataSourceTextField(REPLYTO));
 		
+		// control fields. not visible in views
 		addField(new DataSourceTextField(SELECTOR));
 		addField(new DataSourceTextField(CMD));
 	}

@@ -35,25 +35,6 @@ public class AmqSettingsControllerImpl extends AbstractSettingsController implem
 		this.brokerInfoDS = brokerInfoDS;
 	}
 
-	@Override
-	public QueueListDS getQueueListDS(){
-		return queueListDS;
-	}
-
-	@Override
-	public void setQueueListDS(QueueListDS queueListDS) {
-		if(this.queueListDS != null){
-			this.queueListDS.destroy();
-		}
-		this.queueListDS = queueListDS;
-	}
-	
-	@Override
-	public MessageListDS getMessageListDS(){
-		return messageListDS;
-	}
-	
-
 	public void setMessageListDS(MessageListDS messageListDS) {
 		this.messageListDS = messageListDS;
 	}

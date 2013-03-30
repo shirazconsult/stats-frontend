@@ -13,7 +13,6 @@ import com.shico.mnm.amq.client.charts.EnqDecInflChartPortlet;
 import com.shico.mnm.amq.client.charts.MemUsageChartPortlet;
 import com.shico.mnm.amq.model.AmqRemoteSettingsDS;
 import com.shico.mnm.amq.model.BrokerInfoDS;
-import com.shico.mnm.amq.model.QueueListDS;
 import com.shico.mnm.common.client.ChartDataProvider;
 import com.shico.mnm.common.client.ChildRunnable;
 import com.shico.mnm.common.client.ParentRunnable;
@@ -66,7 +65,6 @@ public class AmqTabPanel extends VLayout {
 						
 					String restUrl = (String)settingsController.getSetting(AmqRemoteSettingsDS.BROKERURL);
 					settingsController.setBrokerInfoDS(new BrokerInfoDS(restUrl));
-					settingsController.setQueueListDS(new QueueListDS(restUrl));							
 
 					settingsLoaded = true;					
 					logger.log(Level.INFO, "Settings loaded from local storage.");
@@ -86,7 +84,6 @@ public class AmqTabPanel extends VLayout {
 							String restUrl = (String)settings.get(AmqRemoteSettingsDS.BROKERURL);
 
 							settingsController.setBrokerInfoDS(new BrokerInfoDS(restUrl));
-							settingsController.setQueueListDS(new QueueListDS(restUrl));
 
 							settingsLoaded = true;
 							logger.log(Level.INFO, "Settings loaded from server.");

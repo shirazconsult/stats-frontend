@@ -123,6 +123,8 @@ public class MsgActionWin extends Window {
 		switch (action) {
 		case MOVE:
 			return "Select a Queue/Topic to move to";
+		case BULK_MOVE:
+			return "Select a Queue/Topic to move alle the messages to";
 		case COPY:
 			return "Select a Queue/Topic to copy to";
 		case ADD_Q:
@@ -146,6 +148,16 @@ public class MsgActionWin extends Window {
 				}
 			});
 			break;
+		case BULK_MOVE:
+			btn.setTitle("Bulk Move");
+			btn.addClickHandler(new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
+					valueCallback.execute(getQueueListBox().getValueAsString());
+					hide();					
+				}
+			});
+			break;			
 		case COPY:
 			btn.setTitle("Copy");
 			btn.addClickHandler(new ClickHandler() {				
