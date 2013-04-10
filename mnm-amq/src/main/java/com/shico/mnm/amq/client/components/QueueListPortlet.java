@@ -123,7 +123,7 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 				@Override
 				public void onRecordDoubleClick(RecordDoubleClickEvent event) {
 					Record record = event.getRecord();
-					openMessagePortlet(record.getAttribute(QueueListDS.NAME));
+					openMessagePortlet(record.getAttribute(QueueListDS.NAME), null);
 				}
 			});
 		}
@@ -136,7 +136,7 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 	}
 	
 	private IButton getPurgeButton(){
-		IButton btn = new IButton("purge");
+		IButton btn = new IButton("Purge");
 		btn.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -170,7 +170,7 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 	}
 	
 	private IButton getDeleteButton(){
-		IButton btn = new IButton("delete");
+		IButton btn = new IButton("Delete");
 		btn.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -198,7 +198,7 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 	}
 
 	private IButton getBrowseButton(){
-		IButton btn = new IButton("browse");
+		IButton btn = new IButton("Browse");
 		btn.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -207,12 +207,52 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 					SC.say("Please select a destination.");
 					return;
 				}
-				openMessagePortlet(record.getAttribute(QueueListDS.NAME));
+				openMessagePortlet(record.getAttribute(QueueListDS.NAME), null);
 			}
 		});
 		return btn;
 	}
 
+	private IButton getSelectButton(){
+		IButton btn = new IButton("Select");
+		btn.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				final ListGridRecord record = listGrid.getSelectedRecord();
+				if(record == null){
+					SC.say("Please select a destination.");
+					return;
+				}
+				new MsgActionWin(DataEventType.SELECT, getDataRecords(), new ValueCallback() {					
+					@Override
+					public void execute(String value) {
+						openMessagePortlet(record.getAttribute(QueueListDS.NAME), value);
+					}
+				});
+			}
+		});
+		return btn;
+	}
+
+	private IButton getAddBtn(){
+		IButton btn = new IButton("Add");
+		btn.addClickHandler(new ClickHandler() {			
+			@Override
+			public void onClick(ClickEvent event) {
+				new MsgActionWin(DataEventType.ADD_Q, getDataRecords(), new ValueCallback() {
+					@Override
+					public void execute(String value) {
+						Record record = new Record();
+						record.setAttribute(QueueListDS.NAME, value);
+						record.setAttribute(QueueListDS.BROKERNAME, "local");
+						listGrid.addData(record);		
+					}
+				});
+			}
+		});
+		return btn;
+	}
+	
 	private IButton getMoveButton(){
 		IButton btn = new IButton("Bulk Move");
 		btn.addClickHandler(new ClickHandler() {
@@ -262,7 +302,7 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 		return btn;
 	}
 
-	private void openMessagePortlet(String qn){
+	private void openMessagePortlet(String qn, String selector){
 		if(msgListPortlet == null){
 			msgListPortlet = new MessageListPortlet(settingsController);
 			msgListPortlet.setPortalContainer(getPortalContainer());
@@ -275,7 +315,7 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 			msgListPortlet.draw();
 		}
 		msgListPortlet.setQueueListProvider(this);
-		msgListPortlet.update(qn, "local");
+		msgListPortlet.update(qn, "local", selector);		
 	}
 	
 	// Creates a Recored for putting in the DSRequest for copy and move operations
@@ -289,25 +329,6 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 		return new Record(props);
 	}
 	
-	private IButton getAddBtn(){
-		IButton btn = new IButton("Add");
-		btn.addClickHandler(new ClickHandler() {			
-			@Override
-			public void onClick(ClickEvent event) {
-				new MsgActionWin(DataEventType.ADD_Q, getDataRecords(), new ValueCallback() {
-					@Override
-					public void execute(String value) {
-						Record record = new Record();
-						record.setAttribute(QueueListDS.NAME, value);
-						record.setAttribute(QueueListDS.BROKERNAME, "local");
-						listGrid.addData(record);		
-					}
-				});
-			}
-		});
-		return btn;
-	}
-
 	HLayout headerPanel;
 	private HLayout getHeaderPanel(){
 		headerPanel = new HLayout();
@@ -315,6 +336,7 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 		headerPanel.setTitle("Browse");
 
 		headerPanel.addMember(getBrowseButton());
+		headerPanel.addMember(getSelectButton());
 		headerPanel.addMember(getMoveButton());
 		headerPanel.addMember(getPurgeButton());
 		headerPanel.addMember(getDeleteButton());

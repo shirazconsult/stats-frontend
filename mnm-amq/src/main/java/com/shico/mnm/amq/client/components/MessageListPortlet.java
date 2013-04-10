@@ -19,6 +19,7 @@ import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.Record;
+import com.smartgwt.client.data.ResultSet;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.SelectionAppearance;
 import com.smartgwt.client.util.BooleanCallback;
@@ -65,16 +66,24 @@ public class MessageListPortlet extends PortletWin implements DataLoadedEventHan
 		EventBus.instance().addHandler(DataLoadedEvent.TYPE, this);
 	}
 			
-	public void update(String qn, String broker){
+	public void update(String qn, String broker, String selector){
 		Criteria criteria = new Criteria(MessageListDS.QUEUE, qn);
 		criteria.addCriteria(MessageListDS.BROKER, broker);
-		
-		listGrid.fetchData(criteria);
+		if(selector != null && !selector.trim().equals("")){
+			criteria.addCriteria(MessageListDS.SELECTOR, selector);
+		}
+		ResultSet rs = listGrid.getResultSet();
+		if(rs == null || rs.willFetchData(criteria)){		
+			listGrid.fetchData(criteria);
+		}else{
+			listGrid.setCriteria(criteria);
+			listGrid.invalidateCache();			
+		}
 		
 		headerPanel.setTitle(qn);
 		setTitle(qn);
 	}
-	
+
 	@SuppressWarnings("incomplete-switch")
 	@Override
 	public void onDataLoaded(DataLoadedEvent event) {
@@ -189,7 +198,6 @@ public class MessageListPortlet extends PortletWin implements DataLoadedEventHan
 							@Override
 							public void execute(DSResponse response, Object rawData, DSRequest request) {
 								if(response.getStatus() == DSResponse.STATUS_SUCCESS){
-									listGrid.invalidateCache();
 									Map<String, Object> info = getMsgEventInfo(extractMsgIds(recs), DataEventType.COPY, getTitle(), value);
 									EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info, MessageListPortlet.class));
 								}

@@ -41,7 +41,7 @@ public class MsgActionWin extends Window {
 	}
 
 	private void setup(DataEventType action){
-		setWidth(280);  
+		setWidth(400);  
 		setHeight(125);
         setTitle(getCaption(action));  
         setShowMinimizeButton(false);  
@@ -63,14 +63,26 @@ public class MsgActionWin extends Window {
 		container.setLayoutAlign(VerticalAlignment.CENTER);
 				
 		DynamicForm df = new DynamicForm();
-		if(action == DataEventType.ADD_Q){	
-			df.setFields(getInputQueueTextItem());
+		switch(action){
+		case ADD_Q:
+			df.setFields(getInputTextItem());
 			df.setWidth100();
+			getInputTextItem().setTitle("Queue");
 			container.addMember(df);
-		}else{
+			break;
+		case SELECT:
+			df.setFields(getInputTextItem());
+			df.setWidth100();
+			getInputTextItem().setTitle("Selector");
+			container.addMember(df);
+			break;
+		case MOVE:
+		case BULK_MOVE:
+		case COPY:			
 			df.setFields(getQueueListBox());
 			df.setWidth100();
 			container.addMember(df);
+			break;
 		}
 		
 		HLayout hp = new HLayout();
@@ -87,12 +99,13 @@ public class MsgActionWin extends Window {
 		show();
 	}
 
-	TextItem inputQueueTextItem;
-	private TextItem getInputQueueTextItem(){
-		if(inputQueueTextItem == null){
-			inputQueueTextItem = new TextItem("QueueName", "Queue");
+	TextItem inputTextItem;
+	private TextItem getInputTextItem(){
+		if(inputTextItem == null){
+			inputTextItem = new TextItem("InputTextField");
+			inputTextItem.setWidth(300);
 		}
-		return inputQueueTextItem;		
+		return inputTextItem;		
 	}
 	
 	private ComboBoxItem getQueueListBox(){
@@ -103,6 +116,7 @@ public class MsgActionWin extends Window {
 			queueListBox.setAddUnknownValues(false);
 		
 			queueListBox.setValueMap(getQueueList());
+			queueListBox.setWidth(300);
 		}
 		return queueListBox;
 	}
@@ -129,6 +143,8 @@ public class MsgActionWin extends Window {
 			return "Select a Queue/Topic to copy to";
 		case ADD_Q:
 			return "Add Queue";
+		case SELECT:
+			return "Browse with Selector";
 		default:
 			return "Unknow Action !!";
 		}
@@ -173,10 +189,21 @@ public class MsgActionWin extends Window {
 			btn.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
-					valueCallback.execute(getInputQueueTextItem().getValueAsString());
+					valueCallback.execute(getInputTextItem().getValueAsString());
 					hide();
 				}
 			});
+			break;
+		case SELECT:
+			btn.setTitle("Select");
+			btn.addClickHandler(new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
+					valueCallback.execute(getInputTextItem().getValueAsString());
+					hide();
+				}
+			});
+			break;			
 		}
 		
 		return btn;
