@@ -8,6 +8,7 @@ import com.shico.mnm.amq.client.HasData;
 import com.shico.mnm.amq.model.AmqRemoteSettingsDS;
 import com.shico.mnm.amq.model.MessageListDS;
 import com.shico.mnm.amq.model.QueueListDS;
+import com.shico.mnm.common.component.PortalWin;
 import com.shico.mnm.common.component.PortletWin;
 import com.shico.mnm.common.event.DataEventType;
 import com.shico.mnm.common.event.DataLoadedEvent;
@@ -185,8 +186,8 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 					public void execute(Boolean value) {
 						if(value){
 							listGrid.removeData(record);
-							if(msgListPortlet != null && getPortalContainer().hasPortlet(qName)){
-								Portlet portlet = getPortalContainer().getPortlet(qName);
+							if(msgListPortlet != null && ((PortalWin)getPortalContainer()).hasPortlet(qName)){
+								Portlet portlet = ((PortalWin)getPortalContainer()).getPortlet(qName);
 								getPortalContainer().removePortlet(portlet);
 							}						
 						}
@@ -285,8 +286,8 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 										public void execute(DSResponse response, Object rawData, DSRequest request) {
 											if(response.getStatus() == 0){
 												listGrid.invalidateCache();
-												if(msgListPortlet != null && getPortalContainer().hasPortlet(qName)){
-													Portlet portlet = getPortalContainer().getPortlet(qName);
+												if(msgListPortlet != null && ((PortalWin)getPortalContainer()).hasPortlet(qName)){
+													Portlet portlet = ((PortalWin)getPortalContainer()).getPortlet(qName);
 													getPortalContainer().removePortlet(portlet);
 												}																		
 											}											
@@ -307,7 +308,7 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 			msgListPortlet = new MessageListPortlet(settingsController);
 			msgListPortlet.setPortalContainer(getPortalContainer());
 		}
-		if(!getPortalContainer().hasPortlet(qn)){
+		if(!((PortalWin)getPortalContainer()).hasPortlet(qn)){
 			getPortalContainer().addPortlet(msgListPortlet, 0, 1);
 		}
 		msgListPortlet.restore();
@@ -359,6 +360,11 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 	@Override
 	protected void handleHelp() {
 		SC.say("Not implemented yet.");
+	}
+
+	@Override
+	protected void handleClose() {
+		// do nothing. This portlet must not be closed.
 	}
 
 	@Override

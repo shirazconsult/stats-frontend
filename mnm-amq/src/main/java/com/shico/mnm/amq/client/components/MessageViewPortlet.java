@@ -11,6 +11,7 @@ import com.shico.mnm.amq.client.HasData;
 import com.shico.mnm.amq.model.AmqRemoteSettingsDS;
 import com.shico.mnm.amq.model.MessageDetailDS;
 import com.shico.mnm.amq.model.MessageListDS;
+import com.shico.mnm.common.component.PortalWin;
 import com.shico.mnm.common.component.PortletWin;
 import com.shico.mnm.common.event.DataEventType;
 import com.shico.mnm.common.event.DataLoadedEvent;
@@ -316,7 +317,7 @@ public class MessageViewPortlet extends PortletWin {
 	}
 
 	private void removeMeFromContainer(){
-		Portlet portlet = getPortalContainer().getPortlet(getTitle());
+		Portlet portlet = ((PortalWin)getPortalContainer()).getPortlet(getTitle());
 		getPortalContainer().removePortlet(portlet);
 	}
 
@@ -344,4 +345,5 @@ public class MessageViewPortlet extends PortletWin {
 		// TODO Auto-generated method stub
 		
 	}
+
 }

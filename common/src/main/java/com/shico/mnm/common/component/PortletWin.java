@@ -13,8 +13,9 @@ public abstract class PortletWin extends Portlet {
 	protected abstract void handleRefresh();
 	protected abstract void handleSettings();
 	protected abstract void handleHelp();
+//	protected abstract void handleClose();
 	
-	private PortalWin portalContainer;
+	private PortalLayout portalContainer;
 	
 	public PortletWin() {
 		super();
@@ -43,7 +44,12 @@ public abstract class PortletWin extends Portlet {
 						handleHelp();
 					}
 				}), 
-        		HeaderControls.CLOSE_BUTTON);    
+				new HeaderControl(HeaderControl.CLOSE, new ClickHandler() {
+					@Override
+					public void onClick(ClickEvent event) {
+						handleClose();
+					}
+				}));    
         setOverflow(Overflow.VISIBLE);  
 	}
 
@@ -51,10 +57,15 @@ public abstract class PortletWin extends Portlet {
 		this();
 		setTitle(title);
 	}
-	public void setPortalContainer(PortalWin portalContainer) {
+	public void setPortalContainer(PortalLayout portalContainer) {
 		this.portalContainer = portalContainer;
 	}
-	public PortalWin getPortalContainer() {
+	public PortalLayout getPortalContainer() {
 		return portalContainer;
 	}
+	
+	protected void handleClose() {
+		getPortalContainer().removePortlet(this);
+	}
+
 }

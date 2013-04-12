@@ -138,6 +138,11 @@ public class BrokerInfoPortlet extends PortletWin implements DataLoadedEventHand
 		SC.say("Not implemented yet.");
 	}
 	
+	@Override
+	protected void handleClose() {
+		// do nothing. this portlet must not be closed
+	}
+
 	FormItemValueFormatter byteFormatter = new FormItemValueFormatter() {
 		
 		@Override

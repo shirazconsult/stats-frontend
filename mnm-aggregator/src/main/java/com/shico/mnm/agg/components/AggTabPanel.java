@@ -154,11 +154,20 @@ public class AggTabPanel extends VLayout {
 		if(monitorPanel.getMembers().length == 0){
 			PortalLayout portalLayout = new PortalWin(2);  
 
-	        portalLayout.addPortlet(new HeapMemChartPortlet(dataClient, 0.45, 0.45), 0, 0);
-	        portalLayout.addPortlet(new NonHeapMemChartPortlet(dataClient, 0.45, 0.45), 0, 1);
-	        portalLayout.addPortlet(new LoadViewPortlet(dataClient, 0.45, 0.45), 1, 0);
-	        portalLayout.addPortlet(new ProcessingTimeTablePortlet(dataClient, 0.45, 0.45), 1, 1); 
+			HeapMemChartPortlet hmcp = new HeapMemChartPortlet(dataClient, 0.45, 0.45);
+	        portalLayout.addPortlet(hmcp, 0, 0);
+	        NonHeapMemChartPortlet nhmcp = new NonHeapMemChartPortlet(dataClient, 0.45, 0.45);
+	        portalLayout.addPortlet(nhmcp, 0, 1);
+	        LoadViewPortlet lvp = new LoadViewPortlet(dataClient, 0.45, 0.45);
+	        portalLayout.addPortlet(lvp, 1, 0);
+	        ProcessingTimeTablePortlet pttp = new ProcessingTimeTablePortlet(dataClient, 0.45, 0.45);
+	        portalLayout.addPortlet(pttp, 1, 1); 
 
+	        hmcp.setPortalContainer(portalLayout);
+	        nhmcp.setPortalContainer(portalLayout);
+	        lvp.setPortalContainer(portalLayout);
+	        pttp.setPortalContainer(portalLayout);
+	        
 			monitorPanel.addMember(portalLayout);
 			
 			EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AGG_CHART_SETTINGS_CHANGED_EVENT, settingsController.getSettingsMap()));

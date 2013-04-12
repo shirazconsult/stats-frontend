@@ -9,6 +9,7 @@ import com.shico.mnm.amq.client.AmqSettingsController;
 import com.shico.mnm.amq.client.HasData;
 import com.shico.mnm.amq.model.AmqRemoteSettingsDS;
 import com.shico.mnm.amq.model.MessageListDS;
+import com.shico.mnm.common.component.PortalWin;
 import com.shico.mnm.common.component.PortletWin;
 import com.shico.mnm.common.event.DataEventType;
 import com.shico.mnm.common.event.DataLoadedEvent;
@@ -142,8 +143,8 @@ public class MessageListPortlet extends PortletWin implements DataLoadedEventHan
 						msgViewPortlet = new MessageViewPortlet(settingsController);
 						msgViewPortlet.setPortalContainer(getPortalContainer());
 					}
-					if(!getPortalContainer().hasPortlet(MessageViewPortlet.TITLE)){
-						getPortalContainer().addPortlet(msgViewPortlet, 0, 2);
+					if(!((PortalWin)getPortalContainer()).hasPortlet(MessageViewPortlet.TITLE)){
+						((PortalWin)getPortalContainer()).addPortlet(msgViewPortlet, 0, 2);
 					}
 					msgViewPortlet.restore();
 					if(msgViewPortlet.isDirty()){

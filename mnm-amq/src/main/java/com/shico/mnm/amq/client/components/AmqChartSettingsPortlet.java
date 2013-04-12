@@ -181,6 +181,11 @@ public class AmqChartSettingsPortlet extends PortletWin implements DataLoadedEve
 	}
 
 	@Override
+	protected void handleClose() {
+		// do nothing. this portlet must not be closed
+	}
+
+	@Override
 	public void onDataLoaded(DataLoadedEvent event) {
 		switch(event.eventType){
 		case AMQ_SETTINGS_LOADED_EVENT:

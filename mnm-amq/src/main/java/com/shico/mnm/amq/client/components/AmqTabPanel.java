@@ -159,11 +159,20 @@ public class AmqTabPanel extends VLayout {
 		if(monitorPanel.getMembers().length == 0){
 			PortalLayout portalLayout = new PortalWin(2);  
 
-	        portalLayout.addPortlet(new EnqDecInflChartPortlet(dataClient, 0.45, 0.40), 0, 0);
-	        portalLayout.addPortlet(new AvgEnqTimeChartPortlet(dataClient, 0.45, 0.40), 0, 1);
-	        portalLayout.addPortlet(new MemUsageChartPortlet(dataClient, 0.45, 0.40), 1, 0);
-	        portalLayout.addPortlet(new DiskUsageChartPortlet(dataClient, 0.45, 0.40), 1, 1); 
+			EnqDecInflChartPortlet edicp = new EnqDecInflChartPortlet(dataClient, 0.45, 0.40);
+	        portalLayout.addPortlet(edicp, 0, 0);
+	        AvgEnqTimeChartPortlet aetcp = new AvgEnqTimeChartPortlet(dataClient, 0.45, 0.40);
+	        portalLayout.addPortlet(aetcp, 0, 1);
+	        MemUsageChartPortlet mucp = new MemUsageChartPortlet(dataClient, 0.45, 0.40);
+	        portalLayout.addPortlet(mucp, 1, 0);
+	        DiskUsageChartPortlet ducp = new DiskUsageChartPortlet(dataClient, 0.45, 0.40);
+	        portalLayout.addPortlet(ducp, 1, 1); 
 
+	        edicp.setPortalContainer(portalLayout);
+	        aetcp.setPortalContainer(portalLayout);
+	        mucp.setPortalContainer(portalLayout);
+	        ducp.setPortalContainer(portalLayout);
+	        
 			monitorPanel.addMember(portalLayout);
 
 			if(settingsLoaded){
