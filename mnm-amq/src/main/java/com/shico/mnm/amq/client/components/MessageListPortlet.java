@@ -21,6 +21,7 @@ import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.data.ResultSet;
 import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.types.FetchMode;
 import com.smartgwt.client.types.SelectionAppearance;
 import com.smartgwt.client.util.BooleanCallback;
 import com.smartgwt.client.util.SC;
@@ -66,12 +67,14 @@ public class MessageListPortlet extends PortletWin implements DataLoadedEventHan
 		EventBus.instance().addHandler(DataLoadedEvent.TYPE, this);
 	}
 			
+	int startRow, endRow, totalRows;
 	public void update(String qn, String broker, String selector){
 		Criteria criteria = new Criteria(MessageListDS.QUEUE, qn);
 		criteria.addCriteria(MessageListDS.BROKER, broker);
 		if(selector != null && !selector.trim().equals("")){
 			criteria.addCriteria(MessageListDS.SELECTOR, selector);
 		}
+		
 		ResultSet rs = listGrid.getResultSet();
 		if(rs == null || rs.willFetchData(criteria)){		
 			listGrid.fetchData(criteria);
@@ -105,12 +108,15 @@ public class MessageListPortlet extends PortletWin implements DataLoadedEventHan
 			listGrid = new ListGrid();
 			listGrid.setWidth100();
 			listGrid.setHeight100();
-			listGrid.setShowAllRecords(true);  
 			listGrid.setCellHeight(24);
 			listGrid.setDataSource(datasource);
 //			listGrid.setDateFormatter(DateDisplayFormat.TOLOCALESTRING);
 			listGrid.setSelectionAppearance(SelectionAppearance.CHECKBOX);
 			listGrid.setCanSelectAll(true);
+			// paging
+			listGrid.setShowAllRecords(false);
+			listGrid.setDataFetchMode(FetchMode.PAGED);
+			listGrid.setDataPageSize(50);
 			
 			ListGridField msgIdF = new ListGridField(MessageListDS.MESSAGEID, "Message ID");
 			msgIdF.setWidth(310);
