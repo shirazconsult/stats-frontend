@@ -25,5 +25,5 @@ public interface StatsChartDataProvider extends ChartDataProvider{
 	public final static int toIdx = 8;
 	
 	DataView getNativeLiveUsagePieChartView();
-//	DtatView getNativeLiveUsageBobleChartView();
+	DataView getNativeLiveUsageColumnChartView();
 }

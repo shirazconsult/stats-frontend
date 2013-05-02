@@ -15,6 +15,11 @@ import com.shico.mnm.agg.client.AggClientHandle;
 import com.shico.mnm.amq.client.AmqClientHandle;
 import com.shico.mnm.common.client.ChildRunnable;
 import com.shico.mnm.common.client.ParentRunnable;
+import com.shico.mnm.common.event.DataEventType;
+import com.shico.mnm.common.event.DataLoadedEvent;
+import com.shico.mnm.common.event.EventBus;
+import com.shico.mnm.stats.client.StatsChartDataProviderImpl;
+import com.shico.mnm.stats.client.StatsClientHandle;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.tab.Tab;
 import com.smartgwt.client.widgets.tab.TabSet;
@@ -33,7 +38,7 @@ public class Statistics implements EntryPoint {
 			@Override
 			public void onUncaughtException(Throwable e) {
 				Window.alert(e.getMessage());
-				logger.log(Level.SEVERE, "Failed to startup Statistics.", e);
+				logger.log(Level.SEVERE, "Uncaught Error in the Statistics Front-end.", e);
 			}
 		});
 		
@@ -79,8 +84,10 @@ public class Statistics implements EntryPoint {
 		
 		parent.run();
 
+
 		wrapper.draw();
 	}	
+	private StatsChartDataProviderImpl statsChartDataProvider;
 
 	TabSet getMainTabPanel(){
 		mainTabPanel = new TabSet();
@@ -93,8 +100,12 @@ public class Statistics implements EntryPoint {
 		Tab aggTab = new Tab("Aggregator");
 		aggTab.setPane(AggClientHandle.getAggTabPanel());
 		mainTabPanel.addTab(aggTab);
-		mainTabPanel.selectTab(0);
 
+		Tab statsTab = new Tab("Live Stats");
+		statsTab.setPane(StatsClientHandle.getStatsTabPanel());
+		mainTabPanel.addTab(statsTab);
+
+		mainTabPanel.selectTab(0);
 		return mainTabPanel;
 	}	
 }

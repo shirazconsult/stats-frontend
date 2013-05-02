@@ -23,6 +23,7 @@
   <inherits name="com.shico.mnm.common.MnMCommon"/>  
   <inherits name="com.shico.mnm.amq.AmqMnM"/>
   <inherits name="com.shico.mnm.agg.AggregatorMnM"/>
+  <inherits name="com.shico.mnm.stats.Stats"/>
     
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.shico.statistics.client.Statistics'/>

@@ -112,7 +112,13 @@ public class SettingsValuesManager extends ValuesManager {
 		StorageMap sm = new StorageMap(settingsStorage);
 
 		DataSource ds = getDataSource();
-		Map data = ds.getCacheData()[0].toMap();
+		Record[] cacheData = ds.getCacheData();
+		Map data = null;
+		if(cacheData != null && cacheData.length >= 1){
+			data = ds.getCacheData()[0].toMap();
+		}else{
+			return;
+		}
 
 		DynamicForm[] members = getMembers();
 		for (DynamicForm df : members) {

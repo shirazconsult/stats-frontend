@@ -26,6 +26,7 @@
 		<module>mnm-amq</module>
 		<module>common</module>
 		<module>mnm-aggregator</module>
+		<module>stats-charts</module>
 		<module>statistics</module>
 	</modules>
 

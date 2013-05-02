@@ -77,7 +77,7 @@ public class StatsTabPanel extends VLayout {
 	private LiveUsageChartPortlet liveUsageChartPortlet;
 	public LiveUsageChartPortlet getLiveUsageChartPortlet(){
 		if(liveUsageChartPortlet == null){
-			liveUsageChartPortlet = new LiveUsageChartPortlet(dataClient, 0.45, 0.40);
+			liveUsageChartPortlet = new LiveUsageChartPortlet(dataClient, 1, 0.40);
 		}
 		return liveUsageChartPortlet;
 	}

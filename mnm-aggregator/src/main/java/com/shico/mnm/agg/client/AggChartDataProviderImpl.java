@@ -20,7 +20,7 @@ import com.google.gwt.visualization.client.DataView;
 import com.google.gwt.visualization.client.formatters.ArrowFormat;
 import com.google.gwt.visualization.client.formatters.ArrowFormat.Options;
 import com.shico.mnm.agg.model.AggRemoteSettingsDS;
-import com.shico.mnm.common.client.StatRestService;
+import com.shico.mnm.common.client.MonitorRestService;
 import com.shico.mnm.common.event.DataEventType;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.DataLoadedEventHandler;
@@ -42,7 +42,7 @@ public class AggChartDataProviderImpl implements AggChartDataProvider, DataLoade
 	DataView sysLoadAvgView = null;
 	DataView liveThreadView = null;
 	
-	StatRestService service;
+	MonitorRestService service;
 	AggSettingsController settingsController;
 	
 	int fetchedRowIdx; // goes one ahead of fetched data. points to the next data-row to be fetched.
@@ -410,7 +410,7 @@ public class AggChartDataProviderImpl implements AggChartDataProvider, DataLoade
 			
 //			Resource resource = new Resource("http://127.0.0.1:9119/statistics/rest/monitor");
 			Resource resource = new Resource(chartUrl);
-			service = GWT.create(StatRestService.class);
+			service = GWT.create(MonitorRestService.class);
 			((RestServiceProxy)service).setResource(resource);
 			
 			

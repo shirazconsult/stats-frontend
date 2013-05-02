@@ -1,6 +1,8 @@
 package com.shico.mnm.stats.client;
 
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,8 +40,9 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 //	DataTable adadtionData = null;
 	
 	DataTable data;
-	DataTable preparedData;
+	DataTable groupedData;
 	DataView liveUsageView = null;
+	SortedSet<String> channelSet = new TreeSet<String>();
 	
 	StatsRestService service;
 	int fetchedRowIdx;
@@ -91,6 +94,7 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 
 	@Override
 	public void getRows(long from, long to) {
+		logger.log(Level.INFO, "Requesting records from "+from+" to "+to);
 		service.getViewRows(from, to, new MethodCallback<NestedList<Object>>() {
 			
 			public void onFailure(Method method, Throwable exception) {
@@ -110,12 +114,13 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 					fetchedRowIdx += page.size();							
 					for (ListResult<Object> row : page) {
 						int colIdx = 0;
-						for (Object elem : row.getResult()) {		
+						List<Object> rec = row.getResult();
+						for (Object elem : rec) {		
 							if(colIdx <= 2){
 								data.setValue(idx, colIdx, elem == null ? null : elem.toString());
 							}else{
 								data.setValue(idx, colIdx, (Double)elem);
-							}
+							}	
 							colIdx++;
 						}
 						idx++;
@@ -125,7 +130,8 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 						data.removeRows(0, data.getNumberOfRows()-slidingWinSize);
 						updateView = true;
 					}
-					preparedData = getPreparedData(data);
+					
+					groupedData = getGroupedData(data);
 					EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.STATS_DATA_LOADED_EVENT));
 				}catch(Exception e){
 					logger.log(Level.SEVERE, "Exception while updating data. "+e.getMessage());
@@ -136,7 +142,7 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 
 	@Override
 	public AbstractDataTable getDataTable() {
-		return preparedData;
+		return groupedData;
 	}
 
 	Timer timer;
@@ -146,8 +152,11 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 			timer.cancel();
 		}
 		timer = new Timer() {
+			long interval = Math.max(minSchedulePeriodInSec, schedulePeriodInSec)*1000;
 			public void run() {
-				getLastRow();
+				getRows(myfrom, myto);
+				myfrom = myto;
+				myto += interval;
 			}
 		};
 		slidingWinSize = maxDataRows;
@@ -156,26 +165,67 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 
 	@Override
 	public DataView getNativeLiveUsagePieChartView() {
-		liveUsageView = getNativeLiveUsagePieChartView(DataView.create(preparedData), preparedData);
+		liveUsageView = getNativeLiveUsagePieChartView(DataView.create(groupedData), groupedData);
 		return liveUsageView;
 	}
 	
-	private native DataTable getPreparedData(DataTable data)/*-{
-	return $wnd.google.visualization.data.group(
-		data, 
-		[@com.shico.mnm.stats.client.StatsChartDataProvider::typeIdx,
-		@com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx],
-		[{
-			'column': @com.shico.mnm.stats.client.StatsChartDataProvider::totalDurationIdx, 
-			'aggregation': $wnd.google.visualization.data.sum, 
-			'type': 'number',
-			'label': 'viewedMillis'
-		}]
+	@Override
+	public DataView getNativeLiveUsageColumnChartView() {
+		liveUsageView = getNativeLiveUsageColumnChartView(groupedData);
+		return liveUsageView;
+	}
+
+	private native DataTable getGroupedData(DataTable data)/*-{
+		var channels = data.getDistinctValues(@com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx);  // get array of channels in ascending order
+		return $wnd.google.visualization.data.group(
+			data, 
+			[@com.shico.mnm.stats.client.StatsChartDataProvider::typeIdx,
+			@com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx],
+			[{
+				'column': @com.shico.mnm.stats.client.StatsChartDataProvider::totalDurationIdx, 
+				'aggregation': $wnd.google.visualization.data.sum, 
+				'type': 'number',
+				'label': 'viewedMillis'
+			}]
 		);
 	}-*/;
-	
+
+	// TODO: set the percentage on the graph
+	private native DataView getNativeLiveUsageColumnChartView2(DataTable data)/*-{
+		var rowIdxs = data.getFilteredRows([{column: @com.shico.mnm.stats.client.StatsChartDataProvider::typeIdx, value: 'LiveUsage'}]);
+
+		var row = new Array();
+		var lut = new $wnd.google.visualization.DataTable();
+		lut.addColumn('string', '');
+		row[0] = '';
+		for(var i=0; i<rowIdxs.length; i++){
+			var col = data.getValue(rowIdxs[i], 1);
+			lut.addColumn('number', col);
+			row[i+1] = Math.round(data.getValue(rowIdxs[i], 2) / 36000) / 100;
+		}
+		lut.addRow(row);
+		
+		return new $wnd.google.visualization.DataView(lut);
+	}-*/;
+
+	private native DataView getNativeLiveUsageColumnChartView(DataTable data)/*-{
+		var view = new $wnd.google.visualization.DataView(data);
+		view.setColumns(
+		[
+		@com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx, 
+		{calc:toHoursAndMinutes, type:'number', title:'hours'}
+		]);
+		var rowIdxs = data.getFilteredRows([{column: @com.shico.mnm.stats.client.StatsChartDataProvider::typeIdx, value: 'LiveUsage'}]);
+    	view.setRows(rowIdxs);	    
+
+		function toHoursAndMinutes(dataTable, rowNum){
+			return Math.round(dataTable.getValue(rowNum, 2) / 36000) / 100;
+		}
+
+		return view;		
+	}-*/;
+
 	private native DataView getNativeLiveUsagePieChartView(DataView view, DataTable data)/*-{
-		var channels = data.getDistinctValues(1);  // get array of channels in ascending order
 		view.setColumns(
 		[
 		@com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx, 
@@ -191,16 +241,17 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 		return view;		
 	}-*/;
 
+	long myfrom  = 1367411036351L;
+	long myto = myfrom + 10000;
+
 	@Override
 	public void onDataLoaded(DataLoadedEvent event) {
 		switch (event.eventType) {
 		case STATS_METADATA_LOADED_EVENT:
 			// get rows for the last 20 seconds
-			long now = System.currentTimeMillis();
-			long from  = 1367411009908L;
-			long to = 1367411047509L;
-			getRows(from, to);
-//			schedule(10, slidingWinSize);
+//			long now = System.currentTimeMillis();
+			getRows(myfrom, myto);
+			schedule(10, slidingWinSize);
 			break;
 		case STATS_CHART_SETTINGS_CHANGED_EVENT:
 //			String chartUrl = (String)event.info.get(AmqRemoteSettingsDS.CHARTURL);

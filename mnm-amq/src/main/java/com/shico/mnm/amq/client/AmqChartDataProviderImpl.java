@@ -19,7 +19,7 @@ import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.DataView;
 import com.google.gwt.visualization.client.formatters.NumberFormat;
 import com.shico.mnm.amq.model.AmqRemoteSettingsDS;
-import com.shico.mnm.common.client.StatRestService;
+import com.shico.mnm.common.client.MonitorRestService;
 import com.shico.mnm.common.event.DataEventType;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.DataLoadedEventHandler;
@@ -37,7 +37,7 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 	DataView avgEnqTimeView = null;
 	DataView memUsageView = null;
 	DataView diskUsageView = null;
-	StatRestService service;
+	MonitorRestService service;
 	int fetchedRowIdx;
 	int scheduleIntervalSec = 10;
 	int slidingWinTime = 10; // Number of minutes in a sliding window 
@@ -311,7 +311,7 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 			}
 			
 			Resource resource = new Resource(chartUrl);
-			service = GWT.create(StatRestService.class);
+			service = GWT.create(MonitorRestService.class);
 			((RestServiceProxy)service).setResource(resource);
 
 			// Get column metadata
@@ -324,13 +324,12 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 			}catch(NumberFormatException nfe){
 				logger.log(Level.WARNING, nfe.getMessage());
 			}
-			int winSize = slidingWinTime;
 			try{
-				winSize = Integer.parseInt((String)settingsController.getSetting(AmqRemoteSettingsDS.CHARTWINSIZE));
+				slidingWinTime = Integer.parseInt((String)settingsController.getSetting(AmqRemoteSettingsDS.CHARTWINSIZE));
 			}catch(NumberFormatException nfe){
 				logger.log(Level.WARNING, nfe.getMessage());
 			}
-			schedule(Math.max(refreshInterval, 10), Math.max(winSize,10));
+			schedule(Math.max(refreshInterval, 10), Math.max(slidingWinTime,10));
 			break;
 		}
 	}

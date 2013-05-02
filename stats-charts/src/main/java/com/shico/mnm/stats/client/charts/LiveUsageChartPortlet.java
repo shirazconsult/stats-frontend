@@ -1,13 +1,17 @@
 package com.shico.mnm.stats.client.charts;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.visualization.client.DataView;
+import com.google.gwt.visualization.client.LegendPosition;
+import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import com.shico.mnm.common.chart.PieChartPortlet;
+import com.google.gwt.visualization.client.visualizations.corechart.TextStyle;
+import com.shico.mnm.common.chart.ColumnChartPortlet;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
 import com.shico.mnm.stats.client.StatsChartDataProvider;
 
-public class LiveUsageChartPortlet extends PieChartPortlet {
+public class LiveUsageChartPortlet extends ColumnChartPortlet {
 
 	public LiveUsageChartPortlet(StatsChartDataProvider dataProvider, double widthRatio, double heightRatio) {
 		super(dataProvider, widthRatio, heightRatio);
@@ -18,12 +22,25 @@ public class LiveUsageChartPortlet extends PieChartPortlet {
 
 	@Override
 	protected DataView getView() {
-		return ((StatsChartDataProvider)dataProvider).getNativeLiveUsagePieChartView();
+		return ((StatsChartDataProvider)dataProvider).getNativeLiveUsageColumnChartView();
 	}
 
 	@Override
 	protected Options getOptions() {
-		return getChartOptions("Channel View");
+		Options opts = getChartOptions("Channel View");
+		opts.setLegend(LegendPosition.NONE);
+		
+		AxisOptions vopts = AxisOptions.create();
+		AxisOptions hopts = AxisOptions.create();
+		TextStyle ts = TextStyle.create();
+		ts.setFontSize(8);
+		hopts.setTextStyle(ts);
+		vopts.setTextStyle(ts);
+//		vopts.set("title", "Hours");
+		opts.setVAxisOptions(vopts);
+		opts.setHAxisOptions(hopts);
+		
+		return opts;
 	}	
 	
 	@Override
@@ -52,4 +69,8 @@ public class LiveUsageChartPortlet extends PieChartPortlet {
 		
 	}
 	
+	private native JavaScriptObject getVAxisOptions()/*-{
+		return {left:50, width:"80%"}
+	}-*/;
+
 }

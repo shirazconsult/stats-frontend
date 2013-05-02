@@ -40,6 +40,12 @@
 			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.shico.mnm</groupId>
+			<artifactId>stats-charts</artifactId>
+			<version>${project.version}</version>
+			<scope>compile</scope>
+		</dependency>
 
 		<!-- gwt -->
 		<dependency>
