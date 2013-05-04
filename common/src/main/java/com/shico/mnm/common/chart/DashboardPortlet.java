@@ -5,14 +5,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.ChartArea;
-import com.google.gwt.visualization.client.DataView;
-import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
-import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
+import com.google.gwt.visualization.client.visualizations.Visualization;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.google.gwt.visualization.client.visualizations.corechart.TextStyle;
 import com.shico.mnm.common.client.ChartDataProvider;
@@ -24,27 +22,35 @@ import com.smartgwt.client.widgets.events.RestoreClickEvent;
 import com.smartgwt.client.widgets.events.RestoreClickHandler;
 import com.smartgwt.client.widgets.layout.VLayout;
 
-public abstract class BubbleChartPortlet extends PortletWin implements DataLoadedEventHandler, MaximizeClickHandler, RestoreClickHandler {
-	private static Logger logger = Logger.getLogger("BubbleChartPortlet");
+public abstract class DashboardPortlet extends PortletWin implements DataLoadedEventHandler, MaximizeClickHandler, RestoreClickHandler {
+	private static Logger logger = Logger.getLogger("DashboardPortlet");
 	
 	protected VLayout container;
-	protected BubbleChart chart; 
+	protected VLayout vPanel;
 	protected double originalWidthRatio, originalHeightRatio, widthRatio, heightRatio;
 	protected ChartDataProvider dataProvider;
 	private HandlerRegistration dcHandlerRegistration;
 	
-	protected abstract Options getOptions();
-	protected abstract AbstractDataTable getView();
+	private Dashboard dashboard;
+	
+	protected abstract Visualization[] getCharts();
+	protected abstract JavaScriptObject getControls();
+	protected abstract String getPanelTitle();
+	protected abstract AbstractDataTable getData();
 
-	public BubbleChartPortlet(ChartDataProvider dataProvider, double widthRatio, double heightRatio) {
+	public DashboardPortlet(ChartDataProvider dataProvider, double widthRatio, double heightRatio) {
 		super();
 		this.dataProvider = dataProvider; 
 		container = new VLayout();
-		container.setWidth100();
+		vPanel = new VLayout();
+		container.addMember(vPanel);
+		
+		Label label = new Label(getPanelTitle());
+		vPanel.addMember(label);
 		
 		this.originalWidthRatio = this.widthRatio = widthRatio;
 		this.originalHeightRatio = this.heightRatio = heightRatio;		
-
+		
 		addItem(container);
 
 		addMaximizeClickHandler(this);
@@ -52,19 +58,30 @@ public abstract class BubbleChartPortlet extends PortletWin implements DataLoade
 	}
 
 	public void draw(){
-		try{
-			AbstractDataTable view = getView();
-			if(chart == null){
-				chart = new BubbleChart(dataProvider.getDataTable(), getOptions());			
-				container.addMember(chart);
-			}else {
-				chart.draw(view, getOptions());
+		try {
+			if(dashboard == null){
+				dashboard = new Dashboard();
+//				vPanel.addMember(dashboard);
+				dashboard.bind(getControls(), getCharts());
 			}
+//			dashboard.draw(getData());
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Error in drawing chart."+e.getMessage());
+			logger.log(Level.SEVERE, "Error in drawing Table."+e.getMessage());
 		}		
 	}
-	
+
+	protected Options getChartOptions(String title) {
+		Options options = Options.create();
+		options.setWidth((int)(Window.getClientWidth()*widthRatio));
+		options.setHeight((int)(Window.getClientHeight()*heightRatio));
+		
+		options.setTitle(title);
+		
+		options.setChartArea((ChartArea) getChartArea());
+		options.setLegendTextStyle((TextStyle) getLegendTextStyle());
+		return options;
+	}
+
 	@Override
 	public void onMaximizeClick(MaximizeClickEvent event) {
 		widthRatio = 0.8;
@@ -78,24 +95,20 @@ public abstract class BubbleChartPortlet extends PortletWin implements DataLoade
 		heightRatio = originalHeightRatio;
 		draw();
 	}
-	
-	protected Options getChartOptions(String title) {
-		Options options = Options.create();
-		options.setWidth((int)(Window.getClientWidth()*widthRatio));
-		options.setHeight((int)(Window.getClientHeight()*heightRatio));
-		
-		options.setTitle(title);
-		
-		options.setChartArea((ChartArea) getChartArea());
-		options.setLegendTextStyle((TextStyle) getLegendTextStyle());
-		return options;
-	}
+
+	private native JavaScriptObject getCssClassNames()/*-{
+		var cssClassNames = {headerRow: 'shico-VTabel-HeaderRow',
+    						selectedTableRow: 'shico-VTable-SelectedTableRow'
+    						};
+		return cssClassNames;
+	}-*/;
 	
 	private native JavaScriptObject getLegendTextStyle()/*-{
 		return {color: 'black', fontSize: 10};
 	}-*/;
-	
+
 	private native JavaScriptObject getChartArea()/*-{
 		return {left:50, width:"80%"}
 	}-*/;
+
 }

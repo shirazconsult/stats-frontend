@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.ChartArea;
 import com.google.gwt.visualization.client.DataView;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
@@ -31,7 +32,7 @@ public abstract class ColumnChartPortlet extends PortletWin implements DataLoade
 	private HandlerRegistration dcHandlerRegistration;
 	
 	protected abstract Options getOptions();
-	protected abstract DataView getView();
+	protected abstract AbstractDataTable getView();
 
 	public ColumnChartPortlet(ChartDataProvider dataProvider, double widthRatio, double heightRatio) {
 		super();
@@ -50,7 +51,7 @@ public abstract class ColumnChartPortlet extends PortletWin implements DataLoade
 
 	public void draw(){
 		try{
-			DataView view = getView();
+			AbstractDataTable view = getView();
 			if(chart == null){
 				chart = new ColumnChart(dataProvider.getDataTable(), getOptions());				
 				container.addMember(chart);

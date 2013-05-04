@@ -10,6 +10,8 @@ import com.shico.mnm.common.event.EventBus;
 import com.shico.mnm.stats.client.StatsChartDataProviderImpl;
 import com.shico.mnm.stats.client.charts.LiveUsageBubbleChartPortlet;
 import com.shico.mnm.stats.client.charts.LiveUsageChartPortlet;
+import com.shico.mnm.stats.client.charts.MovieRentChartPortlet;
+import com.shico.mnm.stats.client.charts.WidgetShowChartPortlet;
 import com.smartgwt.client.types.Side;
 import com.smartgwt.client.widgets.layout.PortalLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
@@ -68,8 +70,14 @@ public class StatsTabPanel extends VLayout {
 			PortalLayout portalLayout = new PortalWin(1);
 			portalLayout.addPortlet(getLiveUsageChartPortlet(), 0, 0);
 			portalLayout.addPortlet(getLiveUsageBubbleChartPortlet(), 0, 1);
+			portalLayout.addPortlet(getMovieRentChartPortlet(), 0, 2);
+			portalLayout.addPortlet(getWidgShowChartPortlet(), 0, 3);
 			
-			int height = getLiveUsageChartPortlet().getHeight()+getLiveUsageBubbleChartPortlet().getHeight();
+			int height = getLiveUsageChartPortlet().getHeight() +
+					getLiveUsageBubbleChartPortlet().getHeight() +
+					getMovieRentChartPortlet().getHeight() +
+					getWidgShowChartPortlet().getHeight();
+			
 			portalLayout.setHeight(height);
 			liveChartPanel.addMember(portalLayout);
 			
@@ -79,16 +87,30 @@ public class StatsTabPanel extends VLayout {
 	
 	private LiveUsageChartPortlet liveUsageChartPortlet;
 	private LiveUsageBubbleChartPortlet liveUsageBubbleChartPortlet;
+	private MovieRentChartPortlet movieRentChartPortlet;
+	private WidgetShowChartPortlet widgetShowChartPortlet;
 	public LiveUsageChartPortlet getLiveUsageChartPortlet(){
 		if(liveUsageChartPortlet == null){
-			liveUsageChartPortlet = new LiveUsageChartPortlet(dataClient, 1, 0.40);
+			liveUsageChartPortlet = new LiveUsageChartPortlet(dataClient, 1, 0.25);
 		}
 		return liveUsageChartPortlet;
 	}
 	public LiveUsageBubbleChartPortlet getLiveUsageBubbleChartPortlet(){
 		if(liveUsageBubbleChartPortlet == null){
-			liveUsageBubbleChartPortlet = new LiveUsageBubbleChartPortlet(dataClient, 1, 0.40);
+			liveUsageBubbleChartPortlet = new LiveUsageBubbleChartPortlet(dataClient, 1, 0.25);
 		}
 		return liveUsageBubbleChartPortlet;
+	}
+	public MovieRentChartPortlet getMovieRentChartPortlet(){
+		if(movieRentChartPortlet == null){
+			movieRentChartPortlet = new MovieRentChartPortlet(dataClient, 1, 0.25);
+		}
+		return movieRentChartPortlet;
+	}
+	public WidgetShowChartPortlet getWidgShowChartPortlet(){
+		if(widgetShowChartPortlet == null){
+			widgetShowChartPortlet = new WidgetShowChartPortlet(dataClient, 1, 0.25);
+		}
+		return widgetShowChartPortlet;
 	}
 }

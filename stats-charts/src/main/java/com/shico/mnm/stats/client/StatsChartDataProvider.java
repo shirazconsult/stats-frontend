@@ -1,6 +1,6 @@
 package com.shico.mnm.stats.client;
 
-import com.google.gwt.visualization.client.DataView;
+import com.google.gwt.visualization.client.AbstractDataTable;
 import com.shico.mnm.common.client.ChartDataProvider;
 
 public interface StatsChartDataProvider extends ChartDataProvider{
@@ -24,7 +24,9 @@ public interface StatsChartDataProvider extends ChartDataProvider{
 	public final static int fromIdx = 7;
 	public final static int toIdx = 8;
 	
-	DataView getNativeLiveUsagePieChartView();
-	DataView getNativeLiveUsageColumnChartView();
-	DataView getNativeLiveUsageBubbleChartView();
+	AbstractDataTable getLiveUsagePieChartView();
+	AbstractDataTable getLiveUsageColumnChartView();
+	AbstractDataTable getLiveUsageBubbleChartView();
+	AbstractDataTable getMostPopularMovieRentals();
+	AbstractDataTable getMostPopularWidgetsPieChartView();
 }

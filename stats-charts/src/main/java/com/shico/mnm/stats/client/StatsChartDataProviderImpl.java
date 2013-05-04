@@ -169,24 +169,33 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 	}
 
 	@Override
-	public DataView getNativeLiveUsagePieChartView() {
+	public DataView getLiveUsagePieChartView() {
 		liveUsageView = getNativeLiveUsagePieChartView(DataView.create(groupedData), groupedData);
 		return liveUsageView;
 	}
 	
 	@Override
-	public DataView getNativeLiveUsageColumnChartView() {
+	public DataView getLiveUsageColumnChartView() {
 		liveUsageView = getNativeLiveUsageColumnChartView(groupedData);
 		return liveUsageView;
 	}
 
 	@Override
-	public DataView getNativeLiveUsageBubbleChartView() {
+	public DataView getLiveUsageBubbleChartView() {
 		liveUsageProgramView = getMostPopularProgramsView(data);
 		return liveUsageProgramView;
 	}
 
-
+	@Override
+	public AbstractDataTable getMostPopularMovieRentals() {
+		return getMostPopularMovieRentals(groupedData);
+	}
+	
+	@Override
+	public AbstractDataTable getMostPopularWidgetsPieChartView(){
+		return getMostPopularWidgetsPieChartView(groupedData);
+	}
+	
 	private native DataTable getGroupedData(DataTable data)/*-{
 		return $wnd.google.visualization.data.group(
 			data, 
@@ -197,10 +206,63 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 				'aggregation': $wnd.google.visualization.data.sum, 
 				'type': 'number',
 				'label': 'viewedMillis'
+			},
+			{
+				'column': @com.shico.mnm.stats.client.StatsChartDataProvider::sumIdx, 
+				'aggregation': $wnd.google.visualization.data.sum, 
+				'type': 'number',
+				'label': 'sum'
 			}]
 		);
 	}-*/;
 
+	private native DataTable getMostPopularMovieRentals(DataTable data)/*-{
+		var rowIdxs = data.getFilteredRows([{column: 0, value: 'movieRent'}]);
+		
+		view = new $wnd.google.visualization.DataView(data);
+		view.setRows(rowIdxs);
+		var topTenIdxs = new Array();
+		var sortedIdxs = view.getSortedRows(3);
+		var numOfRows = sortedIdxs.length;
+		for(var i=numOfRows-1; i>=Math.max(0, numOfRows-10); i--){
+			topTenIdxs.push(sortedIdxs[i]); 
+		}
+		view.setRows(topTenIdxs);
+
+		var row = new Array();
+		var lut = new $wnd.google.visualization.DataTable();
+		lut.addColumn('string', '');
+		row[0] = '';
+		var sortByName = view.getSortedRows(1);
+		for(var i=0; i<view.getNumberOfRows(); i++){
+			var col = view.getValue(sortByName[i], 1);
+			lut.addColumn('number', col);
+			row[i+1] = view.getValue(sortByName[i], 3);
+		}
+		lut.addRow(row);
+				
+		return lut;
+	}-*/;
+	
+	private native DataView getMostPopularWidgetsPieChartView(DataTable data)/*-{
+		var rowIdxs = data.getFilteredRows([{column: 0, value: 'widgetShow'}]);
+
+		view = new $wnd.google.visualization.DataView(data);
+		view.setRows(rowIdxs);
+		var topTenIdxs = new Array();
+		var sortedIdxs = view.getSortedRows(3);
+		var numOfRows = sortedIdxs.length;
+		for(var i=numOfRows-1; i>=Math.max(0, numOfRows-10); i--){
+			topTenIdxs.push(sortedIdxs[i]); 
+		}
+		view.setRows(topTenIdxs);
+
+		view.setColumns([1, 3]);
+
+		return view;		
+	}-*/;
+
+	
 	private native DataView getMostPopularProgramsView(DataTable data)/*-{
 		var view = new $wnd.google.visualization.DataView(data);
 		var rowIdxs = data.getFilteredRows([{column: @com.shico.mnm.stats.client.StatsChartDataProvider::typeIdx, value: 'LiveUsage'}]);
@@ -230,18 +292,18 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 			{calc:toHoursAndMinutes, type:'number', label:'totalDuration'}, 
 			{sourceColumn: 4, label:'Viewers'},
 			{sourceColumn:1, label:'Channel'},
-			{calc:timePerViewer, type:'number', label:'avgViewTime'}
+			{calc:timePerViewer, type:'number', label:'avgViewTime', id: 'avgViewTime'}
 		]);
 		
 		// Sort on avgViewTime column and pick only the top ten programs.
 		var topTenIdxs = new Array();
-		var numOfRows = view2.getViewRows().length;
 		var sorted = view2.getSortedRows(4);
+		var numOfRows = sorted.length;
 		for(var i=numOfRows-1; i>=Math.max(0, numOfRows-10); i--){
-			topTenIdxs.push(i); 
+			topTenIdxs.push(sorted[i]); 
 		}
 		view2.setRows(topTenIdxs);
-		
+				
 		function toHoursAndMinutes(dataTable, rowNum){
 			return Math.round(dataTable.getValue(rowNum, 3) / 36000) / 100;
 		}

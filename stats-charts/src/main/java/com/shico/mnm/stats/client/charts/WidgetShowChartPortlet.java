@@ -5,28 +5,28 @@ import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.google.gwt.visualization.client.visualizations.corechart.TextStyle;
-import com.shico.mnm.common.chart.BubbleChartPortlet;
+import com.shico.mnm.common.chart.PieChartPortlet;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
 import com.shico.mnm.stats.client.StatsChartDataProvider;
 
-public class LiveUsageBubbleChartPortlet extends BubbleChartPortlet {
+public class WidgetShowChartPortlet extends PieChartPortlet {
 
-	public LiveUsageBubbleChartPortlet(StatsChartDataProvider dataProvider, double widthRatio, double heightRatio) {
+	public WidgetShowChartPortlet(StatsChartDataProvider dataProvider, double widthRatio, double heightRatio) {
 		super(dataProvider, widthRatio, heightRatio);
-		setTitle("Most Watched Programs");
+		setTitle("Most Popular Widgets");
 		
 		EventBus.instance().addHandler(DataLoadedEvent.TYPE, this);		
 	}
 
 	@Override
 	protected AbstractDataTable getView() {
-		return ((StatsChartDataProvider)dataProvider).getLiveUsageBubbleChartView();
+		return ((StatsChartDataProvider)dataProvider).getMostPopularWidgetsPieChartView();
 	}
 
 	@Override
 	protected Options getOptions() {
-		Options opts = getChartOptions("Most Watched Programs");
+		Options opts = getChartOptions("Most Popular Widgets");
 		
 		AxisOptions vopts = AxisOptions.create();
 		AxisOptions hopts = AxisOptions.create();
@@ -34,13 +34,11 @@ public class LiveUsageBubbleChartPortlet extends BubbleChartPortlet {
 		ts.setFontSize(8);
 		hopts.setTextStyle(ts);
 		vopts.setTextStyle(ts);
-		opts.set("bubble.textStyle", "{fontSize: 9}");
-		vopts.set("title", "Viewers");
-		hopts.set("title", "Hours");
+//		vopts.set("title", "Hours");
 		opts.setVAxisOptions(vopts);
 		opts.setHAxisOptions(hopts);
 		
-		opts.set("sortBubblesBySize", true);
+		opts.set("is3D", true);
 		
 		return opts;
 	}	

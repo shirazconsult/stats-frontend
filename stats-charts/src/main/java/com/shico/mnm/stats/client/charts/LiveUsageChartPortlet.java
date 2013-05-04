@@ -1,6 +1,7 @@
 package com.shico.mnm.stats.client.charts;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.DataView;
 import com.google.gwt.visualization.client.LegendPosition;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
@@ -21,8 +22,8 @@ public class LiveUsageChartPortlet extends ColumnChartPortlet {
 	}
 
 	@Override
-	protected DataView getView() {
-		return ((StatsChartDataProvider)dataProvider).getNativeLiveUsageColumnChartView();
+	protected AbstractDataTable getView() {
+		return ((StatsChartDataProvider)dataProvider).getLiveUsageColumnChartView();
 	}
 
 	@Override
