@@ -26,4 +26,5 @@ public interface StatsChartDataProvider extends ChartDataProvider{
 	
 	DataView getNativeLiveUsagePieChartView();
 	DataView getNativeLiveUsageColumnChartView();
+	DataView getNativeLiveUsageBubbleChartView();
 }

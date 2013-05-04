@@ -41,7 +41,8 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 	
 	DataTable data;
 	DataTable groupedData;
-	DataView liveUsageView = null;
+	DataView liveUsageView;
+	DataView liveUsageProgramView;
 	SortedSet<String> channelSet = new TreeSet<String>();
 	
 	StatsRestService service;
@@ -49,6 +50,10 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 	int slidingWinSize = 10000; // 1 million rows
 	int minSchedulePeriodInSec = 10; // don't schedule less than 10 sec.
 	boolean updateView;
+
+	long startTS = 1367411036351L;
+	long lastFrom = startTS;  
+	long lastTo = lastFrom + 10000;
 
 	public StatsChartDataProviderImpl() {
 		super();
@@ -154,9 +159,9 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 		timer = new Timer() {
 			long interval = Math.max(minSchedulePeriodInSec, schedulePeriodInSec)*1000;
 			public void run() {
-				getRows(myfrom, myto);
-				myfrom = myto;
-				myto += interval;
+				getRows(lastFrom, lastTo);
+				lastFrom = lastTo;
+				lastTo += interval;
 			}
 		};
 		slidingWinSize = maxDataRows;
@@ -175,8 +180,14 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 		return liveUsageView;
 	}
 
+	@Override
+	public DataView getNativeLiveUsageBubbleChartView() {
+		liveUsageProgramView = getMostPopularProgramsView(data);
+		return liveUsageProgramView;
+	}
+
+
 	private native DataTable getGroupedData(DataTable data)/*-{
-		var channels = data.getDistinctValues(@com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx);  // get array of channels in ascending order
 		return $wnd.google.visualization.data.group(
 			data, 
 			[@com.shico.mnm.stats.client.StatsChartDataProvider::typeIdx,
@@ -190,8 +201,60 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 		);
 	}-*/;
 
-	// TODO: set the percentage on the graph
-	private native DataView getNativeLiveUsageColumnChartView2(DataTable data)/*-{
+	private native DataView getMostPopularProgramsView(DataTable data)/*-{
+		var view = new $wnd.google.visualization.DataView(data);
+		var rowIdxs = data.getFilteredRows([{column: @com.shico.mnm.stats.client.StatsChartDataProvider::typeIdx, value: 'LiveUsage'}]);
+		view.setRows(rowIdxs);
+		var progdata = $wnd.google.visualization.data.group(
+			view, 
+			[@com.shico.mnm.stats.client.StatsChartDataProvider::typeIdx,
+			@com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx,
+			@com.shico.mnm.stats.client.StatsChartDataProvider::titleIdx],
+			[{
+				'column': @com.shico.mnm.stats.client.StatsChartDataProvider::totalDurationIdx, 
+				'aggregation': $wnd.google.visualization.data.sum, 
+				'type': 'number',
+				'label': 'viewedMillis'
+			},
+			{
+				'column': @com.shico.mnm.stats.client.StatsChartDataProvider::sumIdx, 
+				'aggregation': $wnd.google.visualization.data.sum, 
+				'type': 'number',
+				'label': 'viewers'
+			}]
+		);
+
+		var view2 = new $wnd.google.visualization.DataView(progdata);
+		view2.setColumns([
+			{sourceColumn:2, id: 'ID', label:'Program', title:'Program'}, 
+			{calc:toHoursAndMinutes, type:'number', label:'totalDuration'}, 
+			{sourceColumn: 4, label:'Viewers'},
+			{sourceColumn:1, label:'Channel'},
+			{calc:timePerViewer, type:'number', label:'avgViewTime'}
+		]);
+		
+		// Sort on avgViewTime column and pick only the top ten programs.
+		var topTenIdxs = new Array();
+		var numOfRows = view2.getViewRows().length;
+		var sorted = view2.getSortedRows(4);
+		for(var i=numOfRows-1; i>=Math.max(0, numOfRows-10); i--){
+			topTenIdxs.push(i); 
+		}
+		view2.setRows(topTenIdxs);
+		
+		function toHoursAndMinutes(dataTable, rowNum){
+			return Math.round(dataTable.getValue(rowNum, 3) / 36000) / 100;
+		}
+
+		function timePerViewer(dataTable, rowNum){
+			var durationInHour = Math.round(dataTable.getValue(rowNum, 3) / 36000) / 100;
+			return dataTable.getValue(rowNum, 4) / durationInHour;
+		}
+
+		return view2;
+	}-*/;
+	
+	private native DataView getNativeLiveUsageChartWrapperView(DataTable data)/*-{
 		var rowIdxs = data.getFilteredRows([{column: @com.shico.mnm.stats.client.StatsChartDataProvider::typeIdx, value: 'LiveUsage'}]);
 
 		var row = new Array();
@@ -241,16 +304,13 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 		return view;		
 	}-*/;
 
-	long myfrom  = 1367411036351L;
-	long myto = myfrom + 10000;
-
 	@Override
 	public void onDataLoaded(DataLoadedEvent event) {
 		switch (event.eventType) {
 		case STATS_METADATA_LOADED_EVENT:
 			// get rows for the last 20 seconds
 //			long now = System.currentTimeMillis();
-			getRows(myfrom, myto);
+			getRows(lastFrom, lastTo);
 			schedule(10, slidingWinSize);
 			break;
 		case STATS_CHART_SETTINGS_CHANGED_EVENT:

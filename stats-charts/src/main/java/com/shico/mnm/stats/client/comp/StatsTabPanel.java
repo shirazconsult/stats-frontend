@@ -8,6 +8,7 @@ import com.shico.mnm.common.event.DataEventType;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
 import com.shico.mnm.stats.client.StatsChartDataProviderImpl;
+import com.shico.mnm.stats.client.charts.LiveUsageBubbleChartPortlet;
 import com.shico.mnm.stats.client.charts.LiveUsageChartPortlet;
 import com.smartgwt.client.types.Side;
 import com.smartgwt.client.widgets.layout.PortalLayout;
@@ -18,7 +19,7 @@ import com.smartgwt.client.widgets.tab.events.TabSelectedEvent;
 import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 
 public class StatsTabPanel extends VLayout { 
-	private static final Logger logger = Logger.getLogger("AmqTabPanel");
+	private static final Logger logger = Logger.getLogger("StatsTabPanel");
 				
 	StatsChartDataProviderImpl dataClient;
 	
@@ -66,7 +67,9 @@ public class StatsTabPanel extends VLayout {
 		if(liveChartPanel.getMembers().length == 0){			
 			PortalLayout portalLayout = new PortalWin(1);
 			portalLayout.addPortlet(getLiveUsageChartPortlet(), 0, 0);
-			int height = getLiveUsageChartPortlet().getHeight();
+			portalLayout.addPortlet(getLiveUsageBubbleChartPortlet(), 0, 1);
+			
+			int height = getLiveUsageChartPortlet().getHeight()+getLiveUsageBubbleChartPortlet().getHeight();
 			portalLayout.setHeight(height);
 			liveChartPanel.addMember(portalLayout);
 			
@@ -75,10 +78,17 @@ public class StatsTabPanel extends VLayout {
 	}
 	
 	private LiveUsageChartPortlet liveUsageChartPortlet;
+	private LiveUsageBubbleChartPortlet liveUsageBubbleChartPortlet;
 	public LiveUsageChartPortlet getLiveUsageChartPortlet(){
 		if(liveUsageChartPortlet == null){
 			liveUsageChartPortlet = new LiveUsageChartPortlet(dataClient, 1, 0.40);
 		}
 		return liveUsageChartPortlet;
+	}
+	public LiveUsageBubbleChartPortlet getLiveUsageBubbleChartPortlet(){
+		if(liveUsageBubbleChartPortlet == null){
+			liveUsageBubbleChartPortlet = new LiveUsageBubbleChartPortlet(dataClient, 1, 0.40);
+		}
+		return liveUsageBubbleChartPortlet;
 	}
 }
