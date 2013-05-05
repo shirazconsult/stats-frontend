@@ -1,4 +1,4 @@
-package com.shico.mnm.agg.components;
+package com.shico.mnm.stats.client.comp;
 
 import java.util.Map;
 import java.util.logging.Level;
@@ -6,15 +6,15 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.user.client.Window;
-import com.shico.mnm.agg.client.AggClientHandle;
-import com.shico.mnm.agg.client.AggSettingsController;
-import com.shico.mnm.agg.model.AggRemoteSettingsDS;
 import com.shico.mnm.common.component.PortletWin;
 import com.shico.mnm.common.event.DataEventType;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.DataLoadedEventHandler;
 import com.shico.mnm.common.event.EventBus;
 import com.shico.mnm.common.model.SettingsValuesManager;
+import com.shico.mnm.stats.client.StatsClientHandle;
+import com.shico.mnm.stats.client.StatsSettingsController;
+import com.shico.mnm.stats.model.StatsRemoteSettingsDS;
 import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.TitleOrientation;
@@ -29,17 +29,17 @@ import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
-public class AggChartSettingsPortlet extends PortletWin implements DataLoadedEventHandler {
-	private static Logger logger = Logger.getLogger("AggChartSettingsPortlet");
+public class StatsChartSettingsPortlet extends PortletWin implements DataLoadedEventHandler {
+	private static Logger logger = Logger.getLogger("StatsChartSettingsPortlet");
 	
 	public final static String TITLE = "Chart Settings";
 	VLayout container;
-	AggSettingsController settingsConroller;
+	StatsSettingsController settingsConroller;
 	DynamicForm userSettingsform;
 	DynamicForm chartSettingsform;
 	SettingsValuesManager valuesManager;
 	
-	public AggChartSettingsPortlet(AggSettingsController settingsConroller) {
+	public StatsChartSettingsPortlet(StatsSettingsController settingsConroller) {
 		super(TITLE);
 		this.settingsConroller = settingsConroller;
 		
@@ -56,7 +56,7 @@ public class AggChartSettingsPortlet extends PortletWin implements DataLoadedEve
 		
 		addItem(container);
 
-		valuesManager = new SettingsValuesManager(AggClientHandle.APP_NAME);
+		valuesManager = new SettingsValuesManager(StatsClientHandle.APP_NAME);
 		valuesManager.addMember(getUserSettingsForm());
 		valuesManager.addMember(getAdminSettingsForm());
 		valuesManager.setDataSource(settingsConroller.getSettingsDS());
@@ -74,8 +74,8 @@ public class AggChartSettingsPortlet extends PortletWin implements DataLoadedEve
 			userSettingsform.setCellPadding(5);
 			userSettingsform.setNumCols(2);
 			
-			TextItem userItem = new TextItem(AggRemoteSettingsDS.CHARTUSER, "User name");
-			TextItem pwdItem = new PasswordItem(AggRemoteSettingsDS.CHARTPWD, "Password");
+			TextItem userItem = new TextItem(StatsRemoteSettingsDS.CHARTUSER, "User name");
+			TextItem pwdItem = new PasswordItem(StatsRemoteSettingsDS.CHARTPWD, "Password");
 
 			userSettingsform.setFields(userItem, pwdItem);			
 		}
@@ -92,13 +92,13 @@ public class AggChartSettingsPortlet extends PortletWin implements DataLoadedEve
 			chartSettingsform.setCellPadding(5);
 			chartSettingsform.setNumCols(4);
 			
-			HiddenItem appItem = new HiddenItem(AggRemoteSettingsDS.APP);
-			appItem.setValue(AggClientHandle.APP_NAME);
-			TextItem urlItem = new TextItem(AggRemoteSettingsDS.CHARTURL, "Server URL");
+			HiddenItem appItem = new HiddenItem(StatsRemoteSettingsDS.APP);
+			appItem.setValue(StatsClientHandle.APP_NAME);
+			TextItem urlItem = new TextItem(StatsRemoteSettingsDS.CHARTURL, "Server URL");
 			urlItem.setWidth(400);
 			urlItem.setColSpan(4);
-			TextItem refreshItem = new TextItem(AggRemoteSettingsDS.CHARTREFRESHINTERVAL, "Refresh Interval (Sec.)");
-			TextItem viewItem = new TextItem(AggRemoteSettingsDS.CHARTWINSIZE, "View Size (Min.)");
+			TextItem refreshItem = new TextItem(StatsRemoteSettingsDS.CHARTREFRESHINTERVAL, "Refresh Interval (Sec.)");
+			TextItem viewItem = new TextItem(StatsRemoteSettingsDS.CHARTWINSIZE, "View Size (data records)");
 
 			refreshItem.setLength(3);
 			viewItem.setLength(5);
@@ -124,7 +124,7 @@ public class AggChartSettingsPortlet extends PortletWin implements DataLoadedEve
 					public void onSuccess(Map result) {
 						if(result != null){
 							settingsConroller.getSettingsMap().putAll(result);
-							EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AGG_CHART_SETTINGS_CHANGED_EVENT, result));
+							EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.STATS_CHART_SETTINGS_CHANGED_EVENT, result));
 						}else{
 							logger.log(Level.SEVERE, "Saving of settings probably failed. The returned settings is null.");
 						}
@@ -148,7 +148,7 @@ public class AggChartSettingsPortlet extends PortletWin implements DataLoadedEve
 	}
 	
 	public void update(){
-		Criteria criteria = new Criteria(AggRemoteSettingsDS.APP, AggClientHandle.APP_NAME);
+		Criteria criteria = new Criteria(StatsRemoteSettingsDS.APP, StatsClientHandle.APP_NAME);
 		valuesManager.fetchData(criteria);
 	}
 	
@@ -172,7 +172,7 @@ public class AggChartSettingsPortlet extends PortletWin implements DataLoadedEve
 	@Override
 	public void onDataLoaded(DataLoadedEvent event) {
 		switch(event.eventType){
-		case AGG_SETTINGS_LOADED_EVENT:
+		case STATS_SETTINGS_LOADED_EVENT:
 			update();
 			break;
 		}

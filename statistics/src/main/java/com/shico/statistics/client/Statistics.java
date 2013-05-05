@@ -101,7 +101,7 @@ public class Statistics implements EntryPoint {
 		aggTab.setPane(AggClientHandle.getAggTabPanel());
 		mainTabPanel.addTab(aggTab);
 
-		Tab statsTab = new Tab("Live Stats");
+		Tab statsTab = new Tab("Statistics");
 		statsTab.setPane(StatsClientHandle.getStatsTabPanel());
 		mainTabPanel.addTab(statsTab);
 

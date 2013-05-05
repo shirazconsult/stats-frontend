@@ -9,11 +9,11 @@ import com.shico.mnm.stats.client.comp.StatsTabPanel;
 public class StatsClientHandle {
 	private final static Logger logger = Logger.getLogger("StatsClientHandle");
 	
-	public final static String Stats_REST_PATH = "rest/stats/";
+	public final static String STATS_REST_PATH = "rest/stats/";
 	public final static String APP_NAME = "mnm-stats";
 	
 	private static StatsChartDataProvider statsChartDataProvider;
-//	private static AggSettingsController settingsController;
+	private static StatsSettingsController settingsController;
 
 	private static EventBus eventBus;
 	
@@ -28,7 +28,7 @@ public class StatsClientHandle {
 	
 	public static StatsTabPanel getStatsTabPanel(){
 		if(statsTabPanel == null){
-			statsTabPanel = new StatsTabPanel(getChartDataProvider()); //, getAggSettingsController());
+			statsTabPanel = new StatsTabPanel(getChartDataProvider(), getStatsSettingsController());
 		}
 		return statsTabPanel;
 	}
@@ -40,11 +40,11 @@ public class StatsClientHandle {
 		return eventBus;
 	}
 	
-//	public static AggSettingsController getAggSettingsController(){
-//		if(settingsController == null){
-//			settingsController = new AggSettingsController();
-//		}
-//		return settingsController;
-//	}
+	public static StatsSettingsController getStatsSettingsController(){
+		if(settingsController == null){
+			settingsController = new StatsSettingsController();
+		}
+		return settingsController;
+	}
 
 }

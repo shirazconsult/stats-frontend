@@ -23,21 +23,10 @@ import com.shico.mnm.common.event.DataLoadedEventHandler;
 import com.shico.mnm.common.event.EventBus;
 import com.shico.mnm.common.model.ListResult;
 import com.shico.mnm.common.model.NestedList;
+import com.shico.mnm.stats.model.StatsRemoteSettingsDS;
 
 public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataLoadedEventHandler {
 	private static Logger logger = Logger.getLogger("StatsChartDataProviderImpl");
-	
-//	DataTable liveUsageData = null;
-//	DataTable widgetShowData = null;
-//	DataTable vodUsageMovieData = null;
-//	DataTable vodUsageTrailerData = null;
-//	DataTable dvrUsageData = null;
-//	DataTable webtvLoginData = null;
-//	DataTable startOverUsageData = null;
-//	DataTable timeshiftUsageData = null;
-//	DataTable movierentData = null;
-//	DataTable shopLoadedData = null;
-//	DataTable adadtionData = null;
 	
 	DataTable data;
 	DataTable groupedData;
@@ -47,7 +36,7 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 	
 	StatsRestService service;
 	int fetchedRowIdx;
-	int slidingWinSize = 10000; // 1 million rows
+	int slidingWinSize = 1000; // number of rows to keep/draw
 	int minSchedulePeriodInSec = 10; // don't schedule less than 10 sec.
 	boolean updateView;
 
@@ -55,10 +44,12 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 	long lastFrom = startTS;  
 	long lastTo = lastFrom + 10000;
 
+	private StatsSettingsController settingsController;
+	
 	public StatsChartDataProviderImpl() {
 		super();
 		
-//		settingsController = AmqClientHandle.getAmqSettingsController();
+		settingsController = StatsClientHandle.getStatsSettingsController();
 
 		EventBus.instance().addHandler(DataLoadedEvent.TYPE, this);
 	}
@@ -131,7 +122,7 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 						idx++;
 					}
 					// If num. of rows are more than slidingWinSize, then shrink back to slidingWinSize 
-					if(data.getNumberOfRows() >= slidingWinSize){
+					if(data.getNumberOfRows() > slidingWinSize){
 						data.removeRows(0, data.getNumberOfRows()-slidingWinSize);
 						updateView = true;
 					}
@@ -156,16 +147,15 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 		if(timer != null){
 			timer.cancel();
 		}
+		final int schPeriodInMillis = schedulePeriodInSec*1000;
 		timer = new Timer() {
-			long interval = Math.max(minSchedulePeriodInSec, schedulePeriodInSec)*1000;
 			public void run() {
 				getRows(lastFrom, lastTo);
 				lastFrom = lastTo;
-				lastTo += interval;
+				lastTo += schPeriodInMillis;
 			}
 		};
-		slidingWinSize = maxDataRows;
-		timer.scheduleRepeating(Math.max(minSchedulePeriodInSec, schedulePeriodInSec)*1000);
+		timer.scheduleRepeating(schPeriodInMillis);
 	}
 
 	@Override
@@ -288,10 +278,10 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 
 		var view2 = new $wnd.google.visualization.DataView(progdata);
 		view2.setColumns([
-			{sourceColumn:2, id: 'ID', label:'Program', title:'Program'}, 
+			{sourceColumn:2, id: 'ID', type: 'string', label:'Program', title:'Program'}, 
 			{calc:toHoursAndMinutes, type:'number', label:'totalDuration'}, 
-			{sourceColumn: 4, label:'Viewers'},
-			{sourceColumn:1, label:'Channel'},
+			{sourceColumn: 4, type: 'number', label:'Viewers'},
+			{sourceColumn:1, type: 'string', label:'Channel'},
 			{calc:timePerViewer, type:'number', label:'avgViewTime', id: 'avgViewTime'}
 		]);
 		
@@ -373,14 +363,14 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 			// get rows for the last 20 seconds
 //			long now = System.currentTimeMillis();
 			getRows(lastFrom, lastTo);
-			schedule(10, slidingWinSize);
 			break;
 		case STATS_CHART_SETTINGS_CHANGED_EVENT:
-//			String chartUrl = (String)event.info.get(AmqRemoteSettingsDS.CHARTURL);
-//			if(chartUrl == null || chartUrl.trim().isEmpty()){
-//				return;
-//			}
-//			
+			String chartUrl = (String)event.info.get(StatsRemoteSettingsDS.CHARTURL);
+			if(chartUrl == null || chartUrl.trim().isEmpty()){
+				return;
+			}
+			
+//			Resource resource = new Resource("http://localhost:9119/statistics/rest/stats");
 			Resource resource = new Resource("http://localhost:9119/statistics/rest/stats");
 			service = GWT.create(StatsRestService.class);
 			((RestServiceProxy)service).setResource(resource);
@@ -389,21 +379,22 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 			getColumnNames();
 
 			// Set viewsize and Refresh interval
-//			int refreshInterval = scheduleIntervalSec;
-//			try{
-//				refreshInterval = Integer.parseInt((String)settingsController.getSetting(AmqRemoteSettingsDS.CHARTREFRESHINTERVAL));
-//			}catch(NumberFormatException nfe){
-//				logger.log(Level.WARNING, nfe.getMessage());
-//			}
-//			try{
-//				slidingWinTime = Integer.parseInt((String)settingsController.getSetting(AmqRemoteSettingsDS.CHARTWINSIZE));
-//			}catch(NumberFormatException nfe){
-//				logger.log(Level.WARNING, nfe.getMessage());
-//			}
-//			schedule(Math.max(refreshInterval, 10), Math.max(slidingWinTime,10));
+			int refreshInterval = minSchedulePeriodInSec;
+			try{
+				refreshInterval = Integer.parseInt((String)settingsController.getSetting(StatsRemoteSettingsDS.CHARTREFRESHINTERVAL));
+			}catch(NumberFormatException nfe){
+				logger.log(Level.WARNING, nfe.getMessage());
+			}
+			int slidingSize = slidingWinSize;
+			try{
+				slidingSize = Integer.parseInt((String)settingsController.getSetting(StatsRemoteSettingsDS.CHARTWINSIZE));
+			}catch(NumberFormatException nfe){
+				logger.log(Level.WARNING, nfe.getMessage());
+			}
+			slidingWinSize = Math.min(slidingSize, slidingWinSize);
 			
-//			schedule(minSchedulePeriodInSec, slidingWinSize);
-//			schedule(60, slidingWinSize);
+			schedule(Math.max(refreshInterval, minSchedulePeriodInSec), slidingWinSize);
+			
 			break;
 		}
 	}
