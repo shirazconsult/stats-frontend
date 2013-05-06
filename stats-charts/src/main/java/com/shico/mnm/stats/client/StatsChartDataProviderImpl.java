@@ -239,16 +239,19 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 
 		view = new $wnd.google.visualization.DataView(data);
 		view.setRows(rowIdxs);
-
+		
 		var dt = new $wnd.google.visualization.DataTable();
 		dt.addColumn('string', 'Widget');
 		dt.addColumn('number', 'Used');
 		var row = new Array();
-		for(var i=0; i<rowIdxs.length; i++){
+		// add top 10 widgets to dt.
+		var sortedIdxs = view.getSortedRows(3);		
+		for(var i=sortedIdxs.length-1; i>=Math.max(0, sortedIdxs.length-10); i--){
 			row[i,0] = view.getValue(i, 1);
 			row[i, 1] = view.getValue(i, 3);
 			dt.addRow(row);
 		}
+		// sort by widget name
 		dt.sort(0);
 
 		return dt;		
