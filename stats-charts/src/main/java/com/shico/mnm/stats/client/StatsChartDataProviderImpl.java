@@ -31,7 +31,7 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 	DataTable data;
 	DataTable groupedData;
 	DataView liveUsageView;
-	DataView liveUsageProgramView;
+	AbstractDataTable liveUsageProgramView;
 	SortedSet<String> channelSet = new TreeSet<String>();
 	
 	StatsRestService service;
@@ -171,7 +171,7 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 	}
 
 	@Override
-	public DataView getLiveUsageBubbleChartView() {
+	public AbstractDataTable getLiveUsageBubbleChartView() {
 		liveUsageProgramView = getMostPopularProgramsView(data);
 		return liveUsageProgramView;
 	}
@@ -234,26 +234,28 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 		return lut;
 	}-*/;
 	
-	private native DataView getMostPopularWidgetsPieChartView(DataTable data)/*-{
+	private native AbstractDataTable getMostPopularWidgetsPieChartView(DataTable data)/*-{
 		var rowIdxs = data.getFilteredRows([{column: 0, value: 'widgetShow'}]);
 
 		view = new $wnd.google.visualization.DataView(data);
 		view.setRows(rowIdxs);
-		var topTenIdxs = new Array();
-		var sortedIdxs = view.getSortedRows(3);
-		var numOfRows = sortedIdxs.length;
-		for(var i=numOfRows-1; i>=Math.max(0, numOfRows-10); i--){
-			topTenIdxs.push(sortedIdxs[i]); 
+
+		var dt = new $wnd.google.visualization.DataTable();
+		dt.addColumn('string', 'Widget');
+		dt.addColumn('number', 'Used');
+		var row = new Array();
+		for(var i=0; i<rowIdxs.length; i++){
+			row[i,0] = view.getValue(i, 1);
+			row[i, 1] = view.getValue(i, 3);
+			dt.addRow(row);
 		}
-		view.setRows(topTenIdxs);
+		dt.sort(0);
 
-		view.setColumns([1, 3]);
-
-		return view;		
+		return dt;		
 	}-*/;
 
 	
-	private native DataView getMostPopularProgramsView(DataTable data)/*-{
+	private native AbstractDataTable getMostPopularProgramsView(DataTable data)/*-{
 		var view = new $wnd.google.visualization.DataView(data);
 		var rowIdxs = data.getFilteredRows([{column: @com.shico.mnm.stats.client.StatsChartDataProvider::typeIdx, value: 'LiveUsage'}]);
 		view.setRows(rowIdxs);
@@ -293,7 +295,7 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 			topTenIdxs.push(sorted[i]); 
 		}
 		view2.setRows(topTenIdxs);
-				
+							
 		function toHoursAndMinutes(dataTable, rowNum){
 			return Math.round(dataTable.getValue(rowNum, 3) / 36000) / 100;
 		}
@@ -371,7 +373,7 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 			}
 			
 //			Resource resource = new Resource("http://localhost:9119/statistics/rest/stats");
-			Resource resource = new Resource("http://localhost:9119/statistics/rest/stats");
+			Resource resource = new Resource(chartUrl);
 			service = GWT.create(StatsRestService.class);
 			((RestServiceProxy)service).setResource(resource);
 
