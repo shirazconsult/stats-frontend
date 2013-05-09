@@ -19,6 +19,9 @@ public enum DataEventType {
 	QUEUELIST_METADATA_LOADED_EVENT,
 	MSGLIST_LOADED_EVENT,
 	
+	// Agg admin data events
+	AGG_INFO_LOADED_EVENT,
+	
 	// Stats data events
 	STATS_METADATA_LOADED_EVENT,
 	STATS_DATA_LOADED_EVENT,
@@ -41,7 +44,7 @@ public enum DataEventType {
 	STATS_ADMIN_SETTINGS_CHANGED_EVENT,
 	STATS_CHART_SETTINGS_CHANGED_EVENT,
 	
-	// Failed event type/subtypes
+	// Failed amq. event type/subtypes
 	FAILED_EVENT,
 	FAILED_BROKER_METADATA_LOADED_EVENT,
 	FAILED_BROKER_INFO_LOADED_EVENT, 
@@ -49,6 +52,9 @@ public enum DataEventType {
 	FAILED_MSGLIST_LOADED_EVENT,
 	FAILED_MSG_ACTION_EVENT,
 	FAILED_BROKER_DATA_LOADED_EVENT,
+	
+	// Failed agg. event type/subtypes
+	FAILED_AGG_INFO_LOADED_EVENT,
 	
 	// MSG_EVENT sub-types
 	MOVE, BULK_MOVE, COPY, DELETE, LOAD, SELECT, PURGE, DEL_Q, ADD_Q,

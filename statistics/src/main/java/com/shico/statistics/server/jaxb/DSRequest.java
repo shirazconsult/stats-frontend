@@ -56,7 +56,7 @@ public class DSRequest<T> {
 	@XmlElement
 	private String componentId;
 	
-	@XmlTransient
+	@XmlElement
 	private String oldValues;
 	
 	public OperationType getOperationType() {
@@ -99,6 +99,14 @@ public class DSRequest<T> {
 		return dataSource;
 	}
 	
+	public String getOldValues() {
+		return oldValues;
+	}
+
+	public void setOldValues(String oldValues) {
+		this.oldValues = oldValues;
+	}
+
 	@SuppressWarnings("unchecked")
 	public T getData(Class<T> type) throws JAXBException {
 		JAXBContext jc = JAXBContext.newInstance(type);

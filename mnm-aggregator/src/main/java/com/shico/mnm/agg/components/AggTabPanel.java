@@ -12,6 +12,7 @@ import com.shico.mnm.agg.client.charts.LoadViewPortlet;
 import com.shico.mnm.agg.client.charts.NonHeapMemChartPortlet;
 import com.shico.mnm.agg.client.charts.ProcessingTimeTablePortlet;
 import com.shico.mnm.agg.model.AggRemoteSettingsDS;
+import com.shico.mnm.agg.model.AggregatorInfoDS;
 import com.shico.mnm.common.client.ChartDataProvider;
 import com.shico.mnm.common.client.ChildRunnable;
 import com.shico.mnm.common.client.ParentRunnable;
@@ -60,8 +61,8 @@ public class AggTabPanel extends VLayout {
 					logger.log(Level.INFO, "Loading settings from local storage.");
 					settingsController.setSettingsMapFromLocalStorage();
 
-					//						String restUrl = sm.get(AggRemoteSettingsDS.AGGREGATORURL);
-					//						settingsController.setBrokerInfoDS(new BrokerInfoDS(restUrl));
+					String restUrl = (String)settingsController.getSetting(AggRemoteSettingsDS.AGGREGATORURL);
+					settingsController.setAggregatorInfoDS(new AggregatorInfoDS(restUrl));
 
 					settingsLoaded = true;
 					logger.log(Level.INFO, "Settings loaded from local storage.");
@@ -78,9 +79,8 @@ public class AggTabPanel extends VLayout {
 							settingsController.setSettingsMap(settings);
 
 							// instantiate datasources
-//							String restUrl = (String)settings.get(AggRemoteSettingsDS.AGGREGATORURL);
-//
-//							settingsController.setBrokerInfoDS(new BrokerInfoDS(restUrl));
+							String restUrl = (String)settings.get(AggRemoteSettingsDS.AGGREGATORURL);
+							settingsController.setAggregatorInfoDS(new AggregatorInfoDS(restUrl));
 
 							settingsLoaded = true;
 							logger.log(Level.INFO, "Settings loaded from server.");
@@ -133,8 +133,6 @@ public class AggTabPanel extends VLayout {
 		});
 		container.addTab(monitorTab);
 
-
-
 		setWidth100();
 
 		addMember(container);
@@ -186,19 +184,21 @@ public class AggTabPanel extends VLayout {
 	private void setAggMainAdminPanelPortal(){
 		if(mainAdminPanel.getMembers().length == 0){			
 			PortalLayout portalLayout = new PortalWin(1);
-//			portalLayout.addPortlet(getBrokerInfoPortlet(), 0, 0);
-//			int height = getBrokerInfoPortlet().getHeight();
-			int height = 0;
-//			portalLayout.setHeight(height);
-//			mainAdminPanel.addMember(portalLayout);
+			portalLayout.addPortlet(getAggregatorInfoPortlet(), 0, 0);
+			portalLayout.addPortlet(getAggConfSettingsPortlet(), 0, 1);
 			
-			PortalLayout amqSettingsPortal = getAggSettingsPortal();
+			int height = getAggregatorInfoPortlet().getHeight() + getAggConfSettingsPortlet().getHeight();
+			portalLayout.setHeight(height);
 			
-			height += amqSettingsPortal.getHeight();
+			mainAdminPanel.addMember(portalLayout);
+			
+			PortalLayout aggSettingsPortal = getAggSettingsPortal();
+			
+			height += aggSettingsPortal.getHeight();
 			mainAdminPanel.setHeight(height);
 			
-			mainAdminPanel.addMember(amqSettingsPortal);
-			
+			mainAdminPanel.addMember(aggSettingsPortal);
+
 			if(settingsLoaded){
 				// Because MainAdmin portal contains the brokerInfo portlet which needs to be notified of settings.
 				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.AGG_SETTINGS_LOADED_EVENT, settingsController.getSettingsMap()));
@@ -207,13 +207,13 @@ public class AggTabPanel extends VLayout {
 		}	
 	}
 	
-	public PortalLayout getAggSettingsPortal(){
+	private PortalLayout getAggSettingsPortal(){
 		PortalLayout portalLayout = new PortalWin(2);  
 		
-//		portalLayout.addPortlet(getAggAdminSettingsPortlet(), 0, 0);
-		portalLayout.addPortlet(getAggChartSettingsPortlet(), 0, 0);
+		portalLayout.addPortlet(getAggAdminSettingsPortlet(), 0, 0);
+		portalLayout.addPortlet(getAggChartSettingsPortlet(), 1, 0);
 		
-//		portalLayout.setHeight(Math.max(getAmqAdminSettingsPortlet().getHeight(), getAmqChartSettingsPortlet().getHeight()));
+		portalLayout.setHeight(Math.max(getAggAdminSettingsPortlet().getHeight(), getAggChartSettingsPortlet().getHeight()));
 		portalLayout.setHeight(getAggChartSettingsPortlet().getHeight());
 
 		return portalLayout;
@@ -227,18 +227,27 @@ public class AggTabPanel extends VLayout {
 		return aggChartSettingsPortlet;
 	}
 
-//	AggAdminSettingsPortlet aggAdminSettingsPortlet;
-//	private Portlet getAmqAdminSettingsPortlet() {
-//		if(aggAdminSettingsPortlet == null){
-//			aggAdminSettingsPortlet = new AggAdminSettingsPortlet(settingsController);
-//		}
-//		return aggAdminSettingsPortlet;
-//	}
+	AggAdminSettingsPortlet aggAdminSettingsPortlet;
+	private Portlet getAggAdminSettingsPortlet() {
+		if(aggAdminSettingsPortlet == null){
+			aggAdminSettingsPortlet = new AggAdminSettingsPortlet(settingsController);
+		}
+		return aggAdminSettingsPortlet;
+	}
 
-//	public BrokerInfoPortlet getBrokerInfoPortlet(){
-//		if(brokerInfoPortlet == null){
-//			brokerInfoPortlet = new BrokerInfoPortlet(settingsController);
-//		}
-//		return brokerInfoPortlet;
-//	}
+	private AggregatorInfoPortlet aggregatorInfoPortlet;
+	private Portlet getAggregatorInfoPortlet() {
+		if(aggregatorInfoPortlet == null){
+			aggregatorInfoPortlet = new AggregatorInfoPortlet(settingsController);
+		}
+		return aggregatorInfoPortlet;
+	}
+	
+	private AggConfSettingsPortlet aggConfSettingsPortlet;
+	private AggConfSettingsPortlet getAggConfSettingsPortlet(){
+		if(aggConfSettingsPortlet == null){
+			aggConfSettingsPortlet = new AggConfSettingsPortlet(settingsController);
+		}
+		return aggConfSettingsPortlet;
+	}
 }

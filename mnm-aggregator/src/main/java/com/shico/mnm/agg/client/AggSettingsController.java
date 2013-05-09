@@ -6,6 +6,7 @@ import java.util.Map;
 import com.google.gwt.core.client.GWT;
 import com.shico.mnm.agg.model.AggLocalSettingsDS;
 import com.shico.mnm.agg.model.AggRemoteSettingsDS;
+import com.shico.mnm.agg.model.AggregatorInfoDS;
 import com.shico.mnm.common.client.AbstractSettingsController;
 import com.shico.mnm.common.client.DefaultRestDS;
 import com.smartgwt.client.data.DataSource;
@@ -16,18 +17,18 @@ public class AggSettingsController extends AbstractSettingsController {
 	
 	AggRemoteSettingsDS adminSettingsRemoteDS;
 	AggLocalSettingsDS adminSettingsLocalStorageDS;
-//	BrokerInfoDS brokerInfoDS; 
+	AggregatorInfoDS aggregatorInfoDS;
 		
-//	public BrokerInfoDS getBrokerInfoDS() {
-//		return brokerInfoDS;
-//	}
+	public AggregatorInfoDS getAggregatorInfoDS() {
+		return aggregatorInfoDS;
+	}
 
-//	public void setBrokerInfoDS(BrokerInfoDS brokerInfoDS) {
-//		if(this.brokerInfoDS != null){
-//			this.brokerInfoDS.destroy();
-//		}
-//		this.brokerInfoDS = brokerInfoDS;
-//	}
+	public void setAggregatorInfoDS(AggregatorInfoDS aggregatorInfoDS) {
+		if(this.aggregatorInfoDS != null){
+			this.aggregatorInfoDS.destroy();
+		}
+		this.aggregatorInfoDS = aggregatorInfoDS;
+	}
 	
 	@Override
 	public boolean useLocalStorage() {
