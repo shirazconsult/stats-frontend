@@ -155,7 +155,8 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 				lastTo += schPeriodInMillis;
 			}
 		};
-		timer.scheduleRepeating(schPeriodInMillis);
+		timer.schedule(schPeriodInMillis);
+//		timer.scheduleRepeating(schPeriodInMillis);
 	}
 
 	@Override
@@ -287,7 +288,7 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 			{calc:toHoursAndMinutes, type:'number', label:'totalDuration'}, 
 			{sourceColumn: 4, type: 'number', label:'Viewers'},
 			{sourceColumn:1, type: 'string', label:'Channel'},
-			{calc:getWeightedPopularity, type:'number', label:'Popularity metric'}
+			{calc:getWeightedPopularity, type:'number', label:'Popularity metric', id:'PopularityMetric'}
 		]);
 		
 		// Sort on avgViewTime column and pick only the top ten programs.

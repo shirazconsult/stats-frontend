@@ -16,6 +16,7 @@ import com.shico.mnm.stats.client.StatsClientHandle;
 import com.shico.mnm.stats.client.StatsSettingsController;
 import com.shico.mnm.stats.client.charts.LiveUsageBubbleChartPortlet;
 import com.shico.mnm.stats.client.charts.LiveUsageChartPortlet;
+import com.shico.mnm.stats.client.charts.LiveUsageDashboardPortlet;
 import com.shico.mnm.stats.client.charts.MovieRentChartPortlet;
 import com.shico.mnm.stats.client.charts.WidgetShowChartPortlet;
 import com.shico.mnm.stats.model.StatsRemoteSettingsDS;
@@ -203,28 +204,39 @@ public class StatsTabPanel extends VLayout {
 		return portalLayout;
 	}
 
+
 	private LiveUsageChartPortlet liveUsageChartPortlet;
-	private LiveUsageBubbleChartPortlet liveUsageBubbleChartPortlet;
-	private MovieRentChartPortlet movieRentChartPortlet;
-	private WidgetShowChartPortlet widgetShowChartPortlet;
 	public LiveUsageChartPortlet getLiveUsageChartPortlet(){
 		if(liveUsageChartPortlet == null){
 			liveUsageChartPortlet = new LiveUsageChartPortlet(dataClient, 1, 0.20);
 		}
 		return liveUsageChartPortlet;
 	}
-	public LiveUsageBubbleChartPortlet getLiveUsageBubbleChartPortlet(){
-		if(liveUsageBubbleChartPortlet == null){
-			liveUsageBubbleChartPortlet = new LiveUsageBubbleChartPortlet(dataClient, 1, 0.20);
+
+	private LiveUsageDashboardPortlet liveUsageDashboardPortlet;
+	public LiveUsageDashboardPortlet getLiveUsageBubbleChartPortlet(){
+		if(liveUsageDashboardPortlet == null){
+			liveUsageDashboardPortlet = new LiveUsageDashboardPortlet(dataClient, 1, 0.20);
 		}
-		return liveUsageBubbleChartPortlet;
+		return liveUsageDashboardPortlet;
 	}
+//	private LiveUsageBubbleChartPortlet liveUsageBubbleChartPortlet;
+//	public LiveUsageBubbleChartPortlet getLiveUsageBubbleChartPortlet(){
+//		if(liveUsageBubbleChartPortlet == null){
+//			liveUsageBubbleChartPortlet = new LiveUsageBubbleChartPortlet(dataClient, 1, 0.20);
+//		}
+//		return liveUsageBubbleChartPortlet;
+//	}
+
+	private MovieRentChartPortlet movieRentChartPortlet;
 	public MovieRentChartPortlet getMovieRentChartPortlet(){
 		if(movieRentChartPortlet == null){
 			movieRentChartPortlet = new MovieRentChartPortlet(dataClient, 1, 0.20);
 		}
 		return movieRentChartPortlet;
 	}
+
+	private WidgetShowChartPortlet widgetShowChartPortlet;
 	public WidgetShowChartPortlet getWidgShowChartPortlet(){
 		if(widgetShowChartPortlet == null){
 			widgetShowChartPortlet = new WidgetShowChartPortlet(dataClient, 1, 0.20);

@@ -5,12 +5,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.ChartArea;
-import com.google.gwt.visualization.client.visualizations.Visualization;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.google.gwt.visualization.client.visualizations.corechart.TextStyle;
 import com.shico.mnm.common.client.ChartDataProvider;
@@ -33,7 +33,7 @@ public abstract class DashboardPortlet extends PortletWin implements DataLoadedE
 	
 	private Dashboard dashboard;
 	
-	protected abstract Visualization[] getCharts();
+	protected abstract JsArray<JavaScriptObject> getCharts();
 	protected abstract JavaScriptObject getControls();
 	protected abstract String getPanelTitle();
 	protected abstract AbstractDataTable getData();
@@ -61,10 +61,10 @@ public abstract class DashboardPortlet extends PortletWin implements DataLoadedE
 		try {
 			if(dashboard == null){
 				dashboard = new Dashboard();
-//				vPanel.addMember(dashboard);
-				dashboard.bind(getControls(), getCharts());
+				vPanel.addMember(dashboard);
+//				dashboard.bind(getControls(), getCharts());
 			}
-//			dashboard.draw(getData());
+			dashboard.draw(getData());
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "Error in drawing Table."+e.getMessage());
 		}		

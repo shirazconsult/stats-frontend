@@ -9,7 +9,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.ChartArea;
-import com.google.gwt.visualization.client.DataView;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.google.gwt.visualization.client.visualizations.corechart.TextStyle;
@@ -53,7 +52,7 @@ public abstract class ColumnChartPortlet extends PortletWin implements DataLoade
 		try{
 			AbstractDataTable view = getView();
 			if(chart == null){
-				chart = new ColumnChart(dataProvider.getDataTable(), getOptions());				
+				chart = new ColumnChart(dataProvider.getDataTable(), getOptions());		
 				container.addMember(chart);
 			}else {
 				chart.draw(view, getOptions());
