@@ -280,14 +280,14 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 				'label': 'viewers'
 			}]
 		);
-
+		
 		var view2 = new $wnd.google.visualization.DataView(progdata);
 		view2.setColumns([
 			{sourceColumn:2, id: 'ID', type: 'string', label:'Program', title:'Program'}, 
 			{calc:toHoursAndMinutes, type:'number', label:'totalDuration'}, 
 			{sourceColumn: 4, type: 'number', label:'Viewers'},
 			{sourceColumn:1, type: 'string', label:'Channel'},
-			{calc:timePerViewer, type:'number', label:'avgViewTime', id: 'avgViewTime'}
+			{calc:getWeightedPopularity, type:'number', label:'Popularity metric'}
 		]);
 		
 		// Sort on avgViewTime column and pick only the top ten programs.
@@ -303,9 +303,20 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 			return Math.round(dataTable.getValue(rowNum, 3) / 36000) / 100;
 		}
 
-		function timePerViewer(dataTable, rowNum){
-			var durationInHour = Math.round(dataTable.getValue(rowNum, 3) / 36000) / 100;
-			return dataTable.getValue(rowNum, 4) / durationInHour;
+		function getWeightedPopularity(dataTable, rowNum){
+			var duration = dataTable.getValue(rowNum, 3);
+			var viewers = dataTable.getValue(rowNum, 4);
+			var maxduration = dataTable.getColumnRange(3).max;
+//			var maxviewers =  dataTable.getColumnRange(4).max;
+//			var durationInHour = Math.round(duration / 36000) / 100;
+			var viewersWeight = viewers * 0.7;
+			var durationWeight = duration * 0.3;
+			var totalWeight = viewersWeight * durationWeight;
+			var maxweight = (maxduration / viewers) * totalWeight;
+			var weightedPopularity = (duration / viewers) * totalWeight;
+			
+			var popMetric = (weightedPopularity * 100) / maxweight;
+			return popMetric.toFixed(0) / 10;
 		}
 
 		return view2;
