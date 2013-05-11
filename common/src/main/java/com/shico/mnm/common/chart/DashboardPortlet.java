@@ -62,7 +62,7 @@ public abstract class DashboardPortlet extends PortletWin implements DataLoadedE
 			if(dashboard == null){
 				dashboard = new Dashboard();
 				vPanel.addMember(dashboard);
-//				dashboard.bind(getControls(), getCharts());
+				dashboard.bindDashboard(getControls(), getCharts());
 			}
 			dashboard.draw(getData());
 		} catch (Exception e) {

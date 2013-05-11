@@ -20,28 +20,10 @@ public class LiveUsageDashboardPortlet extends DashboardPortlet {
 	public LiveUsageDashboardPortlet(StatsChartDataProvider dataProvider, double widthRatio, double heightRatio) {
 		super(dataProvider, widthRatio, heightRatio);
 		setTitle("Channel View");
-		
-		HTMLFlow dashboardDiv = new HTMLFlow("<div id=\"dashboard_div\">" +
-				"<div id=\"control_div\"></div><div id=\"bchart_div\"></div><div id=\"chart_div\"></div></div>\n");
-		vPanel.addMember(dashboardDiv);
-		
+				
 		EventBus.instance().addHandler(DataLoadedEvent.TYPE, this);		
 	}
 
-	@Override
-	public void draw() {
-		draw(getControls(), getCharts(), getData());
-	}
-
-	private native void draw(JavaScriptObject controls, JsArray<JavaScriptObject> charts, AbstractDataTable data)/*-{
-		var mydiv = $doc.getElementById('dashboard_div');
-
-		var dashboard = new $wnd.google.visualization.Dashboard(mydiv);
-		dashboard.bind(controls, charts);
-	
-		dashboard.draw(data);
-	}-*/;
-	
 	private native JavaScriptObject getBubbleChartWrapper(String containerId, int height, int width) /*-{
 		return new $wnd.google.visualization.ChartWrapper({
           'chartType': 'BubbleChart',

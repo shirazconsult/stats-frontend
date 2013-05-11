@@ -3,16 +3,15 @@ package com.shico.mnm.common.chart;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.visualization.client.AbstractDataTable;
-import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.HTMLFlow;
 
 public class Dashboard extends HTMLFlow {
 	static final String SETELEMENT_TWICE_ERROR = "Element may only be set once";
 
-	private static String html = "<div id=\"dashboard_div\"> </div>\n";
-	
+	private static String html = "<div id=\"dashboard_div\">" +
+				"<div id=\"control_div\"></div><div id=\"bchart_div\"></div><div id=\"chart_div\"></div></div>\n";
+
 	private JavaScriptObject jso;
 	private Element div;
 	
@@ -29,6 +28,13 @@ public class Dashboard extends HTMLFlow {
 		super(html);
 	}
 	
+	public void bindDashboard(JavaScriptObject controls, JsArray<JavaScriptObject> charts){
+		if(jso == null){
+			jso = createJso();
+		}
+		bind(controls, charts);
+	}
+	
 	@Override
 	public String getInnerHTML() {
 //		return div.getInnerHTML();
@@ -40,14 +46,12 @@ public class Dashboard extends HTMLFlow {
   	}-*/;
 	
 	protected native JavaScriptObject createJso() /*-{
-		return new $wnd.google.visualization.Dashboard($doc.getElementById('dashboard_div'));
-//		return new $wnd.google.visualization.Dashboard(parent);
+		var mydiv = $doc.getElementById('dashboard_div');
+		return new $wnd.google.visualization.Dashboard(mydiv);
 	 }-*/;
 
 	protected native void bind(JavaScriptObject controls, JsArray<JavaScriptObject> charts)/*-{
-		var dashboard = new $wnd.google.visualization.Dashboard($doc.getElementById('dashboard_div'));
-		dashboard.bind(controls, charts);
-//		this.@com.shico.mnm.common.chart.Dashboard::jso.bind(controls, charts);
+		this.@com.shico.mnm.common.chart.Dashboard::jso.bind(controls, charts);
 	}-*/;
 
 }
