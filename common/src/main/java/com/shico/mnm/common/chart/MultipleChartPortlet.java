@@ -11,7 +11,6 @@ import com.google.gwt.visualization.client.ChartArea;
 import com.google.gwt.visualization.client.DataView;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
 import com.google.gwt.visualization.client.visualizations.corechart.TextStyle;
 import com.shico.mnm.common.client.ChartDataProvider;
 import com.shico.mnm.common.component.PortletWin;
@@ -20,12 +19,12 @@ import com.smartgwt.client.widgets.events.MaximizeClickEvent;
 import com.smartgwt.client.widgets.events.MaximizeClickHandler;
 import com.smartgwt.client.widgets.events.RestoreClickEvent;
 import com.smartgwt.client.widgets.events.RestoreClickHandler;
-import com.smartgwt.client.widgets.layout.VLayout;
+import com.smartgwt.client.widgets.layout.HLayout;
 
 public abstract class MultipleChartPortlet extends PortletWin implements DataLoadedEventHandler, MaximizeClickHandler, RestoreClickHandler {
-	private static Logger logger = Logger.getLogger("ColumnChartPortlet");
+	private static Logger logger = Logger.getLogger("MultipleChartPortlet");
 	
-	protected VLayout container;
+	protected HLayout container;
 	protected double originalWidthRatio, originalHeightRatio, widthRatio, heightRatio;
 	protected ChartDataProvider dataProvider;
 	private HandlerRegistration dcHandlerRegistration;
@@ -37,12 +36,15 @@ public abstract class MultipleChartPortlet extends PortletWin implements DataLoa
 	public MultipleChartPortlet(ChartDataProvider dataProvider, double widthRatio, double heightRatio) {
 		super();
 		this.dataProvider = dataProvider; 
-		container = new VLayout();
+		container = new HLayout(100);
 		container.setWidth100();
 		
 		this.originalWidthRatio = this.widthRatio = widthRatio;
 		this.originalHeightRatio = this.heightRatio = heightRatio;		
 
+		for (CoreChart cc : getCharts()) {
+			container.addMember(cc);
+		}
 		addItem(container);
 
 		addMaximizeClickHandler(this);
