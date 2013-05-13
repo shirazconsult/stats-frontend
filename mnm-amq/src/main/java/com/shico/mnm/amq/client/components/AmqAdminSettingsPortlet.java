@@ -104,8 +104,8 @@ public class AmqAdminSettingsPortlet extends PortletWin implements DataLoadedEve
 			urlItem.setColSpan(2);
 			
 			adminSettingsform.setFields(urlItem, appItem);
-			adminSettingsform.setValidateOnChange(true);
-			urlItem.setRequired(true);
+//			adminSettingsform.setValidateOnChange(true);
+//			urlItem.setRequired(true);
 		}
 		return adminSettingsform;
 	}

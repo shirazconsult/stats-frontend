@@ -93,17 +93,17 @@ public class Statistics implements EntryPoint {
 		mainTabPanel = new TabSet();
 		mainTabPanel.setHeight100();
 		
-		Tab amqTab = new Tab("ActiveMQ");
-		amqTab.setPane(AmqClientHandle.getAmqTabPanel());
-		mainTabPanel.addTab(amqTab);
+		Tab statsTab = new Tab("Statistics");
+		statsTab.setPane(StatsClientHandle.getStatsTabPanel());
+		mainTabPanel.addTab(statsTab);
 		
 		Tab aggTab = new Tab("Aggregator");
 		aggTab.setPane(AggClientHandle.getAggTabPanel());
 		mainTabPanel.addTab(aggTab);
 
-		Tab statsTab = new Tab("Statistics");
-		statsTab.setPane(StatsClientHandle.getStatsTabPanel());
-		mainTabPanel.addTab(statsTab);
+		Tab amqTab = new Tab("ActiveMQ");
+		amqTab.setPane(AmqClientHandle.getAmqTabPanel());
+		mainTabPanel.addTab(amqTab);
 
 		mainTabPanel.selectTab(0);
 		return mainTabPanel;

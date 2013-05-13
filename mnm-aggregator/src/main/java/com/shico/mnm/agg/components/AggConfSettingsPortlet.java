@@ -60,7 +60,7 @@ public class AggConfSettingsPortlet extends PortletWin implements DataLoadedEven
 		
 		addItem(container);
 		
-		setHeight(355);
+		setHeight(340);
 
 		EventBus.instance().addHandler(DataLoadedEvent.TYPE, this);
 	}
