@@ -117,7 +117,7 @@ public class StatsTabPanel extends VLayout {
 		});
 		container.addTab(adminTab);
 
-		Tab liveChartTab = new Tab("LiveStats");
+		Tab liveChartTab = new Tab("Live");
 		liveChartTab.setPane(getLiveChartTabPanel());
 		liveChartTab.addTabSelectedHandler(new TabSelectedHandler() {			
 			@Override
