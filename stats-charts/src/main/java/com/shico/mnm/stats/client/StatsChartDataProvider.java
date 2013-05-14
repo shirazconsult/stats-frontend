@@ -29,4 +29,5 @@ public interface StatsChartDataProvider extends ChartDataProvider{
 	AbstractDataTable getLiveUsageBubbleChartView();
 	AbstractDataTable getMostPopularMovieRentals();
 	AbstractDataTable getMostPopularWidgetsPieChartView();
+	AbstractDataTable getLiveUsageTableView();
 }

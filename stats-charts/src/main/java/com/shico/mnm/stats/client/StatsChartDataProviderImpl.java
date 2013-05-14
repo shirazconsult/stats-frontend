@@ -172,6 +172,11 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 	}
 
 	@Override
+	public DataView getLiveUsageTableView() {
+		return getNativeLiveUsageTableView(groupedData);
+	}
+
+	@Override
 	public AbstractDataTable getLiveUsageBubbleChartView() {
 		liveUsageProgramView = getMostPopularProgramsView(data);
 		return liveUsageProgramView;
@@ -284,8 +289,8 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 		
 		var view2 = new $wnd.google.visualization.DataView(progdata);
 		view2.setColumns([
-			{sourceColumn:2, id: 'ID', type: 'string', label:'Program', title:'Program'}, 
-			{calc:toHoursAndMinutes, type:'number', label:'totalDuration'}, 
+			{sourceColumn:2, id: 'ID', type: 'string', label:'Program'}, 
+			{calc:toHoursAndMinutes, type:'number', label:'Hours'}, 
 			{sourceColumn: 4, type: 'number', label:'Viewers'},
 			{sourceColumn:1, type: 'string', label:'Channel'},
 			{calc:getWeightedPopularity, type:'number', label:'Popularity metric', id:'PopularityMetric'}
@@ -299,7 +304,7 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 			topTenIdxs.push(sorted[i]); 
 		}
 		view2.setRows(topTenIdxs);
-							
+		
 		function toHoursAndMinutes(dataTable, rowNum){
 			return Math.round(dataTable.getValue(rowNum, 3) / 36000) / 100;
 		}
@@ -344,8 +349,8 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 		var view = new $wnd.google.visualization.DataView(data);
 		view.setColumns(
 		[
-		@com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx, 
-		{calc:toHoursAndMinutes, type:'number', title:'hours'}
+		{sourceColumn: @com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx, type:'string', label:'Channel'}, 
+		{calc:toHoursAndMinutes, type:'number', label:'Hours'}
 		]);
 		var rowIdxs = data.getFilteredRows([{column: @com.shico.mnm.stats.client.StatsChartDataProvider::typeIdx, value: 'LiveUsage'}]);
     	view.setRows(rowIdxs);	    
@@ -354,6 +359,24 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 			return Math.round(dataTable.getValue(rowNum, 2) / 36000) / 100;
 		}
 
+		return view;		
+	}-*/;
+
+	private native DataView getNativeLiveUsageTableView(DataTable data)/*-{
+		var view = new $wnd.google.visualization.DataView(data);
+		view.setColumns(
+		[
+		{sourceColumn: @com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx, type:'string', label:'Channel'}, 
+		{sourceColumn:3, type:'number', label:'Viewers'},
+		{calc:toHoursAndMinutes, type:'number', label:'Hours'}
+		]);
+		var rowIdxs = data.getFilteredRows([{column: @com.shico.mnm.stats.client.StatsChartDataProvider::typeIdx, value: 'LiveUsage'}]);
+		view.setRows(rowIdxs);	    
+	
+		function toHoursAndMinutes(dataTable, rowNum){
+			return Math.round(dataTable.getValue(rowNum, 2) / 36000) / 100;
+		}
+	
 		return view;		
 	}-*/;
 
@@ -379,6 +402,9 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 		case STATS_METADATA_LOADED_EVENT:
 			// get rows for the last 20 seconds
 //			long now = System.currentTimeMillis();
+			getRows(lastFrom, lastTo);
+			lastFrom = lastTo;
+			lastTo += 5000;
 			getRows(lastFrom, lastTo);
 			break;
 		case STATS_CHART_SETTINGS_CHANGED_EVENT:

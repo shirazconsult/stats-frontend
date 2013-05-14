@@ -2,7 +2,6 @@ package com.shico.mnm.stats.client.charts;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.visualization.client.AbstractDataTable;
-import com.google.gwt.visualization.client.DataView;
 import com.google.gwt.visualization.client.LegendPosition;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
