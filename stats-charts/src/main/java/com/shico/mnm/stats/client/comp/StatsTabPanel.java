@@ -11,7 +11,7 @@ import com.shico.mnm.common.component.PortalWin;
 import com.shico.mnm.common.event.DataEventType;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
-import com.shico.mnm.stats.client.StatsChartDataProviderImpl;
+import com.shico.mnm.stats.client.LiveStatsChartDataProvider;
 import com.shico.mnm.stats.client.StatsClientHandle;
 import com.shico.mnm.stats.client.StatsSettingsController;
 import com.shico.mnm.stats.client.charts.LiveUsageBubbleChartPortlet;
@@ -38,7 +38,7 @@ import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 public class StatsTabPanel extends VLayout { 
 	private static final Logger logger = Logger.getLogger("StatsTabPanel");
 				
-	StatsChartDataProviderImpl dataClient;
+	LiveStatsChartDataProvider dataClient;
 	StatsSettingsController settingsController;
 	
 	TabSet container;
@@ -50,7 +50,7 @@ public class StatsTabPanel extends VLayout {
 	public StatsTabPanel(final ChartDataProvider chartDataProvider, final StatsSettingsController settingsController) {
 		super();
 				
-		this.dataClient = (StatsChartDataProviderImpl)chartDataProvider;
+		this.dataClient = (LiveStatsChartDataProvider)chartDataProvider;
 		this.settingsController = settingsController;
 		
 		ChildRunnable settingLoader = new ChildRunnable() {			

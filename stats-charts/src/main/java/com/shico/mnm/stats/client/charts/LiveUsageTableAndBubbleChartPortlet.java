@@ -14,6 +14,7 @@ import com.shico.mnm.common.chart.ChartWrapper;
 import com.shico.mnm.common.chart.MultipleChartPortlet;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
+import com.shico.mnm.stats.client.LiveStatsChartDataProvider;
 import com.shico.mnm.stats.client.StatsChartDataProvider;
 import com.smartgwt.client.util.SC;
 
@@ -97,7 +98,9 @@ public class LiveUsageTableAndBubbleChartPortlet extends MultipleChartPortlet {
 	public void onDataLoaded(DataLoadedEvent event) {
 		switch (event.eventType) {
 		case STATS_DATA_LOADED_EVENT:
-			draw();
+			if(event.source == LiveStatsChartDataProvider.class){
+				draw();
+			}
 			break;
 		}
 	}

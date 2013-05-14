@@ -1,44 +1,29 @@
 package com.shico.mnm.stats.client;
 
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.fusesource.restygwt.client.Method;
-import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.Resource;
 import org.fusesource.restygwt.client.RestServiceProxy;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.visualization.client.AbstractDataTable;
-import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.DataView;
 import com.shico.mnm.common.event.DataEventType;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.DataLoadedEventHandler;
 import com.shico.mnm.common.event.EventBus;
-import com.shico.mnm.common.model.ListResult;
-import com.shico.mnm.common.model.NestedList;
 import com.shico.mnm.stats.model.StatsRemoteSettingsDS;
 
-public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataLoadedEventHandler {
+public class LiveStatsChartDataProvider extends AbstractStatsChartDataProvider implements StatsChartDataProvider, DataLoadedEventHandler {
 	private static Logger logger = Logger.getLogger("StatsChartDataProviderImpl");
 	
 	DataTable data;
 	DataTable groupedData;
-	DataView liveUsageView;
-	AbstractDataTable liveUsageProgramView;
-	SortedSet<String> channelSet = new TreeSet<String>();
 	
-	StatsRestService service;
-	int fetchedRowIdx;
-	int slidingWinSize = 1000; // number of rows to keep/draw
 	int minSchedulePeriodInSec = 10; // don't schedule less than 10 sec.
-	boolean updateView;
 
 	long startTS = 1367411036351L;
 	long lastFrom = startTS;  
@@ -46,7 +31,7 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 
 	private StatsSettingsController settingsController;
 	
-	public StatsChartDataProviderImpl() {
+	public LiveStatsChartDataProvider() {
 		super();
 		
 		settingsController = StatsClientHandle.getStatsSettingsController();
@@ -54,86 +39,41 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 		EventBus.instance().addHandler(DataLoadedEvent.TYPE, this);
 	}
 
-	
 	@Override
-	public void getColumnNames() {
-		if(data == null){
-			data = DataTable.create();
-			service.getViewColumns(new MethodCallback<ListResult<String>>() {
-				public void onFailure(Method method, Throwable exception) {
-					logger.log(Level.SEVERE, "Failed to get column metadata."+ exception.getMessage());
-					EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.FAILED_STATS_METADATA_LOADED_EVENT));
-				}
-				public void onSuccess(Method method, ListResult<String> response) {
-					logger.log(Level.INFO, "Retrieving column metadata info. ");
-					List<String> result = response.getResult();
-					data.addColumn(ColumnType.STRING, result.get(typeIdx));
-					data.addColumn(ColumnType.STRING, result.get(nameIdx));
-					data.addColumn(ColumnType.STRING, result.get(titleIdx));
-					data.addColumn(ColumnType.NUMBER, result.get(sumIdx));
-					data.addColumn(ColumnType.NUMBER, result.get(minDurationIdx));
-					data.addColumn(ColumnType.NUMBER, result.get(maxDurationIdx));
-					data.addColumn(ColumnType.NUMBER, result.get(totalDurationIdx));
-					data.addColumn(ColumnType.NUMBER, result.get(fromIdx));
-					data.addColumn(ColumnType.NUMBER, result.get(toIdx));
-					
-					EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.STATS_METADATA_LOADED_EVENT));
-				}
-			});
-		}		
+	protected void setData(DataTable data) {
+		this.data = data;
+	}
+
+
+	@Override
+	protected void setGroupedData(DataTable data) {
+		this.groupedData = data;
+	}
+
+
+	@Override
+	protected DataTable getData() {
+		return this.data;
+	}
+
+
+	@Override
+	protected void fireEvent(DataEventType eventtype) {
+		switch(eventtype){
+		case FAILED_STATS_METADATA_LOADED_EVENT:
+		case FAILED_STATS_DATA_LOADED_EVENT:
+		case STATS_METADATA_LOADED_EVENT:
+		case STATS_DATA_LOADED_EVENT:
+			DataLoadedEvent ev = new DataLoadedEvent(eventtype);
+			ev.source = LiveStatsChartDataProvider.class;		
+			EventBus.instance().fireEvent(ev);
+			break;
+		}	
 	}
 
 	@Override
 	public void getLastRow() {
 		throw new RuntimeException("Not Implemented. Use getLastRow instead.");
-	}
-
-	@Override
-	public void getRows(long from, long to) {
-		logger.log(Level.INFO, "Requesting records from "+from+" to "+to);
-		service.getViewRows(from, to, new MethodCallback<NestedList<Object>>() {
-			
-			public void onFailure(Method method, Throwable exception) {
-				logger.log(Level.SEVERE, "Failed to get data rows. "+ exception.getMessage());
-				EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.FAILED_STATS_DATA_LOADED_EVENT));
-			}
-
-			public void onSuccess(Method method, NestedList<Object> response) {
-				try{
-					List<ListResult<Object>> page = response.getRows();
-					if(page.isEmpty()){
-						logger.log(Level.WARNING, "No row returned from Statistics Rest Service.");
-						return;
-					}
-					int idx = data.getNumberOfRows();
-					data.addRows(page.size());
-					fetchedRowIdx += page.size();							
-					for (ListResult<Object> row : page) {
-						int colIdx = 0;
-						List<Object> rec = row.getResult();
-						for (Object elem : rec) {		
-							if(colIdx <= 2){
-								data.setValue(idx, colIdx, elem == null ? null : elem.toString());
-							}else{
-								data.setValue(idx, colIdx, (Double)elem);
-							}	
-							colIdx++;
-						}
-						idx++;
-					}
-					// If num. of rows are more than slidingWinSize, then shrink back to slidingWinSize 
-					if(data.getNumberOfRows() > slidingWinSize){
-						data.removeRows(0, data.getNumberOfRows()-slidingWinSize);
-						updateView = true;
-					}
-					
-					groupedData = getGroupedData(data);
-					EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.STATS_DATA_LOADED_EVENT));
-				}catch(Exception e){
-					logger.log(Level.SEVERE, "Exception while updating data. "+e.getMessage());
-				}
-			}
-		});
 	}
 
 	@Override
@@ -161,14 +101,12 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 
 	@Override
 	public DataView getLiveUsagePieChartView() {
-		liveUsageView = getNativeLiveUsagePieChartView(DataView.create(groupedData), groupedData);
-		return liveUsageView;
+		return getNativeLiveUsagePieChartView(DataView.create(groupedData), groupedData);
 	}
 	
 	@Override
 	public DataView getLiveUsageColumnChartView() {
-		liveUsageView = getNativeLiveUsageColumnChartView(groupedData);
-		return liveUsageView;
+		return getNativeLiveUsageColumnChartView(groupedData);
 	}
 
 	@Override
@@ -178,8 +116,7 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 
 	@Override
 	public AbstractDataTable getLiveUsageBubbleChartView() {
-		liveUsageProgramView = getMostPopularProgramsView(data);
-		return liveUsageProgramView;
+		return getMostPopularProgramsView(data);
 	}
 
 	@Override
@@ -192,26 +129,6 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 		return getMostPopularWidgetsPieChartView(groupedData);
 	}
 	
-	private native DataTable getGroupedData(DataTable data)/*-{
-		return $wnd.google.visualization.data.group(
-			data, 
-			[@com.shico.mnm.stats.client.StatsChartDataProvider::typeIdx,
-			@com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx],
-			[{
-				'column': @com.shico.mnm.stats.client.StatsChartDataProvider::totalDurationIdx, 
-				'aggregation': $wnd.google.visualization.data.sum, 
-				'type': 'number',
-				'label': 'viewedMillis'
-			},
-			{
-				'column': @com.shico.mnm.stats.client.StatsChartDataProvider::sumIdx, 
-				'aggregation': $wnd.google.visualization.data.sum, 
-				'type': 'number',
-				'label': 'sum'
-			}]
-		);
-	}-*/;
-
 	private native DataTable getMostPopularMovieRentals(DataTable data)/*-{
 		var rowIdxs = data.getFilteredRows([{column: 0, value: 'movieRent'}]);
 		
@@ -413,7 +330,6 @@ public class StatsChartDataProviderImpl implements StatsChartDataProvider, DataL
 				return;
 			}
 			
-//			Resource resource = new Resource("http://localhost:9119/statistics/rest/stats");
 			Resource resource = new Resource(chartUrl);
 			service = GWT.create(StatsRestService.class);
 			((RestServiceProxy)service).setResource(resource);

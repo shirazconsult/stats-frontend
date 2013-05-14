@@ -18,7 +18,7 @@ import com.shico.mnm.common.client.ParentRunnable;
 import com.shico.mnm.common.event.DataEventType;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
-import com.shico.mnm.stats.client.StatsChartDataProviderImpl;
+import com.shico.mnm.stats.client.LiveStatsChartDataProvider;
 import com.shico.mnm.stats.client.StatsClientHandle;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.tab.Tab;
@@ -87,7 +87,7 @@ public class Statistics implements EntryPoint {
 
 		wrapper.draw();
 	}	
-	private StatsChartDataProviderImpl statsChartDataProvider;
+	private LiveStatsChartDataProvider statsChartDataProvider;
 
 	TabSet getMainTabPanel(){
 		mainTabPanel = new TabSet();

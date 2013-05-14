@@ -5,7 +5,6 @@ import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.LegendPosition;
 import com.google.gwt.visualization.client.Selection;
 import com.google.gwt.visualization.client.events.SelectHandler;
-import com.google.gwt.visualization.client.events.SelectHandler.SelectEvent;
 import com.google.gwt.visualization.client.visualizations.Table;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
@@ -15,8 +14,8 @@ import com.shico.mnm.common.chart.ChartWrapper;
 import com.shico.mnm.common.chart.MultipleChartPortlet;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
+import com.shico.mnm.stats.client.LiveStatsChartDataProvider;
 import com.shico.mnm.stats.client.StatsChartDataProvider;
-import com.smartgwt.client.util.SC;
 
 public class LiveUsageTableAndColumnChartPortlet extends MultipleChartPortlet {
 	private StatsChartDataProvider dataProvider;
@@ -95,7 +94,9 @@ public class LiveUsageTableAndColumnChartPortlet extends MultipleChartPortlet {
 	public void onDataLoaded(DataLoadedEvent event) {
 		switch (event.eventType) {
 		case STATS_DATA_LOADED_EVENT:
-			draw();
+			if(event.source == LiveStatsChartDataProvider.class){
+				draw();
+			}
 			break;
 		}
 	}

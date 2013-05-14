@@ -21,7 +21,7 @@ public class StatsClientHandle {
 		
 	public static StatsChartDataProvider getChartDataProvider(){
 		if(statsChartDataProvider == null){
-			statsChartDataProvider = new StatsChartDataProviderImpl();
+			statsChartDataProvider = new LiveStatsChartDataProvider();
 		}
 		return statsChartDataProvider;
 	}
