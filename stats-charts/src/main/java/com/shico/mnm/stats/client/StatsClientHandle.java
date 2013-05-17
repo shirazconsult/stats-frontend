@@ -12,23 +12,31 @@ public class StatsClientHandle {
 	public final static String STATS_REST_PATH = "rest/stats/";
 	public final static String APP_NAME = "mnm-stats";
 	
-	private static StatsChartDataProvider statsChartDataProvider;
+	private static StatsChartDataProvider liveStatsChartDataProvider;
+	private static StatsChartDataProvider deadStatsChartDataProvider;
 	private static StatsSettingsController settingsController;
 
 	private static EventBus eventBus;
 	
 	private static StatsTabPanel statsTabPanel;
 		
-	public static StatsChartDataProvider getChartDataProvider(){
-		if(statsChartDataProvider == null){
-			statsChartDataProvider = new LiveStatsChartDataProvider();
+	public static StatsChartDataProvider getLiveStatsChartDataProvider(){
+		if(liveStatsChartDataProvider == null){
+			liveStatsChartDataProvider = new LiveStatsChartDataProvider();
 		}
-		return statsChartDataProvider;
+		return liveStatsChartDataProvider;
 	}
-	
+
+	public static StatsChartDataProvider getDeadStatsChartDataProvider(){
+		if(deadStatsChartDataProvider == null){
+			deadStatsChartDataProvider = new DeadStatsChartDataProvider();
+		}
+		return deadStatsChartDataProvider;
+	}
+
 	public static StatsTabPanel getStatsTabPanel(){
 		if(statsTabPanel == null){
-			statsTabPanel = new StatsTabPanel(getChartDataProvider(), getStatsSettingsController());
+			statsTabPanel = new StatsTabPanel(getLiveStatsChartDataProvider(), getDeadStatsChartDataProvider(), getStatsSettingsController());
 		}
 		return statsTabPanel;
 	}

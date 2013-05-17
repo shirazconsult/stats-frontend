@@ -4,7 +4,6 @@ import com.google.gwt.core.client.JsArray;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.Selection;
 import com.google.gwt.visualization.client.events.SelectHandler;
-import com.google.gwt.visualization.client.events.SelectHandler.SelectEvent;
 import com.google.gwt.visualization.client.visualizations.Table;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
@@ -16,13 +15,13 @@ import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
 import com.shico.mnm.stats.client.LiveStatsChartDataProvider;
 import com.shico.mnm.stats.client.StatsChartDataProvider;
-import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.events.ClickEvent;
 
 public class LiveUsageTableAndBubbleChartPortlet extends MultipleChartPortlet {
 
-	private StatsChartDataProvider dataProvider;
-	private BubbleChart bubbleChart;
-	private Table table;
+	protected StatsChartDataProvider dataProvider;
+	protected BubbleChart bubbleChart;
+	protected Table table;
 	
 	public LiveUsageTableAndBubbleChartPortlet(StatsChartDataProvider dataProvider, double widthRatio, double heightRatio) {
 		super(widthRatio, heightRatio);
@@ -49,13 +48,17 @@ public class LiveUsageTableAndBubbleChartPortlet extends MultipleChartPortlet {
 	
 	@Override
 	protected ChartWrapper[] getCharts() {
-		AbstractDataTable data = dataProvider.getLiveUsageBubbleChartView();
+		AbstractDataTable data = getDataTable();
 		return new ChartWrapper[]{
 				new ChartWrapper(bubbleChart, data, getBubbleChartOptions(), 0.65, 0.8),
 				new ChartWrapper(table, data, getTableOptions(), 0.3, 0.7)
 		};
 	}
 
+	protected AbstractDataTable getDataTable(){
+		return ((LiveStatsChartDataProvider)dataProvider).getLiveUsageBubbleChartView();
+	}
+	
 	private Options bubbleOptions;
 	private Options getBubbleChartOptions() {
 		if(bubbleOptions == null){
@@ -98,7 +101,7 @@ public class LiveUsageTableAndBubbleChartPortlet extends MultipleChartPortlet {
 	public void onDataLoaded(DataLoadedEvent event) {
 		switch (event.eventType) {
 		case STATS_DATA_LOADED_EVENT:
-			if(event.source == LiveStatsChartDataProvider.class){
+			if(event.source.equals("_LiveStatsChartDataProvider")){
 				draw();
 			}
 			break;
@@ -106,18 +109,18 @@ public class LiveUsageTableAndBubbleChartPortlet extends MultipleChartPortlet {
 	}
 
 	@Override
-	protected void handleRefresh() {
+	protected void handleRefresh(ClickEvent event) {
 		draw();
 	}
 
 	@Override
-	protected void handleSettings() {
+	protected void handleSettings(ClickEvent event) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void handleHelp() {
+	protected void handleHelp(ClickEvent event) {
 		// TODO Auto-generated method stub
 		
 	}	

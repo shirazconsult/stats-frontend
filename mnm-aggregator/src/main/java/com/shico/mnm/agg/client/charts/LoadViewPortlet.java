@@ -6,6 +6,7 @@ import com.shico.mnm.agg.client.AggChartDataProvider;
 import com.shico.mnm.common.chart.ColumnChartPortlet;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
+import com.smartgwt.client.widgets.events.ClickEvent;
 
 public class LoadViewPortlet extends ColumnChartPortlet {
 
@@ -36,18 +37,18 @@ public class LoadViewPortlet extends ColumnChartPortlet {
 	}
 
 	@Override
-	protected void handleRefresh() {
+	protected void handleRefresh(ClickEvent event) {
 		draw();
 	}
 
 	@Override
-	protected void handleSettings() {
+	protected void handleSettings(ClickEvent event) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void handleHelp() {
+	protected void handleHelp(ClickEvent event) {
 		// TODO Auto-generated method stub
 		
 	}

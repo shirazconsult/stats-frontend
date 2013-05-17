@@ -200,7 +200,7 @@ public class AmqTabPanel extends VLayout {
 			
 			PortalLayout amqSettingsPortal = getAmqSettingsPortal();
 			
-			height += amqSettingsPortal.getHeight();
+			height = height + amqSettingsPortal.getHeight();
 			mainAdminPanel.setHeight(height);
 			
 			mainAdminPanel.addMember(amqSettingsPortal);

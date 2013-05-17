@@ -224,7 +224,7 @@ public class MessageViewPortlet extends PortletWin {
 							public void execute(DSResponse response, Object rawData, DSRequest request) {
 								if(response.getStatus() == DSResponse.STATUS_SUCCESS){
 									Map<String, Object> info = getMsgEventInfo(DataEventType.MOVE, getTitle(), value);
-									EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info, MessageViewPortlet.class));
+									EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info, "_MessageViewPortlet"));
 									removeMeFromContainer();
 								}
 							}
@@ -251,7 +251,7 @@ public class MessageViewPortlet extends PortletWin {
 								public void execute(DSResponse response, Object rawData, DSRequest request) {
 									if(response.getStatus() == DSResponse.STATUS_SUCCESS){
 										Map<String, Object> info = getMsgEventInfo(DataEventType.DELETE, getTitle(), null);
-										EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info, MessageViewPortlet.class));
+										EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info, "_MessageViewPortlet"));
 										removeMeFromContainer();
 									}
 								}
@@ -278,7 +278,7 @@ public class MessageViewPortlet extends PortletWin {
 							public void execute(DSResponse response, Object rawData, DSRequest request) {
 								if(response.getStatus() == DSResponse.STATUS_SUCCESS){
 									Map<String, Object> info = getMsgEventInfo(DataEventType.COPY, getTitle(), value);
-									EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info, MessageViewPortlet.class));
+									EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info, "_MessageViewPortlet"));
 								}
 							}
 						});
@@ -326,7 +326,7 @@ public class MessageViewPortlet extends PortletWin {
 	}
 
 	@Override
-	protected void handleRefresh() {
+	protected void handleRefresh(ClickEvent event) {
 		if(fetchedMsg != null){
 			update((String)fetchedMsg.get(MessageDetailDS.MESSAGEID), 
 					(String)fetchedMsg.get(MessageDetailDS.QUEUE), 
@@ -335,13 +335,13 @@ public class MessageViewPortlet extends PortletWin {
 	}
 
 	@Override
-	protected void handleSettings() {
+	protected void handleSettings(ClickEvent event) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void handleHelp() {
+	protected void handleHelp(ClickEvent event) {
 		// TODO Auto-generated method stub
 		
 	}

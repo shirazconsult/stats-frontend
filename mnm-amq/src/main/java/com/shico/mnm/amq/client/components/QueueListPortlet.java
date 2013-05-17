@@ -348,17 +348,17 @@ public class QueueListPortlet extends PortletWin implements DataLoadedEventHandl
 	}
 	
 	@Override
-	protected void handleRefresh() {
+	protected void handleRefresh(ClickEvent event) {
 		listGrid.invalidateCache();
 	}
 
 	@Override
-	protected void handleSettings() {
+	protected void handleSettings(ClickEvent event) {
 		SC.say("Not implemented yet.");
 	}
 
 	@Override
-	protected void handleHelp() {
+	protected void handleHelp(ClickEvent event) {
 		SC.say("Not implemented yet.");
 	}
 

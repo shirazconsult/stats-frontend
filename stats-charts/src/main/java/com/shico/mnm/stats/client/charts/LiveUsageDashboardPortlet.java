@@ -10,8 +10,9 @@ import com.shico.mnm.common.chart.BubbleChart;
 import com.shico.mnm.common.chart.DashboardPortlet;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
+import com.shico.mnm.stats.client.LiveStatsChartDataProvider;
 import com.shico.mnm.stats.client.StatsChartDataProvider;
-import com.smartgwt.client.widgets.HTMLFlow;
+import com.smartgwt.client.widgets.events.ClickEvent;
 
 public class LiveUsageDashboardPortlet extends DashboardPortlet {
 	Table table;
@@ -86,7 +87,7 @@ public class LiveUsageDashboardPortlet extends DashboardPortlet {
 
 	@Override
 	protected AbstractDataTable getData() {
-		return ((StatsChartDataProvider)dataProvider).getLiveUsageBubbleChartView();
+		return ((LiveStatsChartDataProvider)dataProvider).getLiveUsageBubbleChartView();
 	}
 	
 	@Override
@@ -99,18 +100,18 @@ public class LiveUsageDashboardPortlet extends DashboardPortlet {
 	}
 
 	@Override
-	protected void handleRefresh() {
+	protected void handleRefresh(ClickEvent event) {
 		draw();
 	}
 
 	@Override
-	protected void handleSettings() {
+	protected void handleSettings(ClickEvent event) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void handleHelp() {
+	protected void handleHelp(ClickEvent event) {
 		// TODO Auto-generated method stub
 		
 	}

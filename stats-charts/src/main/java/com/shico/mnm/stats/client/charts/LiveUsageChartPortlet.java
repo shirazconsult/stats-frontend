@@ -9,7 +9,9 @@ import com.google.gwt.visualization.client.visualizations.corechart.TextStyle;
 import com.shico.mnm.common.chart.ColumnChartPortlet;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
+import com.shico.mnm.stats.client.LiveStatsChartDataProvider;
 import com.shico.mnm.stats.client.StatsChartDataProvider;
+import com.smartgwt.client.widgets.events.ClickEvent;
 
 public class LiveUsageChartPortlet extends ColumnChartPortlet {
 
@@ -22,7 +24,7 @@ public class LiveUsageChartPortlet extends ColumnChartPortlet {
 
 	@Override
 	protected AbstractDataTable getView() {
-		return ((StatsChartDataProvider)dataProvider).getLiveUsageColumnChartView();
+		return ((LiveStatsChartDataProvider)dataProvider).getLiveUsageColumnChartView();
 	}
 
 	@Override
@@ -53,18 +55,18 @@ public class LiveUsageChartPortlet extends ColumnChartPortlet {
 	}
 
 	@Override
-	protected void handleRefresh() {
+	protected void handleRefresh(ClickEvent event) {
 		draw();
 	}
 
 	@Override
-	protected void handleSettings() {
+	protected void handleSettings(ClickEvent event) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void handleHelp() {
+	protected void handleHelp(ClickEvent event) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -2,14 +2,15 @@ package com.shico.mnm.stats.client.charts;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.visualization.client.AbstractDataTable;
-import com.google.gwt.visualization.client.LegendPosition;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.google.gwt.visualization.client.visualizations.corechart.TextStyle;
 import com.shico.mnm.common.chart.ColumnChartPortlet;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
+import com.shico.mnm.stats.client.LiveStatsChartDataProvider;
 import com.shico.mnm.stats.client.StatsChartDataProvider;
+import com.smartgwt.client.widgets.events.ClickEvent;
 
 public class MovieRentChartPortlet extends ColumnChartPortlet {
 
@@ -22,7 +23,7 @@ public class MovieRentChartPortlet extends ColumnChartPortlet {
 
 	@Override
 	protected AbstractDataTable getView() {
-		return ((StatsChartDataProvider)dataProvider).getMostPopularMovieRentals();
+		return ((LiveStatsChartDataProvider)dataProvider).getMostPopularMovieRentals();
 	}
 
 	@Override
@@ -52,18 +53,18 @@ public class MovieRentChartPortlet extends ColumnChartPortlet {
 	}
 
 	@Override
-	protected void handleRefresh() {
+	protected void handleRefresh(ClickEvent event) {
 		draw();
 	}
 
 	@Override
-	protected void handleSettings() {
+	protected void handleSettings(ClickEvent event) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void handleHelp() {
+	protected void handleHelp(ClickEvent event) {
 		// TODO Auto-generated method stub
 		
 	}

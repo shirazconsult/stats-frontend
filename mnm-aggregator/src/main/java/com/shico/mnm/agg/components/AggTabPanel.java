@@ -194,7 +194,7 @@ public class AggTabPanel extends VLayout {
 			
 			PortalLayout aggSettingsPortal = getAggSettingsPortal();
 			
-			height += aggSettingsPortal.getHeight();
+			height = height + aggSettingsPortal.getHeight();
 			mainAdminPanel.setHeight(height);
 			
 			mainAdminPanel.addMember(aggSettingsPortal);

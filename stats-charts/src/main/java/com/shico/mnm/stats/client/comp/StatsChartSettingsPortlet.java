@@ -153,18 +153,17 @@ public class StatsChartSettingsPortlet extends PortletWin implements DataLoadedE
 	}
 	
 	@Override
-	protected void handleRefresh() {
+	protected void handleRefresh(ClickEvent event) {
 		update();
 	}
 
 	@Override
-	protected void handleSettings() {
-		// TODO Auto-generated method stub
-
+	protected void handleSettings(ClickEvent event) {
+		// Nothing for now
 	}
 
 	@Override
-	protected void handleHelp() {
+	protected void handleHelp(ClickEvent event) {
 		// TODO Auto-generated method stub
 
 	}

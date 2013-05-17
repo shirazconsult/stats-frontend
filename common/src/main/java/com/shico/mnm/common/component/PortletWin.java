@@ -10,9 +10,9 @@ import com.smartgwt.client.widgets.layout.Portlet;
 
 public abstract class PortletWin extends Portlet {
 	
-	protected abstract void handleRefresh();
-	protected abstract void handleSettings();
-	protected abstract void handleHelp();
+	protected abstract void handleRefresh(ClickEvent event);
+	protected abstract void handleSettings(ClickEvent event);
+	protected abstract void handleHelp(ClickEvent event);
 //	protected abstract void handleClose();
 	
 	private PortalLayout portalContainer;
@@ -29,19 +29,19 @@ public abstract class PortletWin extends Portlet {
         		new HeaderControl(HeaderControl.REFRESH_THIN, new ClickHandler() {					
 					@Override
 					public void onClick(ClickEvent event) {
-						handleRefresh();
+						handleRefresh(event);
 					}
 				}),
         		new HeaderControl(HeaderControl.SETTINGS, new ClickHandler() {					
 					@Override
 					public void onClick(ClickEvent event) {
-						handleSettings();
+						handleSettings(event);
 					}
 				}), 
         		new HeaderControl(HeaderControl.HELP, new ClickHandler() {					
 					@Override
 					public void onClick(ClickEvent event) {
-						handleHelp();
+						handleHelp(event);
 					}
 				}), 
 				new HeaderControl(HeaderControl.CLOSE, new ClickHandler() {

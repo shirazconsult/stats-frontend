@@ -16,6 +16,7 @@ import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
 import com.shico.mnm.stats.client.LiveStatsChartDataProvider;
 import com.shico.mnm.stats.client.StatsChartDataProvider;
+import com.smartgwt.client.widgets.events.ClickEvent;
 
 public class LiveUsageTableAndColumnChartPortlet extends MultipleChartPortlet {
 	private StatsChartDataProvider dataProvider;
@@ -33,8 +34,8 @@ public class LiveUsageTableAndColumnChartPortlet extends MultipleChartPortlet {
 
 	@Override
 	protected ChartWrapper[] getCharts() {
-		AbstractDataTable data = dataProvider.getLiveUsageColumnChartView();
-		AbstractDataTable tableData = dataProvider.getLiveUsageTableView();
+		AbstractDataTable data = ((LiveStatsChartDataProvider)dataProvider).getLiveUsageColumnChartView();
+		AbstractDataTable tableData = ((LiveStatsChartDataProvider)dataProvider).getLiveUsageTableView();
 		if(columnChart == null){
 			columnChart = new ColumnChart(data, getColumnChartOptions());
 		}
@@ -56,7 +57,7 @@ public class LiveUsageTableAndColumnChartPortlet extends MultipleChartPortlet {
 
 		return new ChartWrapper[]{
 				new ChartWrapper(columnChart, data, getColumnChartOptions(), 0.65, 0.8),
-				new ChartWrapper(table, tableData, getTableOptions(), 0.3, 0.7)
+				new ChartWrapper(table, tableData, getTableOptions(), 0.3, 0.75)
 		};
 	}
 
@@ -94,7 +95,7 @@ public class LiveUsageTableAndColumnChartPortlet extends MultipleChartPortlet {
 	public void onDataLoaded(DataLoadedEvent event) {
 		switch (event.eventType) {
 		case STATS_DATA_LOADED_EVENT:
-			if(event.source == LiveStatsChartDataProvider.class){
+			if(event.source.equals("_LiveStatsChartDataProvider")){
 				draw();
 			}
 			break;
@@ -102,18 +103,17 @@ public class LiveUsageTableAndColumnChartPortlet extends MultipleChartPortlet {
 	}
 
 	@Override
-	protected void handleRefresh() {
+	protected void handleRefresh(ClickEvent event) {
 		draw();
 	}
-
+	
 	@Override
-	protected void handleSettings() {
-		// TODO Auto-generated method stub
-		
+	protected void handleSettings(ClickEvent event) {
+		// nothing for now
 	}
 
 	@Override
-	protected void handleHelp() {
+	protected void handleHelp(ClickEvent event) {
 		// TODO Auto-generated method stub
 		
 	}	

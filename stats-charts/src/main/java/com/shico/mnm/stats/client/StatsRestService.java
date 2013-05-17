@@ -22,7 +22,15 @@ public interface StatsRestService extends RestService {
 			@PathParam("from") long from,
 			@PathParam("to") long to,
 			MethodCallback<NestedList<Object>> callback);
-	
+
+	@GET
+	@Path("/nextpage/views/{type}/{from}/{to}")
+	public void getViewRows(
+			@PathParam("type") String type,
+			@PathParam("from") long from,
+			@PathParam("to") long to,
+			MethodCallback<NestedList<Object>> callback);
+
 //	@GET
 //	@Path("/columns")
 //	public void getColumnNames(MethodCallback<ListResult<String>> callback);

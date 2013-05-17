@@ -1,17 +1,17 @@
 package com.shico.mnm.stats.client;
 
-import com.google.gwt.visualization.client.AbstractDataTable;
 import com.shico.mnm.common.client.ChartDataProvider;
 
 public interface StatsChartDataProvider extends ChartDataProvider{
 	public static String[] viewColumns = {
 		"type", "name", "title", "sum", "minDuration", "maxDuration", "totalDuration", "from", "to"};
 	
-	// events
-	//		"liveusage", "widgetshow", "vodusagemovie", "vodusagetrailer", "dvrusage", 
-//		"webtvlogin", "startoverusage", "timeshiftusage", "movierent", "shoploaded", 
-//		"adadtion"};
-	
+	public static final String STATS_EVENT_TYPE = "stats_event_type";
+	public static String[] statsEvents = {
+		"adAdtion", "DvrUsage", "LiveUsage", "movieRent", "SelfCareSUBSCRIBE", "shopLoaded", 
+		"STARTOVERUsage", "TIMESHIFTUsage", "VodUsageMOVIE", "VodUsageTRAILER", 
+		"WebTVLogin", "widgetShow" 
+		};
 	
 	// data index constants
 	public final static int typeIdx = 0; 
@@ -24,10 +24,12 @@ public interface StatsChartDataProvider extends ChartDataProvider{
 	public final static int fromIdx = 7;
 	public final static int toIdx = 8;
 	
-	AbstractDataTable getLiveUsagePieChartView();
-	AbstractDataTable getLiveUsageColumnChartView();
-	AbstractDataTable getLiveUsageBubbleChartView();
-	AbstractDataTable getMostPopularMovieRentals();
-	AbstractDataTable getMostPopularWidgetsPieChartView();
-	AbstractDataTable getLiveUsageTableView();
+	void getRows(final String type, final long from, final long to);
+
+//	AbstractDataTable getLiveUsagePieChartView();
+//	AbstractDataTable getLiveUsageColumnChartView();
+//	AbstractDataTable getLiveUsageBubbleChartView();
+//	AbstractDataTable getMostPopularMovieRentals();
+//	AbstractDataTable getMostPopularWidgetsPieChartView();
+//	AbstractDataTable getLiveUsageTableView();
 }

@@ -1,5 +1,6 @@
 package com.shico.mnm.stats.client;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -8,7 +9,6 @@ import org.fusesource.restygwt.client.Resource;
 import org.fusesource.restygwt.client.RestServiceProxy;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.DataView;
@@ -18,37 +18,39 @@ import com.shico.mnm.common.event.DataLoadedEventHandler;
 import com.shico.mnm.common.event.EventBus;
 import com.shico.mnm.stats.model.StatsRemoteSettingsDS;
 
-public class LiveStatsChartDataProvider extends AbstractStatsChartDataProvider implements StatsChartDataProvider, DataLoadedEventHandler {
+public class DeadStatsChartDataProvider extends AbstractStatsChartDataProvider implements StatsChartDataProvider, DataLoadedEventHandler {
 	private static Logger logger = Logger.getLogger("StatsChartDataProviderImpl");
 	
-	DataTable data;
-	DataTable groupedData;
+	Map<String, DataTable> dataMap;
 	
-	int minSchedulePeriodInSec = 10; // don't schedule less than 10 sec.
+	private StatsSettingsController settingsController;
+	
+	public DeadStatsChartDataProvider() {
+		super();
 
-	long startTS = 1359729385133L;
-	long lastFrom = startTS;  
-	long lastTo = 1359988604573L;
-
-	public LiveStatsChartDataProvider() {
-		super();		
+		dataMap = new HashMap<String, DataTable>();		
 	}
 
 	@Override
 	protected void setData(DataTable data) {
-		this.data = data;
+		for (String se : statsEvents) {
+			dataMap.put(se, clone(data));
+		}
 	}
 
-
+	private native DataTable clone(DataTable data)/*-{
+		return data.clone();
+	}-*/;
+	
 	@Override
 	protected void postUpdate(DataTable data) {
-		groupedData = getGroupedData(data);
+		// nothing for now
 	}
 
 
 	@Override
 	protected DataTable getData(String type) {
-		return this.data;
+		return dataMap.get(type);
 	}
 
 
@@ -60,7 +62,7 @@ public class LiveStatsChartDataProvider extends AbstractStatsChartDataProvider i
 		case STATS_METADATA_LOADED_EVENT:
 		case STATS_DATA_LOADED_EVENT:
 			DataLoadedEvent ev = new DataLoadedEvent(eventtype, info);
-			ev.source = "_LiveStatsChartDataProvider";		
+			ev.source = "_DeadStatsChartDataProvider";		
 			EventBus.instance().fireEvent(ev);
 			break;
 		}	
@@ -70,34 +72,34 @@ public class LiveStatsChartDataProvider extends AbstractStatsChartDataProvider i
 	public void getLastRow() {
 		throw new RuntimeException("Not Implemented. Use getLastRow instead.");
 	}
-
-	@Override
-	public AbstractDataTable getDataTable() {
-		return groupedData;
+	
+	public void getRows(long from, long to, String statsEventType){
+		DataTable data = dataMap.get(statsEventType);
+		if(data == null){
+			logger.log(Level.WARNING, statsEventType+" is not registered as a legal Statistics data type.");
+			return;
+		}
+		if(!hasData(data, from, to)){
+			getRowsExponatially(statsEventType, from, to);
+		}else{
+			fireDataLoadedEvent(DataEventType.STATS_DATA_LOADED_EVENT, statsEventType);
+		}
 	}
 
-	public AbstractDataTable getLiveUsagePieChartView() {
-		return getNativeLiveUsagePieChartView(DataView.create(groupedData), groupedData);
+	private boolean hasData(DataTable data, long from, long to){
+		if(data.getNumberOfRows() >= 1){			
+			double first = data.getValueDouble(0, toIdx);
+			double last = data.getValueDouble(data.getNumberOfRows()-1, toIdx);
+			
+			double myfrom = (double)from;
+			double myto = (double)to;
+			return first <= myfrom && last >= myto; 
+		}
+		return false;
 	}
 	
-	public AbstractDataTable getLiveUsageColumnChartView() {
-		return getNativeLiveUsageColumnChartView(groupedData);
-	}
-
-	public AbstractDataTable getLiveUsageTableView() {
-		return getNativeLiveUsageTableView(groupedData);
-	}
-
-	public AbstractDataTable getLiveUsageBubbleChartView() {
-		return getMostPopularProgramsView(data, 0, 0);
-	}
-
-	public AbstractDataTable getMostPopularMovieRentals() {
-		return getMostPopularMovieRentals(groupedData);
-	}
-	
-	public AbstractDataTable getMostPopularWidgetsPieChartView(){
-		return getMostPopularWidgetsPieChartView(groupedData);
+	public AbstractDataTable getLiveUsageBubbleChartView(long from, long to) {
+		return getMostPopularProgramsView(dataMap.get("LiveUsage"), (double)from, (double)to);
 	}
 	
 	private native DataTable getMostPopularMovieRentals(DataTable data)/*-{
@@ -150,7 +152,7 @@ public class LiveStatsChartDataProvider extends AbstractStatsChartDataProvider i
 
 		return dt;		
 	}-*/;
-
+	
 	private native DataView getNativeLiveUsageChartWrapperView(DataTable data)/*-{
 		var rowIdxs = data.getFilteredRows([{column: @com.shico.mnm.stats.client.StatsChartDataProvider::typeIdx, value: 'LiveUsage'}]);
 
@@ -223,15 +225,16 @@ public class LiveStatsChartDataProvider extends AbstractStatsChartDataProvider i
 	public void onDataLoaded(DataLoadedEvent event) {
 		switch (event.eventType) {
 		case STATS_METADATA_LOADED_EVENT:
-			// get rows for the last 20 seconds
-//			long now = System.currentTimeMillis();
-			if(event.source.startsWith("_Live")){
-				getRowsExponatially(lastFrom, lastTo);
-				schedule();
+			if(event.source.startsWith("_Dead")){
+				// Load previous days data per default
+//				long now = System.currentTimeMillis();
+				final long end = 1368535898886L; // max toTS in db-table
+				final long start = end-(12*3600000);
+				getRowsExponatially("LiveUsage", start, end);
 			}
 			break;
 		case STATS_CHART_SETTINGS_CHANGED_EVENT:
-			if(event.source.startsWith("_Live")){
+			if(event.source.startsWith("_Dead")){
 				String chartUrl = (String)event.info.get(StatsRemoteSettingsDS.CHARTURL);
 				if(chartUrl == null || chartUrl.trim().isEmpty()){
 					return;
@@ -243,47 +246,9 @@ public class LiveStatsChartDataProvider extends AbstractStatsChartDataProvider i
 
 				// Get column metadata
 				getColumnNames();
-			}			
+			}
+
 			break;
 		}
-	}
-	
-	private void schedule(){
-		// Set viewsize and Refresh interval
-		int refreshInterval = minSchedulePeriodInSec;
-		try{
-			refreshInterval = Integer.parseInt((String)settingsController.getSetting(StatsRemoteSettingsDS.CHARTREFRESHINTERVAL));
-		}catch(NumberFormatException nfe){
-			logger.log(Level.WARNING, nfe.getMessage());
-		}
-		int slidingSize = slidingWinSize;
-		try{
-			slidingSize = Integer.parseInt((String)settingsController.getSetting(StatsRemoteSettingsDS.CHARTWINSIZE));
-		}catch(NumberFormatException nfe){
-			logger.log(Level.WARNING, nfe.getMessage());
-		}
-		slidingWinSize = Math.min(slidingSize, slidingWinSize);
-		
-		schedule(Math.max(refreshInterval, minSchedulePeriodInSec), slidingWinSize);	
-	}
-	
-	Timer timer;
-	@Override
-	public void schedule(final int schedulePeriodInSec, int maxDataRows) {
-		if(timer != null){
-			timer.cancel();
-		}
-		final int schPeriodInMillis = schedulePeriodInSec*1000;
-		timer = new Timer() {
-			public void run() {
-				getRows(lastFrom, lastTo);
-				lastFrom = lastTo;
-//				lastTo += schPeriodInMillis;
-				lastTo = lastTo+3600000;
-			}
-		};
-//		timer.schedule(schPeriodInMillis);
-		timer.scheduleRepeating(schPeriodInMillis);
-	}
-	
+	}		
 }

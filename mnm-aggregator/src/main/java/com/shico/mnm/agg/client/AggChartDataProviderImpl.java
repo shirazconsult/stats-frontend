@@ -118,7 +118,7 @@ public class AggChartDataProviderImpl implements AggChartDataProvider, DataLoade
 						int toRemove = rows.size() / slidingWinRows;
 						if(toRemove != 0){
 							data.removeRows(0, toRemove);
-							slidingCur += toRemove;
+							slidingCur = slidingCur+toRemove;
 						}
 					}
 //					arrowFormat();

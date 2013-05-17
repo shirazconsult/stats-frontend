@@ -8,7 +8,9 @@ import com.google.gwt.visualization.client.visualizations.corechart.TextStyle;
 import com.shico.mnm.common.chart.BubbleChartPortlet;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
+import com.shico.mnm.stats.client.LiveStatsChartDataProvider;
 import com.shico.mnm.stats.client.StatsChartDataProvider;
+import com.smartgwt.client.widgets.events.ClickEvent;
 
 public class LiveUsageBubbleChartPortlet extends BubbleChartPortlet {
 
@@ -21,7 +23,7 @@ public class LiveUsageBubbleChartPortlet extends BubbleChartPortlet {
 
 	@Override
 	protected AbstractDataTable getView() {
-		return ((StatsChartDataProvider)dataProvider).getLiveUsageBubbleChartView();
+		return ((LiveStatsChartDataProvider)dataProvider).getLiveUsageBubbleChartView();
 	}
 
 	@Override
@@ -55,18 +57,18 @@ public class LiveUsageBubbleChartPortlet extends BubbleChartPortlet {
 	}
 
 	@Override
-	protected void handleRefresh() {
+	protected void handleRefresh(ClickEvent event) {
 		draw();
 	}
 
 	@Override
-	protected void handleSettings() {
+	protected void handleSettings(ClickEvent event) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void handleHelp() {
+	protected void handleHelp(ClickEvent event) {
 		// TODO Auto-generated method stub
 		
 	}

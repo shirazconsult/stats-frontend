@@ -105,7 +105,7 @@ public class AmqChartDataProviderImpl implements AmqChartDataProvider, DataLoade
 						return;
 					}
 					data.addRows(size);
-					fetchedRowIdx += size;
+					fetchedRowIdx = fetchedRowIdx+size;
 					for (ListResult<String> row : rows) {
 						int colIdx = 0;
 						for (String elem : row.getResult()) {	

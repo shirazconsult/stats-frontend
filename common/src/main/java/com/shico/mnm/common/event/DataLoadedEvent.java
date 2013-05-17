@@ -24,13 +24,13 @@ public class DataLoadedEvent extends GwtEvent<DataLoadedEventHandler> {
 	
 	public Map<String, Object> info; 
 	public DataEventType eventType;
-	public Class source = DataLoadedEvent.class;  // default value to avoid null pointer exceptions
+	public String source = "_DataLoadedEvent";  // default value to avoid null pointer exceptions
 	
 	public DataLoadedEvent(DataEventType type) {
 		this.eventType = type;		
 	}
 
-	public DataLoadedEvent(DataEventType type, Class source) {
+	public DataLoadedEvent(DataEventType type, String source) {
 		this.eventType = type;
 		this.source = source;
 	}
@@ -41,7 +41,7 @@ public class DataLoadedEvent extends GwtEvent<DataLoadedEventHandler> {
 	}
 
 
-	public DataLoadedEvent(DataEventType type, Map<String, Object> info, Class source) {
+	public DataLoadedEvent(DataEventType type, Map<String, Object> info, String source) {
 		this.eventType = type;		
 		this.info = info;
 		this.source = source;

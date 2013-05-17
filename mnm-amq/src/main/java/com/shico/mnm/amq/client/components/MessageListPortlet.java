@@ -177,7 +177,7 @@ public class MessageListPortlet extends PortletWin implements DataLoadedEventHan
 								if(response.getStatus() == DSResponse.STATUS_SUCCESS){
 									listGrid.invalidateCache();
 									Map<String, Object> info = getMsgEventInfo(extractMsgIds(recs), DataEventType.MOVE, getTitle(), value);
-									EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info, MessageListPortlet.class));
+									EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info, "_MessageListPortlet"));
 								}
 							}
 						});
@@ -206,7 +206,7 @@ public class MessageListPortlet extends PortletWin implements DataLoadedEventHan
 							public void execute(DSResponse response, Object rawData, DSRequest request) {
 								if(response.getStatus() == DSResponse.STATUS_SUCCESS){
 									Map<String, Object> info = getMsgEventInfo(extractMsgIds(recs), DataEventType.COPY, getTitle(), value);
-									EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info, MessageListPortlet.class));
+									EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info, "_MessageListPortlet"));
 								}
 							}
 						});
@@ -244,7 +244,7 @@ public class MessageListPortlet extends PortletWin implements DataLoadedEventHan
 							});
 						}
 						Map<String, Object> info = getMsgEventInfo(extractMsgIds(recs), DataEventType.DELETE, getTitle(), null);
-						EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info, MessageListPortlet.class));				
+						EventBus.instance().fireEvent(new DataLoadedEvent(DataEventType.MSG_EVENT, info, "_MessageListPortlet"));				
 					}
 				});
 			}
@@ -312,15 +312,15 @@ public class MessageListPortlet extends PortletWin implements DataLoadedEventHan
 	}
 	
 	@Override
-	protected void handleRefresh() {
+	protected void handleRefresh(ClickEvent event) {
 		 listGrid.invalidateCache();
 	}
 
 	@Override
-	protected void handleSettings() {
+	protected void handleSettings(ClickEvent event) {
 	}
 
 	@Override
-	protected void handleHelp() {
+	protected void handleHelp(ClickEvent event) {
 	}
 }

@@ -11,6 +11,7 @@ import com.shico.mnm.common.event.EventBus;
 import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.ValuesManager;
 import com.smartgwt.client.widgets.form.fields.HiddenItem;
@@ -121,17 +122,17 @@ public class AggregatorInfoPortlet extends PortletWin implements DataLoadedEvent
 	}
 		
 	@Override
-	protected void handleRefresh() {
+	protected void handleRefresh(ClickEvent event) {
 		update();
 	}
 
 	@Override
-	protected void handleSettings() {
+	protected void handleSettings(ClickEvent event) {
 		SC.say("Not implemented yet.");
 	}
 
 	@Override
-	protected void handleHelp() {
+	protected void handleHelp(ClickEvent event) {
 		SC.say("Not implemented yet.");
 	}
 	
