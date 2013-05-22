@@ -17,14 +17,14 @@ public interface StatsRestService extends RestService {
 	public void getViewColumns(MethodCallback<ListResult<String>> callback);
 	
 	@GET
-	@Path("/nextpage/views/{from}/{to}")
+	@Path("/views/{from}/{to}")
 	public void getViewRows(
 			@PathParam("from") long from,
 			@PathParam("to") long to,
 			MethodCallback<NestedList<Object>> callback);
 
 	@GET
-	@Path("/nextpage/views/{type}/{from}/{to}")
+	@Path("/views/{type}/{from}/{to}")
 	public void getViewRows(
 			@PathParam("type") String type,
 			@PathParam("from") long from,
