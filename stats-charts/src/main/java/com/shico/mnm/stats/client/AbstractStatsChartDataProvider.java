@@ -54,10 +54,8 @@ public abstract class AbstractStatsChartDataProvider implements DataLoadedEventH
 				data.addColumn(ColumnType.STRING, result.get(StatsChartDataProvider.typeIdx));
 				data.addColumn(ColumnType.STRING, result.get(StatsChartDataProvider.nameIdx));
 				data.addColumn(ColumnType.STRING, result.get(StatsChartDataProvider.titleIdx));
-				data.addColumn(ColumnType.NUMBER, result.get(StatsChartDataProvider.sumIdx));
-				data.addColumn(ColumnType.NUMBER, result.get(StatsChartDataProvider.minDurationIdx));
-				data.addColumn(ColumnType.NUMBER, result.get(StatsChartDataProvider.maxDurationIdx));
-				data.addColumn(ColumnType.NUMBER, result.get(StatsChartDataProvider.totalDurationIdx));
+				data.addColumn(ColumnType.NUMBER, result.get(StatsChartDataProvider.viewersIdx));
+				data.addColumn(ColumnType.NUMBER, result.get(StatsChartDataProvider.durationIdx));
 				data.addColumn(ColumnType.NUMBER, result.get(StatsChartDataProvider.fromIdx));
 				data.addColumn(ColumnType.NUMBER, result.get(StatsChartDataProvider.toIdx));
 
@@ -70,75 +68,141 @@ public abstract class AbstractStatsChartDataProvider implements DataLoadedEventH
 
 	public void getRows(long from, long to) {
 		logger.log(Level.INFO, "Requesting records from "+from+" to "+to);
-		service.getViewRows(from, to, new MethodCallback<NestedList<Object>>() {
-			
+		service.getViewPage(from, to, new MethodCallback<NestedList<Object>>() {
+			@Override
 			public void onFailure(Method method, Throwable exception) {
-				String err = "Failed to get data rows. "+ exception.getMessage();
-				logger.log(Level.SEVERE, err);
-				fireErrorEvent(DataEventType.FAILED_STATS_DATA_LOADED_EVENT, err);
+				callbackOnFailure(method, exception);
 			}
-
+			@Override
 			public void onSuccess(Method method, NestedList<Object> response) {
-				try{
-					List<ListResult<Object>> page = response.getRows();
-					if(page.isEmpty()){
-						String err = "No row returned from Statistics Rest Service.";
-						logger.log(Level.WARNING, err);
-						fireErrorEvent(DataEventType.FAILED_STATS_DATA_LOADED_EVENT, err);
-						return;
-					}
-					
-					DataTable data = getData(getStatsEventType(page));
-					
-					handleData(data, page);
-					
-					postUpdate(data);
-					
-					fireEvent(DataEventType.STATS_DATA_LOADED_EVENT, null);					
-				}catch(Exception e){
-					logger.log(Level.SEVERE, "Exception while updating data. "+e.getMessage());
-				}
+				callbackOnSuccess(method, response);
 			}
 		});
 	}
 
+	public void getRows(String from, String to){
+		logger.log(Level.INFO, "Requesting records from "+from+" to "+to);
+		service.getViewPage(from, to, new MethodCallback<NestedList<Object>>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callbackOnFailure(method, exception);
+			}
+			@Override
+			public void onSuccess(Method method, NestedList<Object> response) {
+				callbackOnSuccess(method, response);
+			}
+		});
+	}
+		
 	public void getRows(final String type, final long from, final long to) {
 		logger.log(Level.INFO, "Requesting "+type+" records from "+from+" to "+to);
-		service.getViewRows(type, from, to, new MethodCallback<NestedList<Object>>() {
-			
+		service.getViewPage(type, from, to, new MethodCallback<NestedList<Object>>() {
+			@Override
 			public void onFailure(Method method, Throwable exception) {
-				String err = "Failed to get data rows. "+ exception.getMessage();
-				logger.log(Level.SEVERE, err);
-				fireErrorEvent(DataEventType.FAILED_STATS_DATA_LOADED_EVENT, err);
+				callbackOnFailure(method, exception);
 			}
-
+			@Override
 			public void onSuccess(Method method, NestedList<Object> response) {
-				try{
-					List<ListResult<Object>> page = response.getRows();
-					if(page.isEmpty()){
-						logger.log(Level.WARNING, "No row returned from Statistics Rest Service.");
-						return;
-					}
-					
-					String fetchedType = getStatsEventType(page);
-					if(!type.equals(fetchedType)){
-						String err = "Expected data for "+type+", but received data for "+fetchedType;
-						fireErrorEvent(DataEventType.FAILED_STATS_DATA_LOADED_EVENT, err);
-					}
-					DataTable data = getData(type);
-					
-					handleData(data, page);
-					
-					postUpdate(data);
-					
-					fireDataLoadedEvent(DataEventType.STATS_DATA_LOADED_EVENT, type);					
-				}catch(Exception e){
-					logger.log(Level.SEVERE, "Exception while updating data. "+e.getMessage());
-				}
+				callbackOnSuccess(method, response, type);
 			}
 		});
 	}
 
+	public void getRows(final String type, final String from, final String to) {
+		logger.log(Level.INFO, "Requesting "+type+" records from "+from+" to "+to);
+		service.getViewPage(type, from, to, new MethodCallback<NestedList<Object>>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callbackOnFailure(method, exception);
+			}
+			@Override
+			public void onSuccess(Method method, NestedList<Object> response) {
+				callbackOnSuccess(method, response, type);
+			}
+		});
+	}
+
+	public void getRows(final String type, final String from, final String to, String options) {
+		logger.log(Level.INFO, "Requesting "+type+" records from "+from+" to "+to);
+		service.getViewPage(type, from, to, options, new MethodCallback<NestedList<Object>>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callbackOnFailure(method, exception);
+			}
+			@Override
+			public void onSuccess(Method method, NestedList<Object> response) {
+				callbackOnSuccess(method, response, type);
+			}
+		});
+	}
+
+	public void getRows(final String type, final long from, final long to, String options) {
+		logger.log(Level.INFO, "Requesting "+type+" records from "+from+" to "+to);
+		service.getViewPage(type, from, to, options, new MethodCallback<NestedList<Object>>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callbackOnFailure(method, exception);
+			}
+			@Override
+			public void onSuccess(Method method, NestedList<Object> response) {
+				callbackOnSuccess(method, response, type);
+			}
+		});
+	}
+
+	private void callbackOnFailure(Method method, Throwable exception) {
+		String err = "Failed to get data rows. "+ exception.getMessage();
+		logger.log(Level.SEVERE, err);
+		fireErrorEvent(DataEventType.FAILED_STATS_DATA_LOADED_EVENT, err);
+	}
+
+	private void callbackOnSuccess(Method method, NestedList<Object> response) {
+		try{
+			List<ListResult<Object>> page = response.getRows();
+			if(page.isEmpty()){
+				String err = "No row returned from Statistics Rest Service.";
+				logger.log(Level.WARNING, err);
+				fireErrorEvent(DataEventType.FAILED_STATS_DATA_LOADED_EVENT, err);
+				return;
+			}
+			
+			DataTable data = getData(getStatsEventType(page));
+			
+			handleData(data, page);
+			
+			postUpdate(data);
+			
+			fireEvent(DataEventType.STATS_DATA_LOADED_EVENT, null);					
+		}catch(Exception e){
+			logger.log(Level.SEVERE, "Exception while updating data. "+e.getMessage());
+		}
+	}			
+
+	private void callbackOnSuccess(Method method, NestedList<Object> response, final String type) {
+		try{
+			List<ListResult<Object>> page = response.getRows();
+			if(page.isEmpty()){
+				logger.log(Level.WARNING, "No row returned from Statistics Rest Service.");
+				return;
+			}
+			
+			String fetchedType = getStatsEventType(page);
+			if(!type.equals(fetchedType)){
+				String err = "Expected data for "+type+", but received data for "+fetchedType;
+				fireErrorEvent(DataEventType.FAILED_STATS_DATA_LOADED_EVENT, err);
+			}
+			DataTable data = getData(type);
+			
+			handleData(data, page);
+			
+			postUpdate(data);
+			
+			fireDataLoadedEvent(DataEventType.STATS_DATA_LOADED_EVENT, type);					
+		}catch(Exception e){
+			logger.log(Level.SEVERE, "Exception while updating data. "+e.getMessage());
+		}		
+	}
+		
 	private void handleData(DataTable data, List<ListResult<Object>> page){
 		int idx = data.getNumberOfRows();
 		data.addRows(page.size());
@@ -172,13 +236,13 @@ public abstract class AbstractStatsChartDataProvider implements DataLoadedEventH
 			[@com.shico.mnm.stats.client.StatsChartDataProvider::typeIdx,
 			@com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx],
 			[{
-				'column': @com.shico.mnm.stats.client.StatsChartDataProvider::totalDurationIdx, 
+				'column': @com.shico.mnm.stats.client.StatsChartDataProvider::durationIdx, 
 				'aggregation': $wnd.google.visualization.data.sum, 
 				'type': 'number',
 				'label': 'viewedMillis'
 			},
 			{
-				'column': @com.shico.mnm.stats.client.StatsChartDataProvider::sumIdx, 
+				'column': @com.shico.mnm.stats.client.StatsChartDataProvider::viewersIdx, 
 				'aggregation': $wnd.google.visualization.data.sum, 
 				'type': 'number',
 				'label': 'sum'
@@ -205,10 +269,12 @@ public abstract class AbstractStatsChartDataProvider implements DataLoadedEventH
 		fireEvent(type, info);
 	}
 	
+	@Deprecated
 	public void getRowsExponatially(long from, long to){
 		getRowsExponatially(null, from, to);
 	}
 
+	@Deprecated
 	public void getRowsExponatially(String eventType, long from, long to){
 		if(jobDealer != null){
 			jobDealer.cancel();
@@ -261,6 +327,26 @@ public abstract class AbstractStatsChartDataProvider implements DataLoadedEventH
 
 	// ========================= native tables/views ========================= 
 	// =======================================================================
+	protected native AbstractDataTable getTopProgramsView(DataTable data, double from, double to)/*-{
+		var view = new $wnd.google.visualization.DataView(data);
+		view.setColumns([
+			{sourceColumn:@com.shico.mnm.stats.client.StatsChartDataProvider::titleIdx, id: 'ID', type: 'string', label:'Program'}, 
+			{calc:toHoursAndMinutes, type:'number', label:'Hours'}, 
+			{sourceColumn: @com.shico.mnm.stats.client.StatsChartDataProvider::viewersIdx, type: 'number', label:'Viewers'},
+			{sourceColumn:@com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx, type: 'string', label:'Channel'},
+			{calc:getWeightedPopularity, type:'number', label:'Popularity metric', id:'PopularityMetric'}
+		]);
+		
+		function getWeightedPopularity(dataTable, rowNum){
+			return dataTable.getNumberOfRows()-rowNum;
+		}
+		
+		function toHoursAndMinutes(dataTable, rowNum){
+			return Math.round(dataTable.getValue(rowNum, @com.shico.mnm.stats.client.StatsChartDataProvider::durationIdx) / 36000) / 100;
+		}
+		
+		return view;
+	}-*/;
 	
 	protected native AbstractDataTable getMostPopularProgramsView(DataTable data, double from, double to)/*-{
 		var view = new $wnd.google.visualization.DataView(data);
@@ -282,13 +368,13 @@ public abstract class AbstractStatsChartDataProvider implements DataLoadedEventH
 			@com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx,
 			@com.shico.mnm.stats.client.StatsChartDataProvider::titleIdx],
 			[{
-				'column': @com.shico.mnm.stats.client.StatsChartDataProvider::totalDurationIdx, 
+				'column': @com.shico.mnm.stats.client.StatsChartDataProvider::durationIdx, 
 				'aggregation': $wnd.google.visualization.data.sum, 
 				'type': 'number',
 				'label': 'viewedMillis'
 			},
 			{
-				'column': @com.shico.mnm.stats.client.StatsChartDataProvider::sumIdx, 
+				'column': @com.shico.mnm.stats.client.StatsChartDataProvider::viewersIdx, 
 				'aggregation': $wnd.google.visualization.data.sum, 
 				'type': 'number',
 				'label': 'viewers'

@@ -50,7 +50,11 @@ public class DeadStatsChartDataProvider extends AbstractStatsChartDataProvider i
 
 	@Override
 	protected DataTable getData(String type) {
-		return dataMap.get(type);
+		DataTable dt = dataMap.get(type);
+		if(dt != null){
+			dt.removeRows(0, dt.getNumberOfRows());
+		}
+		return dt;
 	}
 
 
@@ -73,6 +77,7 @@ public class DeadStatsChartDataProvider extends AbstractStatsChartDataProvider i
 		throw new RuntimeException("Not Implemented. Use getLastRow instead.");
 	}
 	
+	@Deprecated
 	public void getRows(long from, long to, String statsEventType){
 		DataTable data = dataMap.get(statsEventType);
 		if(data == null){
@@ -99,7 +104,8 @@ public class DeadStatsChartDataProvider extends AbstractStatsChartDataProvider i
 	}
 	
 	public AbstractDataTable getLiveUsageBubbleChartView(long from, long to) {
-		return getMostPopularProgramsView(dataMap.get("LiveUsage"), (double)from, (double)to);
+		return getTopProgramsView(dataMap.get("LiveUsage"), from, to);
+//		return getMostPopularProgramsView(dataMap.get("LiveUsage"), (double)from, (double)to);
 	}
 	
 	private native DataTable getMostPopularMovieRentals(DataTable data)/*-{
@@ -230,7 +236,8 @@ public class DeadStatsChartDataProvider extends AbstractStatsChartDataProvider i
 //				long now = System.currentTimeMillis();
 				final long end = 1368535898886L; // max toTS in db-table
 				final long start = end-(12*3600000);
-				getRowsExponatially("LiveUsage", start, end);
+				getRows("LiveUsage", start, end, "viewers,top,10");
+//				getRowsExponatially("LiveUsage", start, end);
 			}
 			break;
 		case STATS_CHART_SETTINGS_CHANGED_EVENT:

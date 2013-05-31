@@ -226,7 +226,8 @@ public class LiveStatsChartDataProvider extends AbstractStatsChartDataProvider i
 			// get rows for the last 20 seconds
 //			long now = System.currentTimeMillis();
 			if(event.source.startsWith("_Live")){
-				getRowsExponatially(lastFrom, lastTo);
+				getRows(lastFrom, lastTo);
+//				getRowsExponatially(lastFrom, lastTo);
 				schedule();
 			}
 			break;

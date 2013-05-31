@@ -60,7 +60,7 @@ public class LiveUsageTableAndBubbleChartPortlet2 extends LiveUsageTableAndBubbl
 					
 					currentFrom = from.getTime();
 					currentTo = to.getTime();
-					((DeadStatsChartDataProvider)dataProvider).getRows(currentFrom, currentTo, type);
+					dataProvider.getRows(type, currentFrom, currentTo, "viewers,top,10");
 				}
 				
 				@Override

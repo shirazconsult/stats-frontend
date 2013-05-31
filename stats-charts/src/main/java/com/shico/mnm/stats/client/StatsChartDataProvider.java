@@ -4,7 +4,7 @@ import com.shico.mnm.common.client.ChartDataProvider;
 
 public interface StatsChartDataProvider extends ChartDataProvider{
 	public static String[] viewColumns = {
-		"type", "name", "title", "sum", "minDuration", "maxDuration", "totalDuration", "from", "to"};
+		"type", "name", "title", "viewers", "duration", "from", "to"};
 	
 	public static final String STATS_EVENT_TYPE = "stats_event_type";
 	public static String[] statsEvents = {
@@ -17,15 +17,16 @@ public interface StatsChartDataProvider extends ChartDataProvider{
 	public final static int typeIdx = 0; 
 	public final static int nameIdx = 1; 
 	public final static int titleIdx = 2;
-	public final static int sumIdx = 3;
-	public final static int minDurationIdx = 4; 
-	public final static int maxDurationIdx = 5; 
-	public final static int totalDurationIdx = 6;
-	public final static int fromIdx = 7;
-	public final static int toIdx = 8;
+	public final static int viewersIdx = 3;
+	public final static int durationIdx = 4;
+	public final static int fromIdx = 5;
+	public final static int toIdx = 6;
 	
 	void getRows(final String type, final long from, final long to);
-
+	void getRows(final String type, final String from, final String to);
+	void getRows(final String type, final long from, final long to, final String options);
+	void getRows(final String type, final String from, final String to, final String options);
+	
 //	AbstractDataTable getLiveUsagePieChartView();
 //	AbstractDataTable getLiveUsageColumnChartView();
 //	AbstractDataTable getLiveUsageBubbleChartView();
