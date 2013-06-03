@@ -3,11 +3,11 @@ package com.shico.mnm.stats.client;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.RestService;
 
+import com.shico.mnm.common.model.ListOfMap;
 import com.shico.mnm.common.model.ListResult;
 import com.shico.mnm.common.model.NestedList;
 
@@ -57,11 +57,22 @@ public interface StatsRestService extends RestService {
 			MethodCallback<NestedList<Object>> callback);
 
 	@GET
-	@Path("/view/top/{type}/{from}/{to}/{options}")
+	@Path("/view/{type}/{from}/{to}/{options}")
 	public void getViewPage(
 			@PathParam("type") String type, 
 			@PathParam("from") String from, 
 			@PathParam("to") String to,
 			@PathParam("options") String options,
 			MethodCallback<NestedList<Object>> callback);	
+	
+	@GET
+	@Path("/viewbatch/{type}/{from}/{to}/{options}")
+	public void getViewPageInBatch(
+			@PathParam("type") String type, 
+			@PathParam("from") String from, 
+			@PathParam("to") String to,
+			@PathParam("options") String options,
+			// The response is actually a ListResult<NestedList<Object>>, but since the gwt compiler for some
+			// reason cannot compile it, then we have to do the unmarshalling manually.
+			MethodCallback<ListResult<Object>> callback);
 }

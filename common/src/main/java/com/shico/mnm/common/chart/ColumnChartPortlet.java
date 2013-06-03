@@ -52,7 +52,7 @@ public abstract class ColumnChartPortlet extends PortletWin implements DataLoade
 		try{
 			AbstractDataTable view = getView();
 			if(chart == null){
-				chart = new ColumnChart(dataProvider.getDataTable(), getOptions());		
+				chart = new ColumnChart(view, getOptions());		
 				container.addMember(chart);
 			}else {
 				chart.draw(view, getOptions());

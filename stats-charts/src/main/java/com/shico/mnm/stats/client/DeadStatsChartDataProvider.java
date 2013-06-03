@@ -10,6 +10,7 @@ import org.fusesource.restygwt.client.RestServiceProxy;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.visualization.client.AbstractDataTable;
+import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.DataView;
 import com.shico.mnm.common.event.DataEventType;
@@ -29,13 +30,7 @@ public class DeadStatsChartDataProvider extends AbstractStatsChartDataProvider i
 		super();
 
 		dataMap = new HashMap<String, DataTable>();		
-	}
-
-	@Override
-	protected void setData(DataTable data) {
-		for (String se : statsEvents) {
-			dataMap.put(se, clone(data));
-		}
+		getColumnNames();
 	}
 
 	private native DataTable clone(DataTable data)/*-{
@@ -49,14 +44,27 @@ public class DeadStatsChartDataProvider extends AbstractStatsChartDataProvider i
 
 
 	@Override
-	protected DataTable getData(String type) {
-		DataTable dt = dataMap.get(type);
-		if(dt != null){
-			dt.removeRows(0, dt.getNumberOfRows());
-		}
-		return dt;
+	public DataTable getData(String type) {
+		return dataMap.get(type);
 	}
 
+	@Override
+	public void getColumnNames(){
+		DataTable data = DataTable.create();
+		for (String se : statsEvents) {
+			data.addColumn(ColumnType.STRING, viewColumns[StatsChartDataProvider.typeIdx]);
+			data.addColumn(ColumnType.STRING, viewColumns[StatsChartDataProvider.nameIdx]);
+			data.addColumn(ColumnType.STRING, viewColumns[StatsChartDataProvider.titleIdx]);
+			data.addColumn(ColumnType.NUMBER, viewColumns[StatsChartDataProvider.viewersIdx]);
+			data.addColumn(ColumnType.NUMBER, viewColumns[StatsChartDataProvider.durationIdx]);
+			data.addColumn(ColumnType.STRING, viewColumns[StatsChartDataProvider.timeIdx]);
+
+			dataMap.put(se, clone(data));
+		}
+		for (String se : subStatEvents){
+			dataMap.put(se, clone(data));
+		}
+	}
 
 	@Override
 	protected void fireEvent(DataEventType eventtype, Map<String, Object> info) {
@@ -103,11 +111,21 @@ public class DeadStatsChartDataProvider extends AbstractStatsChartDataProvider i
 		return false;
 	}
 	
-	public AbstractDataTable getLiveUsageBubbleChartView(long from, long to) {
-		return getTopProgramsView(dataMap.get("LiveUsage"), from, to);
+	public AbstractDataTable getLiveUsageBubbleChartView() {
+		return getTopProgramsView(dataMap.get(StatsChartDataProvider.PROGRAM_EVENT));
 //		return getMostPopularProgramsView(dataMap.get("LiveUsage"), (double)from, (double)to);
 	}
 	
+	public AbstractDataTable getLiveUsageColumnChartView(int viewersOrDurationIdx) {
+		return getNativeLiveUsageColumnChartView(dataMap.get("LiveUsage"), viewersOrDurationIdx);
+	}
+
+	public AbstractDataTable getLiveUsageTableView(){
+		return getNativeLiveUsageTableView(dataMap.get("LiveUsage"));
+	}
+	// ========================= native tables/views ========================= 
+	// =======================================================================
+
 	private native DataTable getMostPopularMovieRentals(DataTable data)/*-{
 		var rowIdxs = data.getFilteredRows([{column: 0, value: 'movieRent'}]);
 		
@@ -176,21 +194,55 @@ public class DeadStatsChartDataProvider extends AbstractStatsChartDataProvider i
 		return new $wnd.google.visualization.DataView(lut);
 	}-*/;
 
-	private native DataView getNativeLiveUsageColumnChartView(DataTable data)/*-{
-		var view = new $wnd.google.visualization.DataView(data);
-		view.setColumns(
-		[
-		{sourceColumn: @com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx, type:'string', label:'Channel'}, 
-		{calc:toHoursAndMinutes, type:'number', label:'Hours'}
-		]);
-		var rowIdxs = data.getFilteredRows([{column: @com.shico.mnm.stats.client.StatsChartDataProvider::typeIdx, value: 'LiveUsage'}]);
-    	view.setRows(rowIdxs);	    
-
-		function toHoursAndMinutes(dataTable, rowNum){
-			return Math.round(dataTable.getValue(rowNum, 2) / 36000) / 100;
+	private native DataView getNativeLiveUsageColumnChartView(DataTable data, int vaxisIdx)/*-{
+		var dt = new $wnd.google.visualization.DataTable();
+		
+		var time = data.getValue(0, @com.shico.mnm.stats.client.StatsChartDataProvider::timeIdx);
+		if(time.charAt(5) == 'W'){
+			dt.addColumn('string', 'Week');
+		}else if(time.length <= 7){
+			dt.addColumn('string', 'Month');
+		}else if(time.length <= 10){
+			dt.addColumn('string', 'Day');
+		}else{
+			dt.addColumn('string', 'Hour');
+		}			 
+		var channels = data.getDistinctValues(@com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx);
+		var chanColIdxMap = {};
+		for(var i=0; i<channels.length; i++){
+			var ch = channels[i];
+			dt.addColumn('number', ch);
+			chanColIdxMap[ch] = i+1; // the column idx would be i+1, since we've already added the first column (time).
 		}
-
-		return view;		
+		
+//		for (var i = 0, keys = Object.keys(chanColIdxMap), len = keys.length; i < len; i++) {
+//    		console.log('key is: ' + keys[i] + ', value is: ' + chanColIdxMap[keys[i]]);
+//		}
+		 
+		var prevTime = "";
+		var row = -1;
+		for(var r=0; r<data.getNumberOfRows(); r++){
+			var time = data.getValue(r, @com.shico.mnm.stats.client.StatsChartDataProvider::timeIdx);
+			var ch = data.getValue(r, @com.shico.mnm.stats.client.StatsChartDataProvider::nameIdx);
+			if(prevTime != time){
+				row = row+1;
+				dt.addRows(1);
+				prevTime = time;
+				dt.setValue(row, 0, time);
+			}
+			dt.setValue(row, chanColIdxMap[ch], calcViewersOrDuration(data, r, vaxisIdx));
+		}
+		
+		function calcViewersOrDuration(data, rownum, vaxisIdx){
+			if(vaxisIdx == @com.shico.mnm.stats.client.StatsChartDataProvider::viewersIdx){
+				return data.getValue(rownum, @com.shico.mnm.stats.client.StatsChartDataProvider::viewersIdx);
+			}else{
+				var duration = data.getValue(rownum, @com.shico.mnm.stats.client.StatsChartDataProvider::durationIdx);
+				return Math.round(duration / 36000) / 100;
+			}
+		}
+		
+		return dt;		
 	}-*/;
 
 	private native DataView getNativeLiveUsageTableView(DataTable data)/*-{
@@ -230,16 +282,6 @@ public class DeadStatsChartDataProvider extends AbstractStatsChartDataProvider i
 	@Override
 	public void onDataLoaded(DataLoadedEvent event) {
 		switch (event.eventType) {
-		case STATS_METADATA_LOADED_EVENT:
-			if(event.source.startsWith("_Dead")){
-				// Load previous days data per default
-//				long now = System.currentTimeMillis();
-				final long end = 1368535898886L; // max toTS in db-table
-				final long start = end-(12*3600000);
-				getRows("LiveUsage", start, end, "viewers,top,10");
-//				getRowsExponatially("LiveUsage", start, end);
-			}
-			break;
 		case STATS_CHART_SETTINGS_CHANGED_EVENT:
 			if(event.source.startsWith("_Dead")){
 				String chartUrl = (String)event.info.get(StatsRemoteSettingsDS.CHARTURL);
@@ -250,9 +292,6 @@ public class DeadStatsChartDataProvider extends AbstractStatsChartDataProvider i
 				Resource resource = new Resource(chartUrl);
 				service = GWT.create(StatsRestService.class);
 				((RestServiceProxy)service).setResource(resource);
-
-				// Get column metadata
-				getColumnNames();
 			}
 
 			break;

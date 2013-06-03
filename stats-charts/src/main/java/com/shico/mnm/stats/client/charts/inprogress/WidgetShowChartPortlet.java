@@ -1,36 +1,34 @@
-package com.shico.mnm.stats.client.charts;
+package com.shico.mnm.stats.client.charts.inprogress;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.visualization.client.AbstractDataTable;
-import com.google.gwt.visualization.client.LegendPosition;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.google.gwt.visualization.client.visualizations.corechart.TextStyle;
-import com.shico.mnm.common.chart.ColumnChartPortlet;
+import com.shico.mnm.common.chart.PieChartPortlet;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
 import com.shico.mnm.stats.client.LiveStatsChartDataProvider;
 import com.shico.mnm.stats.client.StatsChartDataProvider;
 import com.smartgwt.client.widgets.events.ClickEvent;
 
-public class LiveUsageChartPortlet extends ColumnChartPortlet {
+public class WidgetShowChartPortlet extends PieChartPortlet {
 
-	public LiveUsageChartPortlet(StatsChartDataProvider dataProvider, double widthRatio, double heightRatio) {
+	public WidgetShowChartPortlet(StatsChartDataProvider dataProvider, double widthRatio, double heightRatio) {
 		super(dataProvider, widthRatio, heightRatio);
-		setTitle("Channel View");
+		setTitle("Most Popular Widgets");
 		
 		EventBus.instance().addHandler(DataLoadedEvent.TYPE, this);		
 	}
 
 	@Override
 	protected AbstractDataTable getView() {
-		return ((LiveStatsChartDataProvider)dataProvider).getLiveUsageColumnChartView();
+		return ((LiveStatsChartDataProvider)dataProvider).getMostPopularWidgetsPieChartView();
 	}
 
 	@Override
 	protected Options getOptions() {
-		Options opts = getChartOptions("Channel View");
-		opts.setLegend(LegendPosition.NONE);
+		Options opts = getChartOptions("Most Popular Widgets");
 		
 		AxisOptions vopts = AxisOptions.create();
 		AxisOptions hopts = AxisOptions.create();
@@ -41,6 +39,8 @@ public class LiveUsageChartPortlet extends ColumnChartPortlet {
 //		vopts.set("title", "Hours");
 		opts.setVAxisOptions(vopts);
 		opts.setHAxisOptions(hopts);
+		
+		opts.set("is3D", true);
 		
 		return opts;
 	}	

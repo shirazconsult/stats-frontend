@@ -1,4 +1,4 @@
-package com.shico.mnm.stats.client.charts;
+package com.shico.mnm.stats.client.charts.live;
 
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.visualization.client.AbstractDataTable;
@@ -32,10 +32,18 @@ public class LiveUsageTableAndColumnChartPortlet extends MultipleChartPortlet {
 		EventBus.instance().addHandler(DataLoadedEvent.TYPE, this);		
 	}
 
+	protected AbstractDataTable getColumnChartDataTable(){
+		return ((LiveStatsChartDataProvider)dataProvider).getLiveUsageColumnChartView();
+	}
+	
+	protected AbstractDataTable getTableChartDataTable(){
+		return ((LiveStatsChartDataProvider)dataProvider).getLiveUsageTableView();
+	}
+	
 	@Override
 	protected ChartWrapper[] getCharts() {
-		AbstractDataTable data = ((LiveStatsChartDataProvider)dataProvider).getLiveUsageColumnChartView();
-		AbstractDataTable tableData = ((LiveStatsChartDataProvider)dataProvider).getLiveUsageTableView();
+		AbstractDataTable data = getColumnChartDataTable();
+		AbstractDataTable tableData = getTableChartDataTable();
 		if(columnChart == null){
 			columnChart = new ColumnChart(data, getColumnChartOptions());
 		}
@@ -61,8 +69,8 @@ public class LiveUsageTableAndColumnChartPortlet extends MultipleChartPortlet {
 		};
 	}
 
-	private Options columnChartOpts;
-	private Options getColumnChartOptions() {
+	protected Options columnChartOpts;
+	protected Options getColumnChartOptions() {
 		if(columnChartOpts == null){
 			columnChartOpts = Options.create();
 			columnChartOpts.setLegend(LegendPosition.NONE);
@@ -80,8 +88,8 @@ public class LiveUsageTableAndColumnChartPortlet extends MultipleChartPortlet {
 		return columnChartOpts;
 	}	
 	
-	private Table.Options tableOptions;
-	private Table.Options getTableOptions(){
+	protected Table.Options tableOptions;
+	protected Table.Options getTableOptions(){
 		if(tableOptions == null){
 			tableOptions = Table.Options.create();
 

@@ -71,6 +71,7 @@ public class ChartFormWin extends Window {
 			@Override
 			public void onClick(ClickEvent event) {
 				Map<String, Object> input = new HashMap<String, Object>();
+								
 				Date from = (Date)fromDateItem.getValue();
 				Date to = (Date)toDateItem.getValue();
 				if(to.before(from)){
@@ -84,16 +85,17 @@ public class ChartFormWin extends Window {
 					animateHide(AnimationEffect.SLIDE);
 					return;					
 				}
-				CalendarUtil.setToFirstDayOfMonth(date);
-				CalendarUtil.addMonthsToDate(date, -3);
-				if(from.before(date)){
-					callback.onFailure("'from' date must not be earlier than three months ago.");
-					animateHide(AnimationEffect.SLIDE);
-					return;					
-				}
-				
-				input.put("from", from);
-				input.put("to", to);
+//				CalendarUtil.setToFirstDayOfMonth(date);
+//				CalendarUtil.addMonthsToDate(date, -3);
+//				if(from.before(date)){
+//					callback.onFailure("'from' date must not be earlier than three months ago.");
+//					animateHide(AnimationEffect.SLIDE);
+//					return;					
+//				}
+
+
+				input.put("from", getISO8601Date(fromDateItem.getDisplayValue()));
+				input.put("to", getISO8601Date(toDateItem.getDisplayValue()));
 				input.put("type", typeItem.getValue());
 				callback.onSuccess(input);
 				animateHide(AnimationEffect.SLIDE);
@@ -122,4 +124,45 @@ public class ChartFormWin extends Window {
         container.addMember(hl);
 	}
 
+	private String getISO8601Date(String displayValue){
+		String[] split = displayValue.split(" ");
+		return split[2] + "-" + getMonth(split[0]) + "-" + split[1];		
+	}
+	
+	private int getMonth(String month){
+		if(month.equals("Jan")){
+			return 1;
+		}
+		if(month.equals("Feb")){
+			return 2;
+		}
+		if(month.equals("Mar")){
+			return 3;
+		}
+		if(month.equals("Apr")){
+			return 4;
+		}
+		if(month.equals("May")){
+			return 5;
+		}
+		if(month.equals("Jun")){
+			return 6;
+		}
+		if(month.equals("Jul")){
+			return 7;
+		}
+		if(month.equals("Aug")){
+			return 8;
+		}
+		if(month.equals("Sep")){
+			return 9;
+		}
+		if(month.equals("Oct")){
+			return 10;
+		}
+		if(month.equals("Nov")){
+			return 11;
+		}
+		return 12;  // "Dec"
+	}
 }

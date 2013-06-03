@@ -1,4 +1,4 @@
-package com.shico.mnm.stats.client.charts;
+package com.shico.mnm.stats.client.charts.live;
 
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.visualization.client.AbstractDataTable;

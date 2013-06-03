@@ -23,7 +23,6 @@ import com.shico.mnm.common.model.NestedList;
 public abstract class AbstractStatsChartDataProvider implements DataLoadedEventHandler {
 	private static Logger logger = Logger.getLogger("AbstractStatsChartDataProvider");
 	
-	protected abstract void setData(DataTable data);
 	protected abstract void postUpdate(DataTable data);
 	protected abstract DataTable getData(String type);
 	protected abstract void fireEvent(DataEventType eventtype, Map<String, Object> eventInfo);
@@ -40,32 +39,6 @@ public abstract class AbstractStatsChartDataProvider implements DataLoadedEventH
 		EventBus.instance().addHandler(DataLoadedEvent.TYPE, this);
 	}
 	
-	public void getColumnNames() {
-		service.getViewColumns(new MethodCallback<ListResult<String>>() {
-			public void onFailure(Method method, Throwable exception) {
-				String err = "Failed to get column metadata."+ exception.getMessage();
-				logger.log(Level.SEVERE, err);
-				fireErrorEvent(DataEventType.FAILED_STATS_METADATA_LOADED_EVENT, err);
-			}
-			public void onSuccess(Method method, ListResult<String> response) {
-				DataTable data = DataTable.create();
-				logger.log(Level.INFO, "Retrieving column metadata info. ");
-				List<String> result = response.getResult();
-				data.addColumn(ColumnType.STRING, result.get(StatsChartDataProvider.typeIdx));
-				data.addColumn(ColumnType.STRING, result.get(StatsChartDataProvider.nameIdx));
-				data.addColumn(ColumnType.STRING, result.get(StatsChartDataProvider.titleIdx));
-				data.addColumn(ColumnType.NUMBER, result.get(StatsChartDataProvider.viewersIdx));
-				data.addColumn(ColumnType.NUMBER, result.get(StatsChartDataProvider.durationIdx));
-				data.addColumn(ColumnType.NUMBER, result.get(StatsChartDataProvider.fromIdx));
-				data.addColumn(ColumnType.NUMBER, result.get(StatsChartDataProvider.toIdx));
-
-				setData(data);
-				
-				fireEvent(DataEventType.STATS_METADATA_LOADED_EVENT, null);
-			}
-		});
-	}
-
 	public void getRows(long from, long to) {
 		logger.log(Level.INFO, "Requesting records from "+from+" to "+to);
 		service.getViewPage(from, to, new MethodCallback<NestedList<Object>>() {
@@ -94,7 +67,10 @@ public abstract class AbstractStatsChartDataProvider implements DataLoadedEventH
 		});
 	}
 		
-	public void getRows(final String type, final long from, final long to) {
+	// eventtype is our events (StatsChartDataProvider's statsEvents and subStatsEvents, while the type is the back-ends
+	// stat events (only StatsChartDataProvider's statsEvents).
+	public void getRows(final String eventtype, final long from, final long to) {
+		final String type = eventtype.contains(".") ? eventtype.split("\\.")[0] : eventtype;
 		logger.log(Level.INFO, "Requesting "+type+" records from "+from+" to "+to);
 		service.getViewPage(type, from, to, new MethodCallback<NestedList<Object>>() {
 			@Override
@@ -103,12 +79,13 @@ public abstract class AbstractStatsChartDataProvider implements DataLoadedEventH
 			}
 			@Override
 			public void onSuccess(Method method, NestedList<Object> response) {
-				callbackOnSuccess(method, response, type);
+				callbackOnSuccess(method, response, eventtype);
 			}
 		});
 	}
 
-	public void getRows(final String type, final String from, final String to) {
+	public void getRows(final String eventtype, final String from, final String to) {
+		final String type = eventtype.contains(".") ? eventtype.split("\\.")[0] : eventtype;
 		logger.log(Level.INFO, "Requesting "+type+" records from "+from+" to "+to);
 		service.getViewPage(type, from, to, new MethodCallback<NestedList<Object>>() {
 			@Override
@@ -117,12 +94,13 @@ public abstract class AbstractStatsChartDataProvider implements DataLoadedEventH
 			}
 			@Override
 			public void onSuccess(Method method, NestedList<Object> response) {
-				callbackOnSuccess(method, response, type);
+				callbackOnSuccess(method, response, eventtype);
 			}
 		});
 	}
 
-	public void getRows(final String type, final String from, final String to, String options) {
+	public void getRows(final String eventtype, final String from, final String to, String options) {
+		final String type = eventtype.contains(".") ? eventtype.split("\\.")[0] : eventtype;
 		logger.log(Level.INFO, "Requesting "+type+" records from "+from+" to "+to);
 		service.getViewPage(type, from, to, options, new MethodCallback<NestedList<Object>>() {
 			@Override
@@ -131,12 +109,13 @@ public abstract class AbstractStatsChartDataProvider implements DataLoadedEventH
 			}
 			@Override
 			public void onSuccess(Method method, NestedList<Object> response) {
-				callbackOnSuccess(method, response, type);
+				callbackOnSuccess(method, response, eventtype);
 			}
 		});
 	}
 
-	public void getRows(final String type, final long from, final long to, String options) {
+	public void getRows(final String eventtype, final long from, final long to, String options) {
+		final String type = eventtype.contains(".") ? eventtype.split("\\.")[0] : eventtype;
 		logger.log(Level.INFO, "Requesting "+type+" records from "+from+" to "+to);
 		service.getViewPage(type, from, to, options, new MethodCallback<NestedList<Object>>() {
 			@Override
@@ -145,7 +124,72 @@ public abstract class AbstractStatsChartDataProvider implements DataLoadedEventH
 			}
 			@Override
 			public void onSuccess(Method method, NestedList<Object> response) {
-				callbackOnSuccess(method, response, type);
+				callbackOnSuccess(method, response, eventtype);
+			}
+		});
+	}
+
+	// eventtype is our events (StatsChartDataProvider's statsEvents and subStatsEvents, while the type is the back-ends
+	// stat events (only StatsChartDataProvider's statsEvents).
+	public void getRowsInBatch(final String eventtype, final String from, final String to, String options) {
+		final String type = eventtype.contains(".") ? eventtype.split("\\.")[0] : eventtype;
+		logger.log(Level.INFO, "Batch requesting "+type+" records from "+from+" to "+to);
+		service.getViewPageInBatch(type, from, to, options, new MethodCallback<ListResult<Object>>() {
+			@Override
+			public void onFailure(Method method, Throwable exception) {
+				callbackOnFailure(method, exception);
+			}
+			@Override
+			public void onSuccess(Method method,
+					ListResult<Object> response) {
+				try{
+					// The response is actually a ListResult<NestedList<Object>>, but since the gwt compiler for some
+					// reason cannot compile it, then we have to do the unmarshalling/decoding manually.
+					List<Object> elements = response.getResult();
+					if(elements.isEmpty()){
+						String err = "No row returned from Statistics Rest Service.";
+						logger.log(Level.WARNING, err);
+						fireErrorEvent(DataEventType.FAILED_STATS_DATA_LOADED_EVENT, err);
+						return;
+					}
+					
+					DataTable data = getData(eventtype);
+					for (Object el : elements) {
+						// el is in fact a NestedList, which basically is a json-map containing "controlData" and "rows"
+						// elements. The "rows" element is then a list of maps. Each map is in turn contains of one
+						// single element "result" and a json-list.
+						Map<String, Object> elem = (Map<String, Object>)el;
+						List<Map<String, Object>> rows = (List<Map<String, Object>>)elem.get("rows");
+						if(rows == null || rows.isEmpty()){
+							continue;
+						}
+						
+						int idx = data.getNumberOfRows();
+						data.addRows(rows.size());
+						for (Map<String, Object> row : rows) {
+							int colIdx = 0;
+							List<Object> record = (List<Object>)row.get("result");
+							for (Object rec : record) {		
+								if(data.getColumnType(colIdx) == ColumnType.STRING){
+									data.setValue(idx, colIdx, rec == null ? null : rec.toString());
+								}else{
+									data.setValue(idx, colIdx, (Double)rec);
+								}	
+								colIdx++;
+							}
+							idx++;
+						}
+						// If num. of rows are more than slidingWinSize, then shrink back to slidingWinSize 
+						if(data.getNumberOfRows() > slidingWinSize){
+							data.removeRows(0, data.getNumberOfRows()-slidingWinSize);
+						}						
+					}
+					postUpdate(data);
+					fireDataLoadedEvent(DataEventType.STATS_DATA_LOADED_EVENT, eventtype);					
+					
+				}catch(Exception e){
+					logger.log(Level.SEVERE, "Exception while updating data. "+e.getMessage());
+				}
 			}
 		});
 	}
@@ -186,11 +230,6 @@ public abstract class AbstractStatsChartDataProvider implements DataLoadedEventH
 				return;
 			}
 			
-			String fetchedType = getStatsEventType(page);
-			if(!type.equals(fetchedType)){
-				String err = "Expected data for "+type+", but received data for "+fetchedType;
-				fireErrorEvent(DataEventType.FAILED_STATS_DATA_LOADED_EVENT, err);
-			}
 			DataTable data = getData(type);
 			
 			handleData(data, page);
@@ -210,7 +249,7 @@ public abstract class AbstractStatsChartDataProvider implements DataLoadedEventH
 			int colIdx = 0;
 			List<Object> rec = row.getResult();
 			for (Object elem : rec) {		
-				if(colIdx <= 2){
+				if(data.getColumnType(colIdx) == ColumnType.STRING){					
 					data.setValue(idx, colIdx, elem == null ? null : elem.toString());
 				}else{
 					data.setValue(idx, colIdx, (Double)elem);
@@ -224,7 +263,7 @@ public abstract class AbstractStatsChartDataProvider implements DataLoadedEventH
 			data.removeRows(0, data.getNumberOfRows()-slidingWinSize);
 		}
 	}
-	
+
 	private String getStatsEventType(List<ListResult<Object>> rows){
 		List<Object> rec = rows.get(0).getResult();
 		return (String)rec.get(StatsChartDataProvider.typeIdx);
@@ -327,7 +366,7 @@ public abstract class AbstractStatsChartDataProvider implements DataLoadedEventH
 
 	// ========================= native tables/views ========================= 
 	// =======================================================================
-	protected native AbstractDataTable getTopProgramsView(DataTable data, double from, double to)/*-{
+	protected native AbstractDataTable getTopProgramsView(DataTable data)/*-{
 		var view = new $wnd.google.visualization.DataView(data);
 		view.setColumns([
 			{sourceColumn:@com.shico.mnm.stats.client.StatsChartDataProvider::titleIdx, id: 'ID', type: 'string', label:'Program'}, 

@@ -15,14 +15,15 @@ import com.shico.mnm.stats.client.DeadStatsChartDataProvider;
 import com.shico.mnm.stats.client.LiveStatsChartDataProvider;
 import com.shico.mnm.stats.client.StatsClientHandle;
 import com.shico.mnm.stats.client.StatsSettingsController;
-import com.shico.mnm.stats.client.charts.LiveUsageBubbleChartPortlet;
-import com.shico.mnm.stats.client.charts.LiveUsageChartPortlet;
-import com.shico.mnm.stats.client.charts.LiveUsageDashboardPortlet;
-import com.shico.mnm.stats.client.charts.LiveUsageTableAndBubbleChartPortlet;
-import com.shico.mnm.stats.client.charts.LiveUsageTableAndBubbleChartPortlet2;
-import com.shico.mnm.stats.client.charts.LiveUsageTableAndColumnChartPortlet;
-import com.shico.mnm.stats.client.charts.MovieRentChartPortlet;
-import com.shico.mnm.stats.client.charts.WidgetShowChartPortlet;
+import com.shico.mnm.stats.client.charts.inprogress.LiveUsageBubbleChartPortlet;
+import com.shico.mnm.stats.client.charts.inprogress.LiveUsageChartPortlet;
+import com.shico.mnm.stats.client.charts.inprogress.LiveUsageDashboardPortlet;
+import com.shico.mnm.stats.client.charts.inprogress.MovieRentChartPortlet;
+import com.shico.mnm.stats.client.charts.inprogress.WidgetShowChartPortlet;
+import com.shico.mnm.stats.client.charts.live.LiveUsageTableAndBubbleChartPortlet;
+import com.shico.mnm.stats.client.charts.live.LiveUsageTableAndColumnChartPortlet;
+import com.shico.mnm.stats.client.charts.periodic.LiveUsageColumnChartPortlet;
+import com.shico.mnm.stats.client.charts.periodic.LiveUsageTableAndBubbleChartPortlet2;
 import com.shico.mnm.stats.model.StatsRemoteSettingsDS;
 import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.data.DSCallback;
@@ -199,17 +200,18 @@ public class StatsTabPanel extends VLayout {
 	}
 	
 	private void setDeadChartPanelPortal(){
-		if(deadChartPanel.getMembers().length == 0){			
-			PortalLayout portalLayout = new PortalWin(1);
-			portalLayout.addPortlet(getLiveUsageTableAndBubbleChartPortlet2(), 0, 0);
-			
-			int height = getLiveUsageTableAndBubbleChartPortlet2().getHeight();
-			
-			portalLayout.setHeight(height);
-			deadChartPanel.addMember(portalLayout);		
-			
+		if(deadChartPanel.getMembers().length == 0){
 			EventBus.instance().fireEvent(
 					new DataLoadedEvent(DataEventType.STATS_CHART_SETTINGS_CHANGED_EVENT, settingsController.getSettingsMap(), "_DeadChartPanel"));
+			
+			PortalLayout portalLayout = new PortalWin(1);
+			portalLayout.addPortlet(getLiveUsageTableAndBubbleChartPortlet2(), 0, 0);
+			portalLayout.addPortlet(getLiveUsageColumnChartPortlet(), 0, 1);
+	
+			int height = getLiveUsageTableAndBubbleChartPortlet2().getHeight() +
+					getLiveUsageColumnChartPortlet().getHeight();			
+			portalLayout.setHeight(height);
+			deadChartPanel.addMember(portalLayout);	
 		}		
 	}
 	
@@ -277,11 +279,19 @@ public class StatsTabPanel extends VLayout {
 	private LiveUsageTableAndBubbleChartPortlet2 liveUsageTableAndBubbleChartPortlet2;
 	private Portlet getLiveUsageTableAndBubbleChartPortlet2() {
 		if(liveUsageTableAndBubbleChartPortlet2 == null){
-			liveUsageTableAndBubbleChartPortlet2 = new LiveUsageTableAndBubbleChartPortlet2(deadStatsChartDataProvider, 1.0, 0.8);
+			liveUsageTableAndBubbleChartPortlet2 = new LiveUsageTableAndBubbleChartPortlet2(deadStatsChartDataProvider, 1.0, 0.4);
 		}
 		return liveUsageTableAndBubbleChartPortlet2;
 	}
-	
+
+	private LiveUsageColumnChartPortlet liveUsageColumnChartPortlet;
+	private Portlet getLiveUsageColumnChartPortlet() {
+		if(liveUsageColumnChartPortlet == null){
+			liveUsageColumnChartPortlet = new LiveUsageColumnChartPortlet(deadStatsChartDataProvider, 1.0, 0.4);
+		}
+		return liveUsageColumnChartPortlet;
+	}
+
 	private LiveUsageDashboardPortlet liveUsageDashboardPortlet;
 	public LiveUsageDashboardPortlet getLiveUsageDashboardPortlet(){
 		if(liveUsageDashboardPortlet == null){

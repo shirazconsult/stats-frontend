@@ -1,34 +1,36 @@
-package com.shico.mnm.stats.client.charts;
+package com.shico.mnm.stats.client.charts.inprogress;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.visualization.client.AbstractDataTable;
+import com.google.gwt.visualization.client.LegendPosition;
 import com.google.gwt.visualization.client.visualizations.corechart.AxisOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.google.gwt.visualization.client.visualizations.corechart.TextStyle;
-import com.shico.mnm.common.chart.BubbleChartPortlet;
+import com.shico.mnm.common.chart.ColumnChartPortlet;
 import com.shico.mnm.common.event.DataLoadedEvent;
 import com.shico.mnm.common.event.EventBus;
 import com.shico.mnm.stats.client.LiveStatsChartDataProvider;
 import com.shico.mnm.stats.client.StatsChartDataProvider;
 import com.smartgwt.client.widgets.events.ClickEvent;
 
-public class LiveUsageBubbleChartPortlet extends BubbleChartPortlet {
+public class LiveUsageChartPortlet extends ColumnChartPortlet {
 
-	public LiveUsageBubbleChartPortlet(StatsChartDataProvider dataProvider, double widthRatio, double heightRatio) {
+	public LiveUsageChartPortlet(StatsChartDataProvider dataProvider, double widthRatio, double heightRatio) {
 		super(dataProvider, widthRatio, heightRatio);
-		setTitle("Most Watched Programs");
+		setTitle("Channel View");
 		
 		EventBus.instance().addHandler(DataLoadedEvent.TYPE, this);		
 	}
 
 	@Override
 	protected AbstractDataTable getView() {
-		return ((LiveStatsChartDataProvider)dataProvider).getLiveUsageBubbleChartView();
+		return ((LiveStatsChartDataProvider)dataProvider).getLiveUsageColumnChartView();
 	}
 
 	@Override
 	protected Options getOptions() {
-		Options opts = getChartOptions("Most Watched Programs");
+		Options opts = getChartOptions("Channel View");
+		opts.setLegend(LegendPosition.NONE);
 		
 		AxisOptions vopts = AxisOptions.create();
 		AxisOptions hopts = AxisOptions.create();
@@ -36,13 +38,9 @@ public class LiveUsageBubbleChartPortlet extends BubbleChartPortlet {
 		ts.setFontSize(8);
 		hopts.setTextStyle(ts);
 		vopts.setTextStyle(ts);
-		opts.set("bubble.textStyle", "{fontSize: 9}");
-		vopts.set("title", "Viewers");
-		hopts.set("title", "Hours");
+//		vopts.set("title", "Hours");
 		opts.setVAxisOptions(vopts);
 		opts.setHAxisOptions(hopts);
-		
-		opts.set("sortBubblesBySize", true);
 		
 		return opts;
 	}	

@@ -10,6 +10,7 @@ import org.fusesource.restygwt.client.RestServiceProxy;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.visualization.client.AbstractDataTable;
+import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.DataView;
 import com.shico.mnm.common.event.DataEventType;
@@ -32,14 +33,22 @@ public class LiveStatsChartDataProvider extends AbstractStatsChartDataProvider i
 
 	public LiveStatsChartDataProvider() {
 		super();		
+		
+		getColumnNames();
 	}
 
 	@Override
-	protected void setData(DataTable data) {
-		this.data = data;
+	public void getColumnNames(){
+		this.data = DataTable.create();
+		data.addColumn(ColumnType.STRING, viewColumns[StatsChartDataProvider.typeIdx]);
+		data.addColumn(ColumnType.STRING, viewColumns[StatsChartDataProvider.nameIdx]);
+		data.addColumn(ColumnType.STRING, viewColumns[StatsChartDataProvider.titleIdx]);
+		data.addColumn(ColumnType.NUMBER, viewColumns[StatsChartDataProvider.viewersIdx]);
+		data.addColumn(ColumnType.NUMBER, viewColumns[StatsChartDataProvider.durationIdx]);
+		data.addColumn(ColumnType.NUMBER, viewColumns[StatsChartDataProvider.fromIdx]);
+		data.addColumn(ColumnType.NUMBER, viewColumns[StatsChartDataProvider.toIdx]);
 	}
-
-
+	
 	@Override
 	protected void postUpdate(DataTable data) {
 		groupedData = getGroupedData(data);
@@ -100,6 +109,9 @@ public class LiveStatsChartDataProvider extends AbstractStatsChartDataProvider i
 		return getMostPopularWidgetsPieChartView(groupedData);
 	}
 	
+	// ========================= native tables/views ========================= 
+	// =======================================================================
+
 	private native DataTable getMostPopularMovieRentals(DataTable data)/*-{
 		var rowIdxs = data.getFilteredRows([{column: 0, value: 'movieRent'}]);
 		
@@ -222,15 +234,6 @@ public class LiveStatsChartDataProvider extends AbstractStatsChartDataProvider i
 	@Override
 	public void onDataLoaded(DataLoadedEvent event) {
 		switch (event.eventType) {
-		case STATS_METADATA_LOADED_EVENT:
-			// get rows for the last 20 seconds
-//			long now = System.currentTimeMillis();
-			if(event.source.startsWith("_Live")){
-				getRows(lastFrom, lastTo);
-//				getRowsExponatially(lastFrom, lastTo);
-				schedule();
-			}
-			break;
 		case STATS_CHART_SETTINGS_CHANGED_EVENT:
 			if(event.source.startsWith("_Live")){
 				String chartUrl = (String)event.info.get(StatsRemoteSettingsDS.CHARTURL);
@@ -242,8 +245,13 @@ public class LiveStatsChartDataProvider extends AbstractStatsChartDataProvider i
 				service = GWT.create(StatsRestService.class);
 				((RestServiceProxy)service).setResource(resource);
 
-				// Get column metadata
-				getColumnNames();
+				// get rows for the last 20 seconds
+//				long now = System.currentTimeMillis();
+				if(event.source.startsWith("_Live")){
+					getRows(lastFrom, lastTo);
+//					getRowsExponatially(lastFrom, lastTo);
+					schedule();
+				}
 			}			
 			break;
 		}

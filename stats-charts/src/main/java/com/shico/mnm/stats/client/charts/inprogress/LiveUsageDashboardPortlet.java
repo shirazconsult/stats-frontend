@@ -1,4 +1,4 @@
-package com.shico.mnm.stats.client.charts;
+package com.shico.mnm.stats.client.charts.inprogress;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
