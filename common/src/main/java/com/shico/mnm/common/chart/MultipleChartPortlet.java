@@ -4,6 +4,7 @@ package com.shico.mnm.common.chart;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.shico.mnm.common.component.PortletWin;
 import com.shico.mnm.common.event.DataLoadedEventHandler;
@@ -58,13 +59,22 @@ public abstract class MultipleChartPortlet extends PortletWin implements DataLoa
 					}
 					cw.chart.draw(cw.data, cw.options);
 				}
-				added = true;
+				if(!added){
+					redrawTimer.schedule(100);
+					added = true;
+				}
 			}
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "Error in drawing chart."+e.getMessage());
 		}		
 	}
-	
+
+	Timer redrawTimer = new Timer() { 
+	    public void run() { 
+	        draw(); 
+	    } 
+	}; 
+
 	@Override
 	public void onMaximizeClick(MaximizeClickEvent event) {
 		widthRatio = 0.8;

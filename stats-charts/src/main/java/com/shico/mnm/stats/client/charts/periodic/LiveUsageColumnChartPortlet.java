@@ -92,17 +92,22 @@ public class LiveUsageColumnChartPortlet extends ColumnChartPortlet {
 	protected Options getOptions() {
 		if(columnChartOpts == null){
 			columnChartOpts = Options.create();
+			TextStyle ts = TextStyle.create();
+			ts.setFontSize(8);
+			TextStyle tts = TextStyle.create();
+			tts.setFontSize(14);
 
 			columnChartOpts.set("animation.easing", "out");
 			columnChartOpts.set("animation.duration", 2000d);
+			columnChartOpts.setLegendTextStyle(ts);
+			
 			AxisOptions vopts = AxisOptions.create();
 			AxisOptions hopts = AxisOptions.create();
-			TextStyle ts = TextStyle.create();
-			ts.setFontSize(8);
 			hopts.setTextStyle(ts);
 			hopts.set("slantedText", true);
 			vopts.setTextStyle(ts);
 			vopts.set("title", "Viewers");
+			vopts.setTitleTextStyle(tts);
 			columnChartOpts.setVAxisOptions(vopts);
 			columnChartOpts.setHAxisOptions(hopts);
 		}

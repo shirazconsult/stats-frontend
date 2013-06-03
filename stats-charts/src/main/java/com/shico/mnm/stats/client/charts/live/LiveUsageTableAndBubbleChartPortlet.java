@@ -71,9 +71,15 @@ public class LiveUsageTableAndBubbleChartPortlet extends MultipleChartPortlet {
 			ts.setFontSize(8);
 			hopts.setTextStyle(ts);
 			vopts.setTextStyle(ts);
-			bubbleOptions.set("bubble.textStyle", "{fontSize: 9}");
+			bubbleOptions.setLegendTextStyle(ts);
+//			bubbleOptions.set("bubble.textStyle", "{fontSize: 7}");
+			bubbleOptions.setFontSize(8);
 			vopts.set("title", "Viewers");
 			hopts.set("title", "Hours");
+			TextStyle tts = TextStyle.create();
+			tts.setFontSize(14);
+			vopts.setTitleTextStyle(tts);
+			hopts.setTitleTextStyle(tts);
 			bubbleOptions.setVAxisOptions(vopts);
 			bubbleOptions.setHAxisOptions(hopts);
 

@@ -73,12 +73,12 @@ public class LiveUsageTableAndColumnChartPortlet extends MultipleChartPortlet {
 	protected Options getColumnChartOptions() {
 		if(columnChartOpts == null){
 			columnChartOpts = Options.create();
-			columnChartOpts.setLegend(LegendPosition.NONE);
-
-			AxisOptions vopts = AxisOptions.create();
-			AxisOptions hopts = AxisOptions.create();
 			TextStyle ts = TextStyle.create();
 			ts.setFontSize(8);
+
+			columnChartOpts.setLegend(LegendPosition.NONE);
+			AxisOptions vopts = AxisOptions.create();
+			AxisOptions hopts = AxisOptions.create();
 			hopts.setTextStyle(ts);
 			vopts.setTextStyle(ts);
 			vopts.set("title", "Hours");
